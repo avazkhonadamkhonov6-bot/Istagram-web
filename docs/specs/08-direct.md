@@ -1,6 +1,6 @@
 # Spec 08 — Direct (chati realtime)
 
-**Ma'sul:** B · **Ruz:** 2 · **Prioritet:** P0 (1:1); guruh — P2
+**Ma'sul:** Avaz — backend (BE-11, Ruzi 3) va front (FE-17, Ruzi 4) · **Prioritet:** P0 (1:1); guruh — P2
 
 ## REST
 
@@ -59,7 +59,7 @@ Typing: server tekshirad ki user ishtirokchi ast; frontend `isTyping:false`-ro p
 
 ## Frontend (Ruzi 4)
 - `/direct/inbox` — chap ruyxati suhbatho (397px), rost — "Your messages" + tugmai "Send message".
-- `/direct/t/[id]` — sarlavha (avatar, username), paymho: xudam — rost, kabud `#3797F0`, matni safed; digaron — chap, xokistari `#EFEFEF`; "Seen" zeri paymi oxirin.
+- `/direct/t/[id]` — sarlavha (avatar, username), paymho: xudam — rost, `--ig-outgoing-message-bubble` bo matni `--ig-text-on-color`; digaron — chap, `--ig-incoming-message-bubble` bo matni `--ig-primary-text`; "Seen" zeri paymi oxirin.
 - Modali "New message": search-i user (Spec 05).
 - Optimistic update: paym favran namoyon meshavad, pas az javobi API — tasdiq.
 

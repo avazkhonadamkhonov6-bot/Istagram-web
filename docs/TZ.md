@@ -176,7 +176,7 @@ exem-3/
 - **Pagination:** hamai ruyxatho — **cursor-based** (`?cursor=&limit=`), limit-i peshfarz 20, maks. 50.
 - **Formati xato:** yagona baroi hama (`specs/00-umumi.md`).
 - **Responsive:** desktop (≥1264px), planshet (768–1263px), mobil (<768px) — misli Instagram.
-- **Sifat:** TypeScript `strict`, ESLint + Prettier, CI dar har PR (`lint → typecheck → test → build`); har modul — e2e baroi "happy path" + xatohoi asosi; Playwright — 5 senariyai asosi (register, post, like, follow, direct).
+- **Sifat:** **emoji istifoda nabared** (kod, UI, commit, hujjatho); TypeScript `strict`, ESLint + Prettier, CI dar har PR (`lint → typecheck → test → build`); har modul — e2e baroi "happy path" + xatohoi asosi; Playwright — 5 senariyai asosi (register, post, like, follow, direct).
 
 Tafsiloti infra (kalidhoi Redis, queue-ho, CI, health): [specs/11-infra-bovarinoki.md](specs/11-infra-bovarinoki.md).
 
@@ -200,7 +200,7 @@ Loyiha tayyor hisob meshavad, agar:
 2. Hamai funksiyahoi **P0** dar jadvali §2 kor mekunand va dar `docs/PROGRESS.md` qayd shudaand.
 3. Ruyxatgiri bo username-i takrori (hatto bo harfhoi kalon) → xatoi "Username band ast" (409).
 4. Du brauzer: paym dar Direct va notification dar realtime merasand.
-5. Dizayn dar desktop va mobil ba Instagram monand ast, rangho az tokenho (`specs/10`) istifoda meshavand.
+5. Dizayn dar desktop va mobil ba Instagram monand ast; **rangho 100% ranghoi asli Instagram** (tokenhoi `--ig-*` az CSS-i instagram.com, `specs/10` §1, AC9–AC10).
 6. `pnpm lint`, `pnpm typecheck`, `pnpm test` bidun xato; CI dar GitHub sabz.
 7. Swagger dar `/api/docs` hamai endpoint-horo nishon medihad.
 8. Dar brauzer (DevTools → Application) token dar `localStorage` **nest**, faqat cookie-hoi httpOnly.
@@ -212,6 +212,7 @@ Loyiha tayyor hisob meshavad, agar:
 
 | Fayl | Chi dorad |
 |---|---|
+| [TASKS.md](TASKS.md) | 36 vazifa bo ID (BE/FE/QA), kas, ruz, "Tayyor, agar" — har kadom Issue-i GitHub |
 | [ROADMAP.md](ROADMAP.md) | Versiyaho v0.1 → v2.0: chi, kay, kriteriyai tayyori |
 | [PLAN.md](PLAN.md) | Naqshai 4 ruz, soat ba soat, baroi A va B |
 | [PROGRESS.md](PROGRESS.md) | Chi tayyor, chi dar jarayon, chi monda |

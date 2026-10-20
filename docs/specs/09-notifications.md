@@ -1,6 +1,6 @@
 # Spec 09 — Notifications
 
-**Ma'sul:** A · **Ruz:** 2 · **Prioritet:** P0
+**Ma'sul:** Avaz — backend (BE-09, Ruzi 2), realtime-i front (FE-15) · Abubakr — UI-i panel (FE-12) · **Prioritet:** P0
 
 ## Kay sohta meshavad
 

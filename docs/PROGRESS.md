@@ -1,70 +1,53 @@
 # PROGRESS — Kujo hastem, chi monda
 
-> Har qadam pas az tamom shudan `[x]` meshavad. Belgiho: ⬜ ogoz nashud · 🟡 dar jarayon · ✅ tayyor · ⛔ masala (dar "Qaydho" navised)
+> Pas az merge-i PR → `[x]`. Tafsiloti har vazifa — [TASKS.md](TASKS.md) va GitHub Issues.
+> Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
-**Holati umumi:** ⬜ Ruzi 1 · ⬜ Ruzi 2 · ⬜ Ruzi 3 · ⬜ Ruzi 4
-**Hozir:** Hujjatho (TZ, PLAN, specs) tayyor → **qadami navbati: Ruzi 1, Qadami 0**
+**Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
+**Hozir:** hujjatho tayyor → **BE-01** (Avaz) · **FE-01** (Abubakr)
 
-## 📄 Hujjatho
-- [x] TZ.md
-- [x] PLAN.md
-- [x] ROADMAP.md
-- [x] specs/00–11 (11 — infra va bovarinoki)
-- [x] Stack navsozi shud: Redis, BullMQ, BFF, argon2, Zod, shadcn/ui, CI, Sentry
+## Hujjatho
+- [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
+- [x] specs/00–11
+- [x] Stack: Redis, BullMQ, BFF, argon2, Zod, shadcn/ui, CI, Sentry
+- [x] Taqsimi kor: Avaz (backend → front), Abubakr (front bo mock)
 
-## RUZI 1 — Backend
-### Qadami 0 (setup)
-- [ ] `corepack enable`, pnpm nasb (A)
-- [ ] Monorepo: `apps/web` (Next.js-i hozira kuchonida shud), `apps/api`, `packages/shared` (Zod), `turbo.json`, TS strict (A)
-- [ ] CI — GitHub Actions (A)
-- [ ] docker-compose: PostgreSQL + Redis + MinIO + bucket (B)
-- [ ] `.env.example` + tekshirishi Zod (B)
-### Poydevor
-- [ ] `schema.prisma` + migratsiyai avval (A)
-- [ ] Prisma, ZodValidationPipe, filter-i xato, logger, Swagger, /health (A)
-- [ ] Redis + CacheService (bypass), BullMQ + worker.ts (B) — Spec 11
-- [ ] common: pagination, `@CurrentUser`, error codes (B)
-### Modulho
-- [ ] Auth — Spec 01 (A) · AC 1–8
-- [ ] Users + Follow — Spec 02 (A) · AC 1–6
-- [ ] Media — Spec 03 (B) · AC 1–4
-- [ ] Posts + Like + Saved — Spec 04 (B)
-- [ ] Comment + replies — Spec 04 (B) · AC 1–7
+## RUZI 1
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [ ] | BE-01 Monorepo | [ ] | FE-01 Tayyori, Next 16 docs |
+| [ ] | BE-02 Kontrakt (Zod) — **to 12:30** | [ ] | FE-02 Rangho, dark, shadcn |
+| [ ] | BE-03 Docker, Prisma, infra, CI | [ ] | FE-03 Komponenthoi UI |
+| [ ] | BE-04 Auth API | [ ] | FE-04 MSW mock |
+| [ ] | BE-05 Users + Follow API | [ ] | FE-05 Layout |
 
-## RUZI 2 — Backend
-- [ ] Feed + grid-i profil — Spec 05 (A)
-- [ ] Explore + Search + Hashtag — Spec 05 (A) · AC 1–5
-- [ ] RealtimeGateway + Redis adapter, job-i media (B)
-- [ ] Stories — Spec 06 (B) · AC 1–4
-- [ ] Notifications — Spec 09 (A) · AC 1–4
-- [ ] Direct REST + WS — Spec 08 (B) · AC 1–5
-- [ ] Reels — Spec 07 (B) · AC 1–4
-- [ ] Suggestions (A, P1)
-- [ ] Seed (A)
-- [ ] e2e test-ho + testi bovarinoki Spec 11 AC1–7 (A + B)
-- [ ] 🔒 Freeze-i API
+## RUZI 2
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [ ] | BE-06 Media API | [ ] | FE-06 Login / Signup |
+| [ ] | BE-07 Posts, Like, Comment, Saved | [ ] | FE-07 Feed + PostCard |
+| [ ] | BE-08 Feed, Explore, Search | [ ] | FE-08 Post modal |
+| [ ] | BE-09 Realtime + Notifications | [ ] | FE-09 Profil |
+| [ ] | BE-10 Stories API | [ ] | FE-10 Edit profile + parol |
 
-## RUZI 3 — Frontend
-- [ ] Rangho + dark mode, BFF (auth + proxy), api-client (Zod), Query, proxy.ts + CSP, Sentry (A)
-- [ ] shadcn/ui + komponenthoi UI, error/loading (B)
-- [ ] Layout: sidebar / bottom nav / panel-ho (A)
-- [ ] Login / Signup (B)
-- [ ] Feed + PostCard (A)
-- [ ] Profil + edit + password (B)
-- [ ] Post modal + comment-ho (A)
-- [ ] Explore + Hashtag + Search (B)
+## RUZI 3
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [ ] | BE-11 Direct + Reels API | [ ] | FE-11 Explore, Search |
+| [ ] | BE-12 Seed, e2e, API freeze | [ ] | FE-12 Notifications panel |
+| [ ] | FE-13 BFF + proxy + CSP | [ ] | FE-14 Mock xomush, integratsiya |
+| [ ] | FE-15 Socket + realtime | [ ] | FE-16 Stories |
 
-## RUZI 4 — Frontend + yakun
-- [ ] Create modal (post / reel / story) (A)
-- [ ] Socket client + Notifications (B)
-- [ ] Stories tray + viewer (A)
-- [ ] Direct inbox + chat (B)
-- [ ] Reels (A)
-- [ ] Pardoz: dark toggle, 404, empty states (B)
-- [ ] Testi umumi bo AC-ho + Playwright + Lighthouse + testi qat'shavi (A + B)
-- [ ] README + demo
+## RUZI 4
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [ ] | FE-17 Direct | [ ] | FE-18 Create modal |
+| [ ] | FE-19 Bovarinokii front | [ ] | FE-20 Reels |
+| [ ] | FE-21 Playwright | [ ] | FE-22 Pardoz, responsive |
+| [ ] | QA-01 | [ ] | QA-02 |
+| [ ] | README, `v0.2`, demo | | |
 
 ## Qaydho / masalaho
-- 2026-10-20: Dar kompyuter **pnpm** va **Docker** hanuz nasb nashudaand → Qadami 0.
-- 2026-10-20: Muhlati 4 ruz baroi hamai funksiyaho xele kam ast — tartibi buridan dar PLAN.md.
-- 2026-10-20: Hujjati stack qabul shud. Moslashkuniho: counter-ho dar PostgreSQL (Redis faqat kesh), CAPTCHA va Meilisearch/Kafka/K8s — berun az 4 ruz.
+- 2026-10-20: Dar kompyuteri Avaz **pnpm** va **Docker** hanuz nasb nashudaand → BE-01 / BE-03.
+- 2026-10-20: Muhlati 4 ruz zich ast — tartibi buridan dar PLAN.md.
+- 2026-10-20: Counter-ho dar PostgreSQL (Redis faqat kesh); CAPTCHA, Meilisearch, Kafka, K8s — berun az 4 ruz (ROADMAP).

@@ -1,101 +1,138 @@
-# PLAN — 4 ruz, 2 nafar
+# PLAN — 4 ruz, 2 nafar: Avaz va Abubakr
 
-> Ruzi kor: **~10 soat** (09:00–20:00, bo tanaffus). Nafari **A** va nafari **B**.
-> Tartib: **Ruzi 1–2 — Backend**, **Ruzi 3–4 — Frontend**.
-> Har qadam = yak checkbox dar [PROGRESS.md](PROGRESS.md). Har subh va har shom — **sinxronizatsiya 15 daq.**
+> Ruzi kor: **~10 soat** (09:00–20:00, bo tanaffus).
+> **Avaz** — avval **backend** (Ruzi 1 → Ruzi 3 to 14:00), ba'd **frontend**.
+> **Abubakr** — az ruzi avval **frontend** bo **ma'lumoti mock**, ba'd ulanish ba API-i voqe'i.
+> Vazifahoi alohida bo ID — dar [TASKS.md](TASKS.md) va dar **GitHub Issues** (milestone: Ruzi 1–4).
+
+## Chiro hamin xel taqsim kardem
+
+```
+Ruz:        1                 2                 3                 4
+Avaz:    [Setup+Kontrakt][===== BACKEND =====][BE ▶ BFF][== FRONT: Direct, Realtime, Test ==]
+Abubakr: [UI+Mock ======][== FRONT (mock) ==][Integratsiya][== FRONT: Create, Reels, Pardoz ==]
+                    ▲                                ▲
+       12:30 — kontrakt (Zod) push         Ruzi 3, 14:00 — mock xomush, API-i voqe'i
+```
+
+- **SDD** imkon medihad ki front va back **parallel** kor kunand: spec → Zod schema dar `packages/shared` → Avaz API-ro tibqi on menavisad, Abubakr mock-ro tibqi on mesozad. Ruzi 3 mock-ro xomush mekunem — hama boyad mos oyad.
+- **Mock:** MSW (Mock Service Worker) dar `apps/web/src/mocks/` darxosthoi `/api/*`-ro dar brauzer dastgir mekunad. Xomush kardan — `NEXT_PUBLIC_API_MOCKING=off`. Kodi komponentho **tagyir nameyobad**.
+
+## Mustaqiliyat: har kas bidun intizori digare kor mekunad
+
+Avaz va Abubakr **ba kori yakdigar nigoh namekunand va intizor nameshavand**. Tamosi kor faqat dar **2 nuqta** ast:
+
+| # | Kay | Chi | Agar der shavad |
+|---|---|---|---|
+| 1 | Ruzi 1, 12:30 | Avaz kontrakt (`packages/shared`) push mekunad | Abubakr to 15:30 kor dorad (FE-01…FE-03), ki kontraktro talab namekunad. Agar baz der boshad — tipho-ro mustaqim az `docs/specs/` megirad |
+| 2 | Ruzi 3, 14:00 | Mock xomush, front ba API-i voqe'i | Abubakr bo mock idoma medihad (FE-16), integratsiya — vaqte ki API tayyor shud |
+
+Digar hama — **alohida**:
+
+| | Avaz | Abubakr |
+|---|---|---|
+| Papkaho | `apps/api/`, `packages/`, `apps/web/src/app/api/`, `.github/`, `docker-compose.yml` | `apps/web/` (gayr az `src/app/api/`) |
+| Ma'lumot | PostgreSQL, Redis, MinIO dar Docker | MSW mock (`apps/web/src/mocks/`) — Docker lozim nest |
+| Ba'd az chi | — | Faqat az spec va `packages/shared` |
+| Branch-ho | `feat/be-*` (Ruzi 1–3), `feat/fe-*` (Ruzi 3–4) | `feat/fe-*` |
+| Issue-ho | label `avaz` | label `abubakr` |
 
 ## Qoidahoi kori duyona
 
-- **Git:** `main` — hamesha kor mekunad. Har kas dar branch: `feat/a-auth`, `feat/b-posts`... → Pull Request → digare review mekunad → merge.
-- **Fayli umumi** (`schema.prisma`, `packages/shared`, `app.module.ts`) — **faqat yak nafar dar yak vaqt** tagyir medihad; pesh az tagyir — dar chat xabar dihed.
-- **Spec — kontrakt:** agar A endpoint-ro tagyir dihad → avval spec, ba'd xabar ba B.
-- Agar kor 2× az vaqti planshuda ziyod kashad → muhokima kuned: buridan ba P1 yo yori.
+| Qoida | Tafsilot |
+|---|---|
+| Kujo ki menavisad | Jadvali bolo. Fayli `.github/CODEOWNERS` hamin taqsimro nishon medihad. Ba papkai hamroh dast nazaned |
+| `packages/shared` | Faqat **Avaz** tagyir medihad. Agar Abubakr maydoni nav lozim donad → comment dar Issue → Avaz ilova mekunad |
+| Branch va PR | `feat/be-auth`, `feat/fe-feed`... → PR ba `main` bo **"Closes #<issue>"** → agar CI sabz ast — xudaton merge kuned. Review-i hamroh **hatmi nest** (intizor nashaved) |
+| Emoji | **Emoji istifoda nabared** — na dar kod, na dar UI (ikonkaho faqat SVG), na dar commit/PR, na dar hujjatho |
+| Sinxronizatsiya | Har ruz **09:00** va **19:30** — 15 daq.: chi tayyor, chi monda, masalaho |
+| Agar spec galat ast | Avval spec islah → xabar ba hamroh → ba'd kod |
+| Agar kor 2× ziyod kashad | Darhol xabar dihed → buridan (ruyxati poyon) yo yori |
 
 ---
 
-## RUZI 1 — Backend: poydevor, Auth, Users, Media, Posts
+## RUZI 1
 
-| Vaqt | A | B |
+| Vaqt | Avaz (backend) | Abubakr (frontend) |
 |---|---|---|
-| 09:00–09:15 | 🤝 Sinxronizatsiya: plan va spec-horo yakjoya xondan | 🤝 |
-| 09:15–11:00 | **Qadami 0:** `corepack enable`, monorepo (Turborepo + pnpm), kuchondani Next.js ba `apps/web`, `apps/api` (`nest new`, TS strict), `packages/shared` (Zod), ESLint/Prettier, **CI** (`.github/workflows/ci.yml`, Spec 11 §6) | **Qadami 0:** nasbi Docker Desktop, `docker-compose.yml` (PostgreSQL + **Redis** + MinIO + bucket, healthcheck-ho), `.env.example`, tekshirishi `.env` bo Zod (Spec 11 §2) |
-| 11:00–12:30 | `schema.prisma` purra (Spec 00) → `prisma migrate dev` → `PrismaModule`, `ZodValidationPipe`, filter-i global-i xato (+ `requestId`), logger (pino), Swagger, `/health` | `infra/`: **RedisModule + `CacheService` (bo bypass)**, **QueueModule (BullMQ) + `worker.ts`**, `common/`: pagination, `@CurrentUser()`, kodhoi xato dar `shared` |
-| 12:30–13:30 | 🍽 | 🍽 |
-| 13:30–16:00 | **Auth** (Spec 01): register, login (argon2, timing-safe), username-available, refresh (rotation + grace), logout, ws-ticket, me, `JwtAuthGuard` global + `@Public()`, throttler bo Redis | **Media** (Spec 03): S3 client, `POST /media/presign`, `assertOwnedKey`, `url()`; test bo curl ba MinIO |
-| 16:00–18:30 | **Users** (Spec 02): profil, `PATCH /users/me` (bo yakxelagii username), password; **Follow**: follow/unfollow, followers/following | **Posts** (Spec 04): create (media + hashtag), get, patch, delete; **Like / Saved** idempotent (`skipDuplicates`), kesh-i post |
-| 18:30–19:30 | e2e test: AC-hoi Auth (xususan AC2, AC3 — username-i takrori) | **Comment** + replies, delete |
-| 19:30–20:00 | 🤝 Merge ba `main`, PROGRESS.md, chi monda → ruzi 2 | 🤝 |
+| 09:00–09:15 | Sinxronizatsiya, xondani TZ va PLAN | Sinxronizatsiya |
+| 09:15–10:30 | **BE-01** Monorepo (struktura alla'kay hast): `corepack use pnpm@latest`, `nest new` ba `apps/api`, `packages/tsconfig` (strict), ESLint/Prettier, `pnpm dev` kor kunad → **push** | **FE-01** `corepack enable`, `pnpm install`, xondani `node_modules/next/dist/docs` (proxy, layouts, images, fonts), omuzishi Instagram-i veb |
+| 10:30–12:30 | **BE-02** **Kontrakt:** Zod schema-hoi hamai request/response az spec 01–09 dar `packages/shared` + kodhoi xato → **push 12:30** | **FE-02** Tokenhoi rang + dark mode (Spec 10 §1), shriftho, `globals.css`, **shadcn/ui** init bo ranghoi Instagram |
+| 12:30–13:30 | Tanaffus | Tanaffus |
+| 13:30–15:30 | **BE-03** Docker (Postgres + Redis + MinIO), `.env` + Zod, Prisma schema → migrate, infra (Prisma, Redis+Cache, Queue+worker, logger, filter-i xato, health, Swagger), **CI** | **FE-03** Komponenthoi UI: Button, Input, Avatar, StoryRing, Dialog, Dropdown, Sheet, Skeleton, Spinner, Toast, ikonkaho; `lib/format.ts` |
+| 15:30–18:00 | **BE-04** **Auth** (Spec 01): register (username-i yakxela!), login, refresh, logout, ws-ticket, me, guard, throttler | **FE-04** **MSW mock**: setup, factory-hoi ma'lumot az schema-hoi `shared` (`@faker-js/faker`), handler-ho baroi auth, users, posts, feed |
+| 18:00–19:30 | **BE-05** **Users + Follow** (Spec 02) | **FE-05** **Layout**: Sidebar 245/72, bottom nav + top bar-i mobil, panel-hoi lagzanda (holi) |
+| 19:30–20:00 | Sinxronizatsiya PR-ho → merge, PROGRESS | Sinxronizatsiya |
 
-**Natijai ruzi 1:** user ruyxat meshavad, vorid meshavad, profil, follow, post bo aks, like, comment, save — hama dar Swagger kor mekunand.
+**Natija:** monorepo + kontrakt dar `main`. Backend: auth va profil. Frontend: dizayn-sistema, layout, mock.
 
 ---
 
-## RUZI 2 — Backend: Feed, Explore, Realtime, Stories, Reels, Direct, Notifications
+## RUZI 2
 
-| Vaqt | A | B |
+| Vaqt | Avaz (backend) | Abubakr (frontend, mock) |
 |---|---|---|
-| 09:00–09:15 | 🤝 | 🤝 |
-| 09:15–11:00 | **Feed** (Spec 05) + `isLiked/isSaved` bidun N+1; `GET /users/:u/posts`, `/saved`, `/reels` (grid) | **RealtimeGateway** (Socket.IO `/ws`, auth bo ws-ticket, **Redis adapter**, room `user:<id>`, `RealtimeService.emitToUser`); job `media.process-image` (sharp) |
-| 11:00–12:30 | **Explore** + **Search** (users, hashtags, `/hashtags/:name/posts`) | **Stories** (Spec 06): create, tray, user stories, view, viewers, delete |
-| 12:30–13:30 | 🍽 | 🍽 |
-| 13:30–15:30 | **Notifications** (Spec 09): event-ho → queue `notifications` → **worker** → DB + `notification:new`; REST; job-hoi `maintenance` (repeatable) | **Direct** (Spec 08): conversations, messages REST, read, unsend, unread-count |
-| 15:30–17:00 | `GET /users/suggestions` (P1), **seed** (`db:seed`: 10 user, 50 post, story, chat) | Direct WebSocket: `message:new`, `typing`, `conversation:read`; **Reels** (Spec 07): `/reels`, view |
-| 17:00–19:00 | e2e: feed, notifications; **testi bovarinoki** (Spec 11 AC3–AC5: Redis xomush, worker xomush, like-i parallel) | e2e: stories, direct (2 socket-client, `clientId`-i takrori) |
-| 19:00–20:00 | 🤝 **Freeze-i API:** hamai endpoint-ho dar Swagger, tipho dar `packages/shared` purra. Az in lahza API faqat bo muhokima tagyir meyobad | 🤝 |
-
-**Natijai ruzi 2:** backend-i purra. Frontend metavonad faqat bo spec va Swagger kor kunad.
+| 09:00–09:15 | Sinxronizatsiya | Sinxronizatsiya |
+| 09:15–11:00 | **BE-06** **Media** (Spec 03): presign, `assertOwnedKey`, job `process-image` | **FE-06** **Login / Signup** (ozod/band username, xatoho, holati disabled) |
+| 11:00–13:00 | **BE-07** **Posts + Like + Comment + Saved** (Spec 04), idempotent, kesh | **FE-07** **Feed + PostCard**: carousel, double-tap like, like/save optimistic + rollback, comment-i tez, infinite scroll, Suggested |
+| 13:00–14:00 | Tanaffus | Tanaffus |
+| 14:00–16:00 | **BE-08** **Feed, Explore, Search, Hashtag** (Spec 05) | **FE-08** **Post modal** `/p/[id]` (intercepting route) + comment-ho, replies |
+| 16:00–18:00 | **BE-09** **RealtimeGateway** (Redis adapter) + **Notifications** (event → queue → worker → socket) | **FE-09** **Profil**: header, counter-ho, Follow, tab-ho, grid 3:4, followers/following modal |
+| 18:00–19:30 | **BE-10** **Stories** (Spec 06) | **FE-10** `/accounts/edit` (avatar), `/accounts/password` |
+| 19:30–20:00 | Sinxronizatsiya | Sinxronizatsiya |
 
 ---
 
-## RUZI 3 — Frontend: poydevor, Auth, Feed, Post, Profil, Explore
+## RUZI 3 — Ruzi ulanish
 
-| Vaqt | A | B |
+| Vaqt | Avaz | Abubakr |
 |---|---|---|
-| 09:00–09:15 | 🤝 | 🤝 |
-| 09:15–10:00 | Xondani `node_modules/next/dist/docs` (proxy, layouts, images) | hamon |
-| 10:00–12:30 | Tokenhoi rang + dark mode (Spec 10 §1), **BFF**: `app/api/auth/*`, `app/api/[...path]` (cookie → header, refresh-i avtomati, timeout), `lib/api-client.ts` (Zod), TanStack Query, `proxy.ts` (+ CSP), Sentry | **shadcn/ui** init + tema bo ranghoi Instagram: Button, Input, Dialog, Dropdown, Sheet, Skeleton, Sonner; Avatar, StoryRing, Spinner; `error.tsx`/`loading.tsx` umumi; `lib/format.ts` |
-| 12:30–13:30 | 🍽 | 🍽 |
-| 13:30–15:30 | **Layout**: Sidebar (245/72), bottom nav, top bar mobil; panel-hoi lagzanda (holi) | **Login / Signup** (Spec 01 + §4): ✓/✗ username, xatoho |
-| 15:30–18:00 | **Feed**: `PostCard` (carousel, double-tap ❤, like/save optimistic, comment-i tez), infinite scroll, sutuni Suggested | **Profil**: header, counter-ho, Follow/Following, tab-ho, grid 3:4, followers/following modal; `/accounts/edit` (avatar upload), password |
-| 18:00–19:30 | **Post modal** `/p/[id]` (intercepting route) + comment-ho, replies | **Explore** grid, hashtag page, **Search panel** (+ recent searches) |
-| 19:30–20:00 | 🤝 Merge, tekshirish dar 3 andoza (1440 / 1000 / 390) | 🤝 |
+| 09:00–09:15 | Sinxronizatsiya | Sinxronizatsiya |
+| 09:15–11:30 | **BE-11** **Direct** REST + WebSocket (Spec 08) + **Reels** (Spec 07) | **FE-11** **Explore** grid, hashtag page, **Search panel** + recent |
+| 11:30–13:00 | **BE-12** **Seed** + e2e + testi bovarinoki (Spec 11) → **API freeze** | **FE-12** **Notifications panel** (UI bo mock: guruhbandi, Follow back) |
+| 13:00–14:00 | Tanaffus | Tanaffus |
+| 14:00–16:00 | **FE-13** **BFF**: `app/api/auth/*`, `app/api/[...path]`, `realtime/ticket`, `proxy.ts` + CSP, Sentry | **FE-14** **Mock xomush** → har sahifaro bo API-i voqe'i tekshirad, har farq → Issue |
+| 16:00–17:00 | Islohi farqhoi API ↔ front (yakjoya) | |
+| 17:00–19:30 | **FE-15** **Socket client** (reconnect + refetch) + notifications realtime (badge, toast) | **FE-16** **Stories tray + viewer** (progress, tap, hold, viewers) |
+| 19:30–20:00 | Sinxronizatsiya | Sinxronizatsiya |
+
+**Muhim:** az 14:00 Avaz **dar frontend** ast. Agar backend hanuz tamom nashuda boshad — Avaz to 16:00 backend-ro tamom mekunad, Abubakr bo mock idoma medihad.
 
 ---
 
-## RUZI 4 — Frontend: Create, Stories, Reels, Direct, Notifications + yakun
+## RUZI 4 — Har du dar frontend
 
-| Vaqt | A | B |
+| Vaqt | Avaz | Abubakr |
 |---|---|---|
-| 09:00–09:15 | 🤝 | 🤝 |
-| 09:15–11:30 | **Create modal**: intixob → crop → caption → upload (presign → PUT → POST /posts); reel va story-ro ham hamin modal | **Socket client** (`lib/socket.ts`, reconnect, ulash ba Query kesh) + **Notifications panel** (guruhbandi, Follow back, badge, toast) |
-| 11:30–12:30 | **Stories tray** dar feed | **Direct inbox** |
-| 12:30–13:30 | 🍽 | 🍽 |
-| 13:30–15:30 | **Story viewer** (progress, tap, hold, useri badi, viewers baroi xud) | **Direct chat**: paymho, optimistic, typing, Seen, share post ba Direct, modali "New message" |
-| 15:30–17:00 | **Reels** (scroll-snap, autoplay/pause, mute, like/comment/save) | Pardoz: Dark mode toggle, 404, holati xoli ("No posts yet"), Skeleton dar hama jo |
-| 17:00–19:00 | 🧪 **Testi umumi**: AC-hoi spec 01–05 + Playwright (register, post, like) + Lighthouse | 🧪 AC-hoi spec 06–11 + Playwright (follow, direct) + testi qat'shavi (Redis, worker, internet) |
-| 19:00–20:00 | README (chi guna ba kor andoxtan), PROGRESS.md-i yakuni, demo | 🤝 |
+| 09:00–09:15 | Sinxronizatsiya | Sinxronizatsiya |
+| 09:15–12:30 | **FE-17** **Direct**: inbox, chat, optimistic + `clientId`, typing, Seen, "New message", share post | **FE-18** **Create modal**: intixob → crop → caption → upload (presign → PUT → POST); post, reel, story |
+| 12:30–13:30 | Tanaffus | Tanaffus |
+| 13:30–15:30 | **FE-19** Error boundaries, `error.tsx`, offline banner, virtualizatsiyai feed | **FE-20** **Reels** (scroll-snap, autoplay/pause, mute, like/comment/save) |
+| 15:30–17:00 | **FE-21** Playwright: register, post, like, follow, direct | **FE-22** Pardoz: dark toggle, 404, holati xoli, skeleton-ho, tekshirish dar 1440 / 1000 / 390 |
+| 17:00–19:00 | **QA-01** AC-hoi spec 01, 05, 08, 09, 11 + testi qat'shavi (Redis, worker, internet) | **QA-02** AC-hoi spec 02, 03, 04, 06, 07, 10 + Lighthouse |
+| 19:00–20:00 | README, `git tag v0.2`, demo | PROGRESS / ROADMAP-i yakuni |
 
 ---
 
-## Agar vaqt namerasad — chi buridan (tartibi qurboni)
+## Agar vaqt namerasad — chi buridan (tartib)
 
 1. Suggestions (P1) → ruyxati oddii populyarho
-2. Versiyahoi WebP dar worker → originalro nishon dihem (job baroi tekshirishi tip memonad)
+2. Versiyahoi WebP dar worker → original (tekshirishi tip memonad)
 3. Playwright → tekshirishi dasti az ruyi AC
-4. Virtualizatsiyai feed → infinite scroll-i oddi (limit 10)
+4. Virtualizatsiyai feed → infinite scroll-i oddi
 5. Algoritmi populyari Reels → `createdAt DESC`
 6. Typing va presence dar Direct
 7. Crop dar Create → faqat 1:1 `object-cover`
 8. Guruhbandii vaqt dar Notifications
 
-**Hech vaqt nameburem:** yakxelagii username, tokenho dar httpOnly cookie, argon2, validatsiyai Zod, idempotentnost (like/follow/paym), transaction-hoi counter, filter-i xato, CI, kontrakti spec.
+**Hech vaqt nameburem:** yakxelagii username, tokenho dar httpOnly cookie, argon2, validatsiyai Zod, idempotentnost, transaction-hoi counter, filter-i xato, CI, kontrakti spec.
 
-## Xavfho (risks)
+## Xavfho
 
 | Xavf | Hal |
 |---|---|
-| Docker nasb nest / kor namekunad | Ruzi 1 subh avvalin kor; zaxira — PostgreSQL lokali + AWS S3 |
-| Next.js 16 API-hoi nav | Ruzi 3 subh — xondani docs (dar plan hast) |
-| Konflikt-i Git dar `schema.prisma` | Schema-ro ruzi 1 A yakbora purra menavisad |
-| Redis + BullMQ + BFF vaqtro ziyod mekunand | Infra ruzi 1 subh yakbora sohta meshavad (B), modulho ba'd faqat `CacheService` va `queue.add()`-ro istifoda mebarand |
-| Realtime dar production (CDN, proxy) | Lokali tekshirem; deploy — berun az 4 ruz |
+| Avaz backend-ro tanho to Ruzi 3 tamom nakunad | Kontrakt Ruzi 1 tayyor ast → Abubakr hech vaqt intizor nest. Buridan az ruyxati bolo. Dar holati zarur Abubakr Reels-i backend-ro megirad (sodatarin modul) |
+| Mock va API-i voqe'i farq kunand | Har du az yak Zod schema (`shared`) sohta meshavand; Ruzi 3 14:00–17:00 baroi islohi farqho |
+| Docker kor namekunad | Ruzi 1 13:30 avvalin kor; zaxira — Postgres + Memurai lokali |
+| Konflikti Git | Papkahoi alohida (jadvali bolo); `shared` — faqat Avaz |
+| Next.js 16 API-hoi nav | FE-01 — xondani docs |
