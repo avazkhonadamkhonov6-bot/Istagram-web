@@ -1,6 +1,6 @@
 # Spec 10 — Frontend: dizayn, rangho, sahifaho
 
-**Ma'sul:** 🟩 Abubakr — asosi (Ruzi 1–4) · 🟦 Avaz — BFF, socket, Direct, bovarinoki (Ruzi 3–4) · **Prioritet:** P0
+**Ma'sul:** Abubakr — asosi (Ruzi 1–4) · Avaz — BFF, socket, Direct, bovarinoki (Ruzi 3–4) · **Prioritet:** P0
 
 > Pesh az kod: `node_modules/next/dist/docs/` (Next.js 16) — xususan `16-proxy.md`, `03-layouts-and-pages.md`, `12-images.md`.
 
@@ -24,7 +24,7 @@ Dar `apps/web/src/app/globals.css` hamchun CSS-variable va dar Tailwind 4 tavass
 | `--link` | `#00376B` | `#E0F1FF` | link dar bio |
 | `--like` | `#FF3040` | `#FF3040` | dili surkh |
 | `--error` | `#ED4956` | `#ED4956` | xatoi forma |
-| `--success` | `#58C322` | `#58C322` | ✓ username-i ozod |
+| `--success` | `#58C322` | `#58C322` | nishoni username-i ozod |
 | `--badge` | `#FF3040` | `#FF3040` | nuqtai notification |
 | `--bubble-me` | `#3797F0` | `#3797F0` | paymi xud (Direct) |
 | `--bubble-other` | `#EFEFEF` | `#262626` | paymi digaron |
@@ -48,18 +48,18 @@ Halqai story-i didashuda: `--separator`.
 |---|---|---|
 | ≥ 1264px | Sidebar-i chap **245px** (ikonka + matn + logotip) | Feed 470px + sutuni rost "Suggested" 319px (≥1160px) |
 | 768–1263px | Sidebar **72px** (faqat ikonka) | Feed markaz |
-| < 768px | Top bar (logo, ❤) 60px + bottom nav **50px** (Home, Explore, Reels, Create, Profile) | Feed 100% kenglik |
+| < 768px | Top bar (logo,) 60px + bottom nav **50px** (Home, Explore, Reels, Create, Profile) | Feed 100% kenglik |
 
 **Sidebar (tartib):** Home · Search · Explore · Reels · Messages · Notifications · Create · Profile · (poyon) More.
 Search va Notifications — **panel-i lagzanda 397px** (sidebar ba 72px meravad), misli Instagram.
-Ikonkaho: `lucide-react` (stroke 2, 24px); fa'ol — `fill` / stroke-i gafs. Ikonkai fa'ol + matni semibold.
+Ikonkaho: faqat SVG — `lucide-react` (stroke 2, 24px), **emoji istifoda nabared** (na dar UI, na dar matnho); fa'ol — `fill` / stroke-i gafs. Ikonkai fa'ol + matni semibold.
 
 ## 4. Sahifaho (routes)
 
 | Route | Sahifa | Tafsilot |
 |---|---|---|
 | `/login` | Login | Chap — aksi telefon (desktop), rost — kartai 350px: logo, username, parol, "Log in", link ba signup |
-| `/signup` | Ruyxatgiri | username (✓/✗ realtime, Spec 01), Full name, parol |
+| `/signup` | Ruyxatgiri | username (ozod/band realtime, Spec 01), Full name, parol |
 | `/` | Feed | Stories tray (avatar 56px, halqa 66px), postho, "Suggested for you" |
 | `/explore` | Explore | Grid 3 sutun, gap 4px, har 5-um — kalon (2×2) reel |
 | `/explore/tags/[tag]` | Hashtag | sarlavha + grid |
@@ -77,7 +77,7 @@ Ikonkaho: `lucide-react` (stroke 2, 24px); fa'ol — `fill` / stroke-i gafs. Iko
 
 ## 5. Komponentho (asosi)
 
-- `PostCard` — header (avatar 32px, username • vaqt, ⋯), media (carousel bo nuqtaho, double-tap ❤ animatsiya), amalho (❤ 💬 ✈ … 🔖), "1,234 likes", caption ("... more"), "View all 45 comments", "Add a comment…" + Post.
+- `PostCard` — header (avatar 32px, username • vaqt, ⋯), media (carousel bo nuqtaho, double-tap like animatsiya), amalho (like, comment, share, save), "1,234 likes", caption ("... more"), "View all 45 comments", "Add a comment…" + Post.
 - `StoryRing`, `Avatar` (andozaho: 24/32/44/56/77/150).
 - `FollowButton` (Follow — kabud / Following — xokistari / Follow back).
 - `Modal` (fon `rgba(0,0,0,.65)`, radius 12px), `Dropdown`, `Toast`, `Skeleton` (shimmer hangomi bor shudan).

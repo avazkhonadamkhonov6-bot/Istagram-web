@@ -176,7 +176,7 @@ exem-3/
 - **Pagination:** hamai ruyxatho — **cursor-based** (`?cursor=&limit=`), limit-i peshfarz 20, maks. 50.
 - **Formati xato:** yagona baroi hama (`specs/00-umumi.md`).
 - **Responsive:** desktop (≥1264px), planshet (768–1263px), mobil (<768px) — misli Instagram.
-- **Sifat:** TypeScript `strict`, ESLint + Prettier, CI dar har PR (`lint → typecheck → test → build`); har modul — e2e baroi "happy path" + xatohoi asosi; Playwright — 5 senariyai asosi (register, post, like, follow, direct).
+- **Sifat:** **emoji istifoda nabared** (kod, UI, commit, hujjatho); TypeScript `strict`, ESLint + Prettier, CI dar har PR (`lint → typecheck → test → build`); har modul — e2e baroi "happy path" + xatohoi asosi; Playwright — 5 senariyai asosi (register, post, like, follow, direct).
 
 Tafsiloti infra (kalidhoi Redis, queue-ho, CI, health): [specs/11-infra-bovarinoki.md](specs/11-infra-bovarinoki.md).
 

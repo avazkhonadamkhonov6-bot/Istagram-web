@@ -1,6 +1,6 @@
 # Spec 03 — Media (S3 + CDN)
 
-**Ma'sul:** 🟦 Avaz — backend (BE-06, Ruzi 2) · 🟩 Abubakr — front (FE-10, FE-18) · **Prioritet:** P0
+**Ma'sul:** Avaz — backend (BE-06, Ruzi 2) · Abubakr — front (FE-10, FE-18) · **Prioritet:** P0
 
 ## Arxitektura
 

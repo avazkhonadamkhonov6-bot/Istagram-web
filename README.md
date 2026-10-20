@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Instagram Clone — monorepo
 
-## Getting Started
+Kopiyai Instagram-i veb. Backend — NestJS, frontend — Next.js 16, monorepo — Turborepo + pnpm.
+Kor bo usuli **SDD**: avval spec (`docs/specs/`), ba'd kod.
 
-First, run the development server:
+## Struktura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+exem-3/
+├─ apps/
+│  ├─ api/                    NestJS API (port 4000)              — Avaz
+│  └─ web/                    Next.js (port 3000)                  — Abubakr
+│     └─ src/app/api/         BFF (route handler-ho)               — Avaz
+├─ packages/
+│  ├─ shared/                 Zod schema-ho, tipho, kodhoi xato    — Avaz
+│  └─ tsconfig/               konfiguratsiyai umumii TypeScript    — Avaz
+├─ docs/                      TZ, PLAN, TASKS, PROGRESS, ROADMAP, specs/
+├─ scripts/                   skriptho (masalan sohtani Issue-ho dar GitHub)
+├─ .github/                   CI, CODEOWNERS
+├─ package.json               skripthoi umumi (turbo)
+├─ pnpm-workspace.yaml
+└─ turbo.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tafsiloti har papka — dar `README.md`-i xudi on.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Hujjatho
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Fayl | Baroi chi |
+|---|---|
+| [docs/TZ.md](docs/TZ.md) | Topshiriqi texniki |
+| [docs/PLAN.md](docs/PLAN.md) | 4 ruz, soat ba soat, Avaz va Abubakr |
+| [docs/TASKS.md](docs/TASKS.md) | Hamai vazifaho bo ID (BE-xx, FE-xx, QA-xx) |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | Chi tayyor, chi monda |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Versiyaho v0.1 → v2.0 |
+| [docs/specs/](docs/specs/) | Spec-i har modul (API, AC) |
 
-## Learn More
+## Ogoz (pas az BE-01)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+corepack enable
+pnpm install
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Qoidaho
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Har kas faqat dar papkai xud kor mekunad** (jadvali bolo, `.github/CODEOWNERS`).
+2. `packages/shared` — faqat Avaz tagyir medihad. Agar maydoni nav lozim — comment dar Issue.
+3. Branch: `feat/be-<nom>` yo `feat/fe-<nom>` → PR ba `main` bo `Closes #<issue>`. CI boyad sabz boshad.
+4. Spec — kontrakt. Agar spec galat ast: avval spec, ba'd kod.
+5. **Emoji istifoda nabared** — na dar kod, na dar UI (ikonkaho faqat SVG), na dar commit, na dar hujjatho.
+6. Commit-ho kutoh va fahmo: `feat(api): auth register`, `fix(web): feed scroll`.

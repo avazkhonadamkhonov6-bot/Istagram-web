@@ -44,7 +44,7 @@ for f in "$tmp"/task_*.md; do
 
   if grep -q "^$id ·" <<<"$existing"; then echo "  skip $id (hast)"; continue; fi
 
-  body="$(tail -n +3 "$f")"$'\n\n---\n'"📄 [TASKS.md](https://github.com/$REPO/blob/main/docs/TASKS.md) · [PLAN.md](https://github.com/$REPO/blob/main/docs/PLAN.md)"
+  body="$(tail -n +3 "$f")"$'\n\n---\n'"[TASKS.md](https://github.com/$REPO/blob/main/docs/TASKS.md) · [PLAN.md](https://github.com/$REPO/blob/main/docs/PLAN.md)"
   args=(--repo "$REPO" --title "$title" --body "$body" --label "$type" --label "$who" --milestone "Ruzi $day")
   if [[ "$who" == "avaz" ]]; then args+=(--assignee "$AVAZ_GH"); fi
   if [[ "$who" == "abubakr" && -n "$ABUBAKR_GH" ]]; then args+=(--assignee "$ABUBAKR_GH"); fi

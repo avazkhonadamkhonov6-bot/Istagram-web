@@ -2,46 +2,44 @@
 
 > Har vazifa dar GitHub **Issue**-i alohida ast (milestone = ruz, label = `backend` / `frontend` / `qa` va nomi odam).
 > Tartib va vaqt — dar [PLAN.md](PLAN.md). Pas az tamom: PR bo `Closes #<issue>` → Issue xud baste meshavad.
-> 🟦 Avaz · 🟩 Abubakr
-
-| ID | Kas | Ruz | Vazifa |
+> | ID | Kas | Ruz | Vazifa |
 |---|---|---|---|
-| BE-01 | 🟦 Avaz | 1 | Monorepo setup |
-| BE-02 | 🟦 Avaz | 1 | Kontrakt: Zod schema-ho dar `packages/shared` |
-| BE-03 | 🟦 Avaz | 1 | Docker, Prisma, infra, CI |
-| BE-04 | 🟦 Avaz | 1 | Auth API |
-| BE-05 | 🟦 Avaz | 1 | Users + Follow API |
-| BE-06 | 🟦 Avaz | 2 | Media API (S3) |
-| BE-07 | 🟦 Avaz | 2 | Posts, Like, Comment, Saved API |
-| BE-08 | 🟦 Avaz | 2 | Feed, Explore, Search API |
-| BE-09 | 🟦 Avaz | 2 | Realtime + Notifications API |
-| BE-10 | 🟦 Avaz | 2 | Stories API |
-| BE-11 | 🟦 Avaz | 3 | Direct + Reels API |
-| BE-12 | 🟦 Avaz | 3 | Seed, e2e, API freeze |
-| FE-01 | 🟩 Abubakr | 1 | Tayyori va omuzishi Next.js 16 |
-| FE-02 | 🟩 Abubakr | 1 | Rangho, dark mode, shadcn/ui |
-| FE-03 | 🟩 Abubakr | 1 | Komponenthoi UI |
-| FE-04 | 🟩 Abubakr | 1 | MSW mock |
-| FE-05 | 🟩 Abubakr | 1 | Layout (sidebar, bottom nav) |
-| FE-06 | 🟩 Abubakr | 2 | Login / Signup |
-| FE-07 | 🟩 Abubakr | 2 | Feed + PostCard |
-| FE-08 | 🟩 Abubakr | 2 | Post modal + comment-ho |
-| FE-09 | 🟩 Abubakr | 2 | Profil |
-| FE-10 | 🟩 Abubakr | 2 | Edit profile + parol |
-| FE-11 | 🟩 Abubakr | 3 | Explore, Hashtag, Search |
-| FE-12 | 🟩 Abubakr | 3 | Notifications panel (UI) |
-| FE-13 | 🟦 Avaz | 3 | BFF + proxy.ts + CSP |
-| FE-14 | 🟩 Abubakr | 3 | Xomush kardani mock, integratsiya |
-| FE-15 | 🟦 Avaz | 3 | Socket client + notifications realtime |
-| FE-16 | 🟩 Abubakr | 3 | Stories tray + viewer |
-| FE-17 | 🟦 Avaz | 4 | Direct (front) |
-| FE-18 | 🟩 Abubakr | 4 | Create modal |
-| FE-19 | 🟦 Avaz | 4 | Bovarinokii front |
-| FE-20 | 🟩 Abubakr | 4 | Reels (front) |
-| FE-21 | 🟦 Avaz | 4 | Playwright e2e |
-| FE-22 | 🟩 Abubakr | 4 | Pardoz va responsive |
-| QA-01 | 🟦 Avaz | 4 | QA: spec 01, 05, 08, 09, 11 |
-| QA-02 | 🟩 Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |
+| BE-01 | Avaz | 1 | Monorepo setup |
+| BE-02 | Avaz | 1 | Kontrakt: Zod schema-ho dar `packages/shared` |
+| BE-03 | Avaz | 1 | Docker, Prisma, infra, CI |
+| BE-04 | Avaz | 1 | Auth API |
+| BE-05 | Avaz | 1 | Users + Follow API |
+| BE-06 | Avaz | 2 | Media API (S3) |
+| BE-07 | Avaz | 2 | Posts, Like, Comment, Saved API |
+| BE-08 | Avaz | 2 | Feed, Explore, Search API |
+| BE-09 | Avaz | 2 | Realtime + Notifications API |
+| BE-10 | Avaz | 2 | Stories API |
+| BE-11 | Avaz | 3 | Direct + Reels API |
+| BE-12 | Avaz | 3 | Seed, e2e, API freeze |
+| FE-01 | Abubakr | 1 | Tayyori va omuzishi Next.js 16 |
+| FE-02 | Abubakr | 1 | Rangho, dark mode, shadcn/ui |
+| FE-03 | Abubakr | 1 | Komponenthoi UI |
+| FE-04 | Abubakr | 1 | MSW mock |
+| FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) |
+| FE-06 | Abubakr | 2 | Login / Signup |
+| FE-07 | Abubakr | 2 | Feed + PostCard |
+| FE-08 | Abubakr | 2 | Post modal + comment-ho |
+| FE-09 | Abubakr | 2 | Profil |
+| FE-10 | Abubakr | 2 | Edit profile + parol |
+| FE-11 | Abubakr | 3 | Explore, Hashtag, Search |
+| FE-12 | Abubakr | 3 | Notifications panel (UI) |
+| FE-13 | Avaz | 3 | BFF + proxy.ts + CSP |
+| FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya |
+| FE-15 | Avaz | 3 | Socket client + notifications realtime |
+| FE-16 | Abubakr | 3 | Stories tray + viewer |
+| FE-17 | Avaz | 4 | Direct (front) |
+| FE-18 | Abubakr | 4 | Create modal |
+| FE-19 | Avaz | 4 | Bovarinokii front |
+| FE-20 | Abubakr | 4 | Reels (front) |
+| FE-21 | Avaz | 4 | Playwright e2e |
+| FE-22 | Abubakr | 4 | Pardoz va responsive |
+| QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 |
+| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |
 
 ---
 
@@ -49,10 +47,11 @@
 <!-- who:avaz day:1 type:backend -->
 **Vaqt:** Ruzi 1, 09:15–10:30 · **Spec:** TZ §5.2
 
-- `corepack enable`, `pnpm-workspace.yaml`, `turbo.json` (`dev`, `build`, `lint`, `typecheck`, `test`)
-- Kuchondani Next.js-i hozira ba `apps/web` (`git mv`), `nest new apps/api`
-- `packages/shared` (`@repo/shared`), `packages/tsconfig` (strict)
-- ESLint + Prettier umumi
+- Struktura alla'kay sohta shud: `apps/web` (Next.js kuchonida shud, import `@/` = `src/`), `apps/api` (papkaho), `packages/shared`, `packages/tsconfig`, `pnpm-workspace.yaml`, `turbo.json`, `.gitattributes`, `CODEOWNERS`
+- `corepack enable` → `corepack use pnpm@latest` (maydoni `packageManager` dar `package.json`)
+- `nest new` ba `apps/api` (`--skip-git --package-manager pnpm`), papkahoi mavjudaro nigoh doshtan
+- `packages/tsconfig`: `base.json`, `nestjs.json`, `nextjs.json` (strict); ESLint + Prettier umumi
+- Dar `CODEOWNERS` username-i GitHub-i Abubakr
 
 **Tayyor, agar:**
 - [ ] `pnpm install && pnpm dev` → web :3000 va api :4000 kor mekunand
@@ -159,7 +158,7 @@
 **Tayyor, agar:**
 - [ ] `pnpm --filter api db:seed` — 10 user, 50 post, story, chat
 - [ ] Spec 11 AC3, AC6
-- [ ] Hamai e2e sabz → 🔒 **API freeze**, xabar ba Abubakr
+- [ ] Hamai e2e sabz → **API freeze**, xabar ba Abubakr
 
 ### FE-01 · Tayyori va omuzishi Next.js 16
 <!-- who:abubakr day:1 type:frontend -->
@@ -218,7 +217,7 @@
 **Vaqt:** Ruzi 2, 09:15–11:00 · **Spec:** 01, 10 §4
 
 **Tayyor, agar:**
-- [ ] ✓/✗ username bo debounce 400ms
+- [ ] ozod/band username bo debounce 400ms
 - [ ] Xatoi `USERNAME_TAKEN` zeri maydon
 - [ ] Tugma to forma durust nest — disabled
 
@@ -227,7 +226,7 @@
 **Vaqt:** Ruzi 2, 11:00–13:00 · **Spec:** 04, 05, 10 §5
 
 **Tayyor, agar:**
-- [ ] Carousel, double-tap ❤, like/save optimistic + rollback
+- [ ] Carousel, double-tap like, like/save optimistic + rollback
 - [ ] Infinite scroll, Skeleton, sutuni Suggested (≥1160px)
 
 ### FE-08 · Post modal + comment-ho
@@ -252,7 +251,7 @@
 **Vaqt:** Ruzi 2, 18:00–19:30 · **Spec:** 02, 03
 
 **Tayyor, agar:**
-- [ ] Avatar upload (presign → PUT), bio 0/150, ivazi username bo ✓/✗
+- [ ] Avatar upload (presign → PUT), bio 0/150, ivazi username bo ozod/band
 - [ ] Ivazi parol
 
 ### FE-11 · Explore, Hashtag, Search

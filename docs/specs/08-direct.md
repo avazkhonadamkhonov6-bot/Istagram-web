@@ -1,6 +1,6 @@
 # Spec 08 — Direct (chati realtime)
 
-**Ma'sul:** 🟦 Avaz — backend (BE-11, Ruzi 3) va front (FE-17, Ruzi 4) · **Prioritet:** P0 (1:1); guruh — P2
+**Ma'sul:** Avaz — backend (BE-11, Ruzi 3) va front (FE-17, Ruzi 4) · **Prioritet:** P0 (1:1); guruh — P2
 
 ## REST
 

@@ -16,7 +16,7 @@
 - Sana: ISO 8601 (`2026-10-20T10:00:00.000Z`)
 - ID: `uuid`
 - Auth: header `Authorization: Bearer <accessToken>` — onro **BFF-i Next.js** az cookie-i httpOnly ilova mekunad (Spec 01, TZ §5.3).
-- Har javob header-i `x-request-id` dorad (baroi justujui xato dar log). Hamai endpoint-ho himoyashuda hastand, gayr az onho ki bo **🔓 public** qayd shudaand.
+- Har javob header-i `x-request-id` dorad (baroi justujui xato dar log). Hamai endpoint-ho himoyashuda hastand, gayr az onho ki bo ** public** qayd shudaand.
 - Usernameho dar URL: `/users/:username` (lowercase).
 
 ### Formati xato (yagona)

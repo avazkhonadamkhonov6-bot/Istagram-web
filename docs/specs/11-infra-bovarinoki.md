@@ -1,6 +1,6 @@
 # Spec 11 — Infra va bovarinoki (Redis, BullMQ, Worker, Health, CI)
 
-**Ma'sul:** 🟦 Avaz (BE-03, BE-09, BE-12) · **Prioritet:** P0
+**Ma'sul:** Avaz (BE-03, BE-09, BE-12) · **Prioritet:** P0
 
 ## 1. docker-compose (lokali)
 
@@ -70,7 +70,7 @@ defaultJobOptions: {
 - Worker pas az sohtani notification → `RealtimeService.emitToUser()` tavassuti **Redis adapter** (worker va API — process-hoi gunogun, vale event ba socket merasad).
 
 ### Masalan: rohi yak like (purra)
-1. User ❤ mezanad → UI favran `+1` (optimistic).
+1. User like mezanad → UI favran `+1` (optimistic).
 2. Brauzer → `POST /api/posts/42/like` (Next BFF) → cookie → `Authorization` → NestJS.
 3. NestJS: transaction `like.createMany({ skipDuplicates })`; **faqat agar `count === 1`** → `likeCount++`. Javob `{ isLiked, likeCount }`.
 4. `cache:post:42` hazf meshavad; event `PostLiked` → job `notifications.create` (jobId-i yakxela).
@@ -79,7 +79,7 @@ defaultJobOptions: {
 
 ## 5. Health, log, xatoho
 
-- `GET /api/v1/health` 🔓 (`@nestjs/terminus`): `db` (SELECT 1), `redis` (PING), `s3` (HeadBucket) → `ok | degraded | down`. Redis/S3 xomush → `degraded` (200), DB xomush → `down` (503).
+- `GET /api/v1/health` (public) (`@nestjs/terminus`): `db` (SELECT 1), `redis` (PING), `s3` (HeadBucket) → `ok | degraded | down`. Redis/S3 xomush → `degraded` (200), DB xomush → `down` (503).
 - Log: `nestjs-pino`, JSON, har darxost bo `requestId` (header `x-request-id`, BFF onro mefiristad). Parol, token, cookie dar log **pinhon** (`redact`).
 - Sentry: API (filter-i global → `captureException` faqat baroi 5xx), web (`@sentry/nextjs`). Agar `SENTRY_DSN` xoli — xomush.
 - Graceful shutdown: `app.enableShutdownHooks()`; worker: `worker.close()` dar `SIGTERM`.

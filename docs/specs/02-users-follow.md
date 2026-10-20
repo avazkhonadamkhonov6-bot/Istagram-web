@@ -1,6 +1,6 @@
 # Spec 02 — Users, Profil va Follow
 
-**Ma'sul:** 🟦 Avaz — backend (BE-05, Ruzi 1) · 🟩 Abubakr — front (FE-09, FE-10, Ruzi 2) · **Prioritet:** P0
+**Ma'sul:** Avaz — backend (BE-05, Ruzi 1) · Abubakr — front (FE-09, FE-10, Ruzi 2) · **Prioritet:** P0
 
 ## Endpoint-ho — Profil
 
@@ -8,7 +8,7 @@
 ```json
 {
   "id": "...", "username": "ali", "fullName": "Ali Valiev", "avatarUrl": "https://cdn.../a.jpg",
-  "bio": "Dushanbe 🇹🇯", "website": "https://ali.tj", "isVerified": false,
+  "bio": "Dushanbe", "website": "https://ali.tj", "isVerified": false,
   "postsCount": 12, "followersCount": 340, "followingCount": 120,
   "isMe": false, "isFollowing": true, "followsYou": false
 }

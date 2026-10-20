@@ -1,6 +1,6 @@
 # Spec 01 — Auth (username + parol)
 
-**Ma'sul:** 🟦 Avaz — backend (BE-04, Ruzi 1) · 🟩 Abubakr — front (FE-06, Ruzi 2) · **Prioritet:** P0
+**Ma'sul:** Avaz — backend (BE-04, Ruzi 1) · Abubakr — front (FE-06, Ruzi 2) · **Prioritet:** P0
 
 ## Maqsad
 User bo **username va parol** ruyxat meshavad va vorid meshavad. Ikta useri bo yak username **imkonnopazir** ast.
@@ -17,7 +17,7 @@ User bo **username va parol** ruyxat meshavad va vorid meshavad. Ikta useri bo y
 
 ## Endpoint-ho
 
-### `POST /auth/register` 🔓
+### `POST /auth/register` (public)
 ```json
 // request
 { "username": "Ali.Valiev", "password": "secret123", "fullName": "Ali Valiev" }
@@ -36,20 +36,20 @@ Xatoho: `400 VALIDATION_ERROR`, `409 USERNAME_TAKEN`, `400 USERNAME_RESERVED`.
 5. Agar `create` xatoi Prisma `P2002` dihad (du darxost dar yak vaqt) → `409 USERNAME_TAKEN`
 6. Tokenho sohta, javob dihed.
 
-### `GET /auth/username-available?username=ali` 🔓
+### `GET /auth/username-available?username=ali` (public)
 ```json
 { "available": false }
 ```
-Frontend inro hangomi navishtani username (debounce 400ms) istifoda mebarad — misli Instagram ✓ / ✗ nishon medihad.
+Frontend inro hangomi navishtani username (debounce 400ms) istifoda mebarad — misli Instagram ozod / band nishon medihad.
 
-### `POST /auth/login` 🔓
+### `POST /auth/login` (public)
 ```json
 { "username": "ALI.valiev", "password": "secret123" }
 ```
 200 — misli register. Xato: `401 INVALID_CREDENTIALS` ("Username yo parol noto'g'ri ast" — **nagued** kadomash galat ast).
 Agar user nest — baz ham `argon2.verify` bo hash-i "dummy" ijro meshavad, ki az ruyi vaqti javob fahmidan nashavad ki username hast yo ne (timing attack).
 
-### `POST /auth/refresh` 🔓
+### `POST /auth/refresh` (public)
 `{ "refreshToken": "..." }` — BFF az cookie megirad va mefiristad. NestJS tekshirad (hash dar DB, `revokedAt = null`, `expiresAt > now`) → tokeni kuhnaro `revoke` mekunad → jufti nav medihad (**rotation**).
 Agar tokeni revoke-shuda istifoda shavad → hamai refresh token-hoi in user revoke meshavand (duzdii token).
 200: `{ "accessToken": "...", "refreshToken": "...", ... }` · 401: `INVALID_REFRESH_TOKEN`.

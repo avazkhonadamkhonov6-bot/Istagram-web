@@ -1,7 +1,7 @@
 # ROADMAP — Rohi loyiha az ruzi 1 to miqyosi kalon
 
 > PLAN.md — **4 ruzi avval** soat ba soat. ROADMAP — **manzarai kalon**: chi versiya, kay, chi dorad va chi guna mefahmem ki tayyor ast.
-> Belgiho: ⬜ ogoz nashud · 🟡 dar jarayon · ✅ tayyor
+> Holat: TODO · DOING · DONE
 
 ```
 v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pardoz ──▶ v1.0 Relizi purra ──▶ v2.0 Miqyos
@@ -10,7 +10,7 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 ---
 
-## v0.1 — Backend-i purra ⬜
+## v0.1 — Backend-i purra
 **Muhlat:** Ruzi 1–2 · **Tafsilot:** [PLAN.md](PLAN.md) Ruzi 1–2
 
 | Milestone | Chi dorad | Spec |
@@ -25,7 +25,7 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 ---
 
-## v0.2 — Frontend + MVP-i purra ⬜
+## v0.2 — Frontend + MVP-i purra
 **Muhlat:** Ruzi 3–4 · **Tafsilot:** [PLAN.md](PLAN.md) Ruzi 3–4
 
 | Milestone | Chi dorad | Spec |
@@ -35,11 +35,11 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 | M8 Funksiyahoi zinda | Create, Stories, Reels, Direct, Notifications | 06–09 |
 | M9 Sifat | AC-hoi hamai spec-ho, Playwright, Lighthouse, testi qat'shavi | 11 |
 
-**Tayyor, agar:** DoD-i [TZ.md §9](TZ.md) purra ijro shud → **🎯 MVP (demo)**.
+**Tayyor, agar:** DoD-i [TZ.md §9](TZ.md) purra ijro shud → **MVP (demo)**.
 
 ---
 
-## v0.3 — Production (deploy) ⬜
+## v0.3 — Production (deploy)
 **Muhlat:** Hafta 2 (~5 ruz)
 
 - [ ] Domain + HTTPS, Cloudflare (CDN + WAF)
@@ -55,7 +55,7 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 ---
 
-## v0.4 — Pardoz va P1 ⬜
+## v0.4 — Pardoz va P1
 **Muhlat:** Hafta 3–4
 
 | Funksiya | Prioritet |
@@ -71,7 +71,7 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 ---
 
-## v1.0 — Relizi purra (kopiyai Instagram) ⬜
+## v1.0 — Relizi purra (kopiyai Instagram)
 **Muhlat:** Moh 2
 
 | Funksiya | Tafsilot |
@@ -92,7 +92,7 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 ---
 
-## v2.0 — Miqyos (vaqte ki sarborii voqe'i oyad) ⬜
+## v2.0 — Miqyos (vaqte ki sarborii voqe'i oyad)
 **Muhlat:** Moh 3+ · faqat agar metrikaho talab kunand
 
 | Signal | Amal |
@@ -113,12 +113,12 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 | Versiya | Muhlat | Natija | Holat |
 |---|---|---|---|
-| v0.1 | Ruzi 1–2 | Backend-i purra, API freeze | ⬜ |
-| v0.2 | Ruzi 3–4 | 🎯 MVP — demo | ⬜ |
-| v0.3 | Hafta 2 | Sayt dar internet | ⬜ |
-| v0.4 | Hafta 3–4 | P1, sur'at | ⬜ |
-| v1.0 | Moh 2 | Kopiyai purrai Instagram (P2) | ⬜ |
-| v2.0 | Moh 3+ | Miqyos az ruyi metrika | ⬜ |
+| v0.1 | Ruzi 1–2 | Backend-i purra, API freeze | TODO |
+| v0.2 | Ruzi 3–4 | MVP — demo | TODO |
+| v0.3 | Hafta 2 | Sayt dar internet | TODO |
+| v0.4 | Hafta 3–4 | P1, sur'at | TODO |
+| v1.0 | Moh 2 | Kopiyai purrai Instagram (P2) | TODO |
+| v2.0 | Moh 3+ | Miqyos az ruyi metrika | TODO |
 
 **Qoidahoi kor bo roadmap:**
 - Har funksiyai nav → avval **spec** dar `docs/specs/` (SDD), ba'd kod.

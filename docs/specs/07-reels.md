@@ -1,6 +1,6 @@
 # Spec 07 — Reels
 
-**Ma'sul:** 🟦 Avaz — backend (BE-11, Ruzi 3) · 🟩 Abubakr — front (FE-20, Ruzi 4) · **Prioritet:** P0
+**Ma'sul:** Avaz — backend (BE-11, Ruzi 3) · Abubakr — front (FE-20, Ruzi 4) · **Prioritet:** P0
 
 ## Qoidaho
 - Reel = `Post` bo `type = REEL` va **aniq 1 video** (≤ 90 son., 9:16 tavsiya).
@@ -21,7 +21,7 @@
 ## Frontend (Ruzi 4)
 - Sahifai `/reels`: scroll-i vertikali bo `scroll-snap-type: y mandatory`, har reel balandii purrai ekran (desktop — markaz, 9:16, ~ 400×711px).
 - `IntersectionObserver`: video-i namoyon — `play()`, digaron — `pause()`. Peshfarz `muted`, tugmai ovoz.
-- Rost: like ❤ (shumora), comment 💬, share ✈, save 🔖, ... ; poyon: avatar + username + Follow + caption.
+- Rost: like (shumora), comment, share, save, ... ; poyon: avatar + username + Follow + caption.
 - Double-tap → like bo animatsiyai dil.
 
 ## AC
