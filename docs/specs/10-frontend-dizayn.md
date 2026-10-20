@@ -4,43 +4,172 @@
 
 > Pesh az kod: `node_modules/next/dist/docs/` (Next.js 16) — xususan `16-proxy.md`, `03-layouts-and-pages.md`, `12-images.md`.
 
-## 1. Rangho (design tokens)
+## 1. Rangho (design tokens) — ranghoi asli Instagram
 
-Dar `apps/web/src/app/globals.css` hamchun CSS-variable va dar Tailwind 4 tavassuti `@theme`. **Dar kod ranghoi "hardcode" (`#0095F6`) navised — faqat tokenho.**
+> **Manba':** CSS-i voqe'ii `instagram.com`, giriftashuda **2026-10-20** az variable-hoi `:root, .__ig-light-mode` va `.__ig-dark-mode`. Hamai rangho **aynan** az Instagram hastand — hech rang taxmini nest.
+> **Nomi tokenho — hamon nomhoi Instagram** (`--ig-*`), ki muqoisa va tekshirish oson boshad.
+> Diqqat: Instagram rangi tugmai asosiro az kabudi kuhna `#0095F6` ba **`#4A5DF9`** ivaz kardaast. Mo rangi **nav**-ro istifoda mebarem.
 
+### Qoidaho
+1. Hamai tokenho dar `apps/web/src/app/globals.css`: light dar `:root`, dark dar `.dark` (+ `prefers-color-scheme: dark`), dar Tailwind 4 tavassuti `@theme inline`.
+2. Instagram rangro hamchun `R, G, B` nigoh medorad va `rgb(var(--ig-primary-text))` istifoda mebarad. Mo ham **hamin xel** menavisem, ki shaffofi (`rgba(var(--ig-primary-text), .5)`) oson boshad.
+3. **Dar komponentho rangi hardcode (`#...`, `rgb(...)`) mamnu' ast** — faqat tokenho (AC2).
+4. Agar rangi nav lozim shavad: avval dar CSS-i instagram.com justuju kuned, ba'd ba in jadval ilova kuned. Rangi xudsoxta ilova nakuned.
+
+### 1.1 Fon (background)
 | Token | Light | Dark | Kujo |
 |---|---|---|---|
-| `--bg` | `#FFFFFF` | `#000000` | fon-i asosi |
-| `--bg-secondary` | `#FAFAFA` | `#121212` | fon-i sahifai login, hover |
-| `--bg-elevated` | `#FFFFFF` | `#262626` | modal, dropdown |
-| `--text` | `#000000` | `#F5F5F5` | matni asosi |
-| `--text-secondary` | `#737373` | `#A8A8A8` | vaqt, "View all comments" |
-| `--separator` | `#DBDBDB` | `#262626` | xatho, border |
-| `--primary` | `#0095F6` | `#0095F6` | tugmai Follow / Log in / Share |
-| `--primary-hover` | `#1877F2` | `#1877F2` | |
-| `--primary-disabled` | `#4CB5F9` | `#4CB5F9` (opacity .7) | tugma to validatsiya |
-| `--btn-secondary` | `#EFEFEF` | `#363636` | Following, Edit profile, Message |
-| `--btn-secondary-hover` | `#DBDBDB` | `#262626` | |
-| `--link` | `#00376B` | `#E0F1FF` | link dar bio |
-| `--like` | `#FF3040` | `#FF3040` | dili surkh |
-| `--error` | `#ED4956` | `#ED4956` | xatoi forma |
-| `--success` | `#58C322` | `#58C322` | nishoni username-i ozod |
-| `--badge` | `#FF3040` | `#FF3040` | nuqtai notification |
-| `--bubble-me` | `#3797F0` | `#3797F0` | paymi xud (Direct) |
-| `--bubble-other` | `#EFEFEF` | `#262626` | paymi digaron |
-| `--verified` | `#0095F6` | `#0095F6` | nishoni tasdiq |
+| `--ig-primary-background` | `#FFFFFF` | `#0C1014` | fon-i asosii sahifa |
+| `--ig-secondary-background` | `#F3F5F7` | `#25292E` | fon-i duyum, sahifai login |
+| `--ig-highlight-background` | `#F3F5F7` | `#25292E` | hover-i qatorho (sidebar, ruyxatho) |
+| `--ig-elevated-background` | `#FFFFFF` | `#212328` | modal, popover |
+| `--ig-elevated-highlight-background` | `#EFEFEF` | `#363636` | hover dar modal |
+| `--ig-banner-background` | `#FFFFFF` | `#262626` | banner-ho |
+| `--ig-dropdown-background` | `#F3F5F7` | `#25292E` | dropdown |
+| `--ig-menu-background-color` | `#F8F9F9` | `#262B31` | menyui "More" |
+| `--ig-hover-overlay` | `rgba(12,16,20,.05)` | `rgba(255,255,255,.1)` | qabati hover bolo-i element |
+| `--ig-temporary-highlight` | `#F5FBFF` | `#0095F6` | rushnoii muvaqqati (comment-i nav) |
 
-**Gradienti Instagram** (halqai story, logotip, tugmahoi maxsus):
-```css
---ig-gradient: linear-gradient(45deg, #FEDA75 0%, #FA7E1E 25%, #D62976 50%, #962FBF 75%, #4F5BD5 100%);
+### 1.2 Matn va ikonka
+| Token | Light | Dark | Kujo |
+|---|---|---|---|
+| `--ig-primary-text` | `#0C1014` | `#F8F9F9` | matni asosi, username |
+| `--ig-secondary-text` | `#6A717A` | `#A2AAB4` | vaqt, "View all comments" |
+| `--ig-tertiary-text` | `#C7C7C7` | `#737373` | matni sust |
+| `--ig-primary-icon` | `#0C1014` | `#F8F9F9` | ikonkahoi asosi |
+| `--ig-secondary-icon` | `#8E8E8E` | `#8E8E8E` | ikonkahoi duyum |
+| `--ig-tertiary-icon` | `#C7C7C7` | `#737373` | ikonkahoi gayrifa'ol |
+| `--ig-link` | `#00376B` | `#E0F1FF` | link dar bio, `#hashtag`, `@mention` |
+| `--ig-colors-link-text` | `#4150F7` | `#708DFF` | link-i amal ("Forgot password?", "Sign up") |
+| `--ig-text-on-color` | `#FFFFFF` | `#FFFFFF` | matn bolo-i tugmai rangin |
+| `--ig-text-on-media` | `#FFFFFF` | `#FFFFFF` | matn bolo-i aks/video (Reels, Stories) |
+
+### 1.3 Xatho va border
+| Token | Light | Dark | Kujo |
+|---|---|---|---|
+| `--ig-separator` | `#DBDFE4` | `#2B3036` | xati judokunanda |
+| `--ig-elevated-separator` | `#DBDFE4` | `#2B3036` | xat dar modal |
+| `--ig-stroke` | `#DBDBDB` | `#363636` | border-i kartaho, halqai story-i didashuda |
+| `--ig-focus-stroke` | `#A8A8A8` | `#555555` | border-i focus |
+| `--ig-tablist-border` | `#DBDFE4` | `#2B3036` | xati tab-hoi profil |
+| `--ig-tab-underline-active` | `#0C1014` | `#F8F9F9` | tab-i fa'ol |
+| `--ig-stroke-on-media` | `#FFFFFF` | `#FFFFFF` | border bolo-i media |
+
+### 1.4 Tugmaho
+| Token | Light | Dark | Kujo |
+|---|---|---|---|
+| `--ig-primary-button` | `#4A5DF9` | `#4A5DF9` | **Log in, Follow, Share, Send** |
+| `--ig-primary-button-hover` | `#4150F7` | `#4150F7` | hover |
+| `--ig-colors-button-primary-background--pressed` | `#4150F7` | `#4150F7` | pahsh |
+| `--ig-colors-button-primary-background--disabled` | `#B8CDFF` | `#18208B` | to forma durust nest |
+| `--ig-colors-button-primary-text` | `#FFFFFF` | `#FFFFFF` | matn |
+| `--ig-colors-button-secondary-background` | `#F0F2F5` | `#25292E` | **Following, Edit profile, Message** |
+| `--ig-colors-button-secondary-background--hover` | `#E7EAEE` | `#363C44` | hover |
+| `--ig-colors-button-secondary-background--disabled` | `#DCE0E5` | `#2B3036` | disabled |
+| `--ig-colors-button-secondary-text` | `#0C1014` | `#FFFFFF` | matn |
+| `--ig-colors-button-secondary-text--disabled` | `#5E646D` | `#A2AAB4` | matni disabled |
+| `--ig-colors-button-borderless-text` | `#4150F7` | `#708DFF` | tugmai bidun fon ("Follow" dar sarlavhai post, "Post" dar comment) |
+| `--ig-colors-button-borderless-text--hover` | `#2536D0` | `#85A1FF` | hover |
+| `--ig-colors-button-borderless-text--pressed` | `#1F28AD` | `#A3BCFF` | pahsh |
+| `--ig-colors-button-borderless-text--disabled` | `#B8CDFF` | `#18208B` | disabled ("Post" to matn nest) |
+| `--ig-colors-button-primary-link-text` | `#3143E3` | `#85A1FF` | link-i asosi |
+| `--ig-tertiary-button-background` | `#FFFFFF` | `#FFFFFF` | tugmai sevum |
+| `--ig-tertiary-button-border` | `#DBDBDB` | `#DBDBDB` | border-i on |
+| `--ig-tertiary-button-hover` | `#F5F5F5` | `#F5F5F5` | hover |
+| `--ig-tertiary-button-text` | `#262626` | `#262626` | matn |
+
+### 1.5 Input (formaho)
+| Token | Light | Dark |
+|---|---|---|
+| `--ig-input-border-primary` (focus) | `#212328` | `#F8F9F9` |
+| `--ig-input-border-secondary` (oddi) | `#DBDFE4` | `#5E646D` |
+| `--ig-input-disabled-background-color` | `#F3F5F7` | `#25292E` |
+| `--ig-input-text-and-icon-primary` | `#0C1014` | `#F8F9F9` |
+| `--ig-input-text-and-icon-secondary` (placeholder) | `#6A717A` | `#A2AAB4` |
+| `--ig-input-border-radius` | `12px` | `12px` |
+| `--ig-input-border-width` | `1px` | `1px` |
+| `--ig-text-input-padding-vertical` | `20px` | `20px` |
+
+### 1.6 Holat va nishonho
+| Token | Rang (light = dark) | Kujo |
+|---|---|---|
+| `--ig-badge` | `#FF3040` | nuqtai notification, **dili like-i surkh** |
+| `--ig-error-or-destructive` | `#ED4956` | xatoi forma, "Delete", "Unfollow" dar menyu |
+| `--ig-success` | `#58C322` | username-i ozod |
+| `--ig-live-badge` | `#FF0169` | nishoni LIVE |
+| `--ig-close-friends-refreshed` | `#1CD14F` | halqai "Close friends" |
+| `--ig-subscribers-only` | `#7638FA` | kontenti subscriber-ho |
+
+### 1.7 Direct (paymho)
+| Token | Light | Dark |
+|---|---|---|
+| `--ig-outgoing-message-bubble` (paymi xud) | `#4A5DF9` | `#4A5DF9` |
+| `--ig-incoming-message-bubble` (paymi digaron) | `#F3F5F7` | `#25292E` |
+
+### 1.8 Toggle (switch)
+| Token | Light | Dark |
+|---|---|---|
+| `--ig-toggle-background-on-prism` | `#0C1014` | `#F8F9F9` |
+| `--ig-toggle-background-off-prism` | `#6A717A` | `#A2AAB4` |
+| `--ig-toggle-background-disabled-on-prism` | `#838993` | `#838993` |
+
+### 1.9 Soya, blur, toast
+| Token | Qimat |
+|---|---|
+| `--ig-strong-shadow` | `0 4px 32px 0 rgba(11,16,20,.16)` (modal, dropdown) |
+| `--ig-toast-prism-background-color` | `rgba(37,41,46,.95)` (toast) |
+| `--ig-background-always-dark-blur` | `rgba(43,48,54,.5)` (blur bolo-i media) |
+| Fon-i modal (overlay) | `rgba(0,0,0,.65)` |
+
+### 1.10 Gradienti brendi Instagram (halqai story, logotip, Create)
+Ranghoi decorative az CSS-i Instagram: `--decorative-ig-yellow #FFD600`, `--decorative-ig-orange #FF7A00`, `--decorative-ig-lavender #D300C5`, `--decorative-ig-purple #7638FA`, va rangi pushti-i brend `#FF0069` (dar CSS hamchun `--ig-live-badge`, `#FF0169`).
+
 ```
-Halqai story-i didashuda: `--separator`.
+--ig-brand-gradient: linear-gradient(45deg, #FFD600 0%, #FF7A00 25%, #FF0069 50%, #D300C5 75%, #7638FA 100%);
+```
+- Halqai story-i **nadida**: `--ig-brand-gradient`, gafsi 2px, faosila 2px (`--ig-primary-background`).
+- Halqai story-i **didashuda**: `--ig-stroke`, gafsi 1px.
+- Halqai "Close friends": `--ig-close-friends-refreshed`.
 
-## 2. Typography
-- Shrift: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`.
-- Andoza-i asosi: **14px / 18px**. Username — `font-semibold` (600). Vaqt — 12px `--text-secondary`.
-- Profile: username 20px; counter-ho 16px (raqam semibold).
-- Logotip — matni "Instagram" bo shrifti script (Google Font **"Grand Hotel"**), 28–32px.
+> Halqai story dar instagram.com bo `<canvas>` kashida meshavad, baroi hamin dar CSS gradienti tayyor nest. Gradient az hamin ranghoi decorative-i brend sohta meshavad.
+
+### 1.11 Animatsiya (az CSS-i Instagram)
+| Token | Qimat |
+|---|---|
+| `--ig-animation-move-in` / `--ig-animation-move-out` | `cubic-bezier(0.17, 0.17, 0, 1)` |
+| `--fds-animation-fade-in` | `cubic-bezier(0, 0, 1, 1)` |
+| `--fds-animation-enter-exit-in` | `cubic-bezier(0.14, 1, 0.34, 1)` |
+| `--fds-animation-enter-exit-out` | `cubic-bezier(0.45, 0.1, 0.2, 1)` |
+| `--ig-duration-extra-extra-short-in` | `100ms` |
+| `--fds-duration-extra-short-in` / `-out` | `200ms` / `150ms` |
+| `--fds-duration-short-in` / `-out` | `280ms` / `200ms` |
+| `--fds-duration-medium-in` / `-out` | `400ms` / `350ms` |
+
+### 1.12 Kadom element — kadom token
+| Element | Token |
+|---|---|
+| Fon-i sahifa | `--ig-primary-background` |
+| Sidebar: hover-i qator | `--ig-hover-overlay` |
+| Username, caption | `--ig-primary-text` |
+| Vaqt ("2h"), "View all 45 comments" | `--ig-secondary-text` |
+| Dili like-shuda | `--ig-badge` |
+| Dili like-nashuda, ikonkahoi post | `--ig-primary-icon` |
+| Tugmai "Follow" (kalon) | `--ig-primary-button` + `--ig-colors-button-primary-text` |
+| "Follow" dar sarlavhai post / "Post" dar comment | `--ig-colors-button-borderless-text` |
+| "Following", "Edit profile", "Message" | `--ig-colors-button-secondary-background` + `-text` |
+| Border-i PostCard (desktop) | `--ig-separator` |
+| Modal | `--ig-elevated-background` + `--ig-strong-shadow` |
+| Input | `--ig-input-*` |
+| Paymi xud / digaron | `--ig-outgoing-message-bubble` / `--ig-incoming-message-bubble` |
+| Nishoni tasdiq (verified) | `--ig-primary-button` |
+| "Unfollow", "Delete", "Report" | `--ig-error-or-destructive` |
+
+## 2. Typography (az CSS-i Instagram)
+- Shrifti Instagram — `"Instagram Sans"`: **shrifti xususii Meta, litsenziyai ozod nadorad** — istifoda namebarem. Mo hamon fallback-ro istifoda mebarem ki xudi Instagram dar CSS dorad:
+  `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif` (dar Windows = Segoe UI, aynan misli instagram.com dar Windows).
+- Andozai asosi: **14px / 18px** (az `body`-i instagram.com). Username — 600. Vaqt — 12px `--ig-secondary-text`.
+- Profil: username 20px; counter-ho 16px (raqam 600).
+- Logotip — matni "Instagram" bo shrifti script (Google Font **"Grand Hotel"**), 28–32px (logotipi asl — tamgai Meta).
 
 ## 3. Layout (responsive)
 
@@ -48,7 +177,7 @@ Halqai story-i didashuda: `--separator`.
 |---|---|---|
 | ≥ 1264px | Sidebar-i chap **245px** (ikonka + matn + logotip) | Feed 470px + sutuni rost "Suggested" 319px (≥1160px) |
 | 768–1263px | Sidebar **72px** (faqat ikonka) | Feed markaz |
-| < 768px | Top bar (logo,) 60px + bottom nav **50px** (Home, Explore, Reels, Create, Profile) | Feed 100% kenglik |
+| < 768px | Top bar (logo, notifications) 60px + bottom nav **50px** (Home, Explore, Reels, Create, Profile) | Feed 100% kenglik |
 
 **Sidebar (tartib):** Home · Search · Explore · Reels · Messages · Notifications · Create · Profile · (poyon) More.
 Search va Notifications — **panel-i lagzanda 397px** (sidebar ba 72px meravad), misli Instagram.
@@ -131,16 +260,18 @@ src/
 ## 8. UX-i Instagram (bo diqqat)
 - Vaqt: `2m`, `3h`, `5d`, `2w`, pas az 7 hafta — sana ("October 20").
 - Raqamho: `1,234`, `12.5K`, `1.2M`.
-- Tugmai "Log in" / "Share" / "Post" to forma durust nest — `--primary-disabled`.
+- Tugmai "Log in" / "Share" / "Post" to forma durust nest — `--ig-colors-button-primary-background--disabled`.
 - Caption: `#hashtag` va `@username` — link (`--link`).
 - Skeleton dar hama jo, spinner-i Instagram (12 xati xokistari) hangomi infinite scroll.
 
 ## AC
 - [ ] AC1: Dar 1440px, 1000px va 390px layout misli Instagram ast (sidebar 245 / 72 / bottom nav).
-- [ ] AC2: Dar kod rangi hardcode nest (grep `#[0-9A-F]{6}` dar `components/` → 0).
+- [ ] AC2: Dar kod rangi hardcode nest: grep `#[0-9A-Fa-f]{3,8}\b|rgb\(` dar `src/components` va `src/features` → 0 (rangho faqat dar `globals.css`).
 - [ ] AC3: Dark mode bo `prefers-color-scheme` va toggle dar "More".
 - [ ] AC4: Lighthouse accessibility ≥ 90 (alt baroi aksho, label baroi input-ho).
 - [ ] AC5: Lighthouse performance ≥ 85, LCP < 2.5 s, CLS < 0.1 dar `/` va `/[username]`.
 - [ ] AC6: API-ro qat' kuned → sahifa nameshikanad, xatoi fahmo + tugmai "Try again".
 - [ ] AC7: Like bo internet-i qat' → rollback + toast.
 - [ ] AC8: Feed-i 200 post — scroll ravon (DOM ≤ ~15 PostCard).
+- [ ] AC9: Ranghoi asl: har token-i §1 dar `globals.css` bo hamon qimat. Tekshirish: dar instagram.com (light va dark) va dar loyiha dar DevTools `getComputedStyle(document.documentElement).getPropertyValue("--ig-primary-button")` va tokenhoi digar — natija yaksa.
+- [ ] AC10: Muqoisai vizuali: screenshot-i sahifahoi login, feed, profil, post, direct dar instagram.com va dar loyiha kanori ham — rangho farq nadorand.

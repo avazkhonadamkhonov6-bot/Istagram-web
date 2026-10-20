@@ -200,7 +200,7 @@ Loyiha tayyor hisob meshavad, agar:
 2. Hamai funksiyahoi **P0** dar jadvali §2 kor mekunand va dar `docs/PROGRESS.md` qayd shudaand.
 3. Ruyxatgiri bo username-i takrori (hatto bo harfhoi kalon) → xatoi "Username band ast" (409).
 4. Du brauzer: paym dar Direct va notification dar realtime merasand.
-5. Dizayn dar desktop va mobil ba Instagram monand ast, rangho az tokenho (`specs/10`) istifoda meshavand.
+5. Dizayn dar desktop va mobil ba Instagram monand ast; **rangho 100% ranghoi asli Instagram** (tokenhoi `--ig-*` az CSS-i instagram.com, `specs/10` §1, AC9–AC10).
 6. `pnpm lint`, `pnpm typecheck`, `pnpm test` bidun xato; CI dar GitHub sabz.
 7. Swagger dar `/api/docs` hamai endpoint-horo nishon medihad.
 8. Dar brauzer (DevTools → Application) token dar `localStorage` **nest**, faqat cookie-hoi httpOnly.

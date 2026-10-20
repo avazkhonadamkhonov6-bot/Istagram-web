@@ -175,10 +175,14 @@
 <!-- who:abubakr day:1 type:frontend -->
 **Vaqt:** Ruzi 1, 10:30–12:30 · **Spec:** 10 §1–2
 
+- Ranghoi aslii Instagram: **hamai** tokenhoi Spec 10 §1.1–§1.11 bo **hamon nom** (`--ig-*`) va **hamon qimat** dar `globals.css` (light + dark)
+- shadcn/ui init; ranghoi shadcn (`--primary`, `--background`, `--border`...) ba tokenhoi `--ig-*` baste meshavand (masalan `--primary: rgb(var(--ig-primary-button))`)
+
 **Tayyor, agar:**
-- [ ] Hamai tokenhoi Spec 10 §1 dar `globals.css` (light + dark)
-- [ ] shadcn/ui init, rangho ba tokenho baste
-- [ ] Spec 10 AC3
+- [ ] Har token az jadvalhoi Spec 10 §1 dar `globals.css` hast, qimatho yak ba yak mos (Spec 10 AC9)
+- [ ] Tugmai asosi `#4A5DF9`, ne `#0095F6`
+- [ ] Spec 10 AC2, AC3
+- [ ] Sahifai `/dev/colors`: hamai tokenho dar light va dark kanori ham
 
 ### FE-03 · Komponenthoi UI
 <!-- who:abubakr day:1 type:frontend -->

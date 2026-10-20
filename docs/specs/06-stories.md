@@ -32,7 +32,7 @@ interface StoryDto { id: string; mediaUrl: string; type: 'IMAGE'|'VIDEO'; durati
 ### `DELETE /stories/:id` — faqat muallif → 204
 
 ## Frontend (barosi Ruzi 4)
-- Halqai gradient atrofi avatar: `hasUnseen` → gradient (Spec 10), dide shuda → xokistari `#DBDBDB`.
+- Halqai gradient atrofi avatar: `hasUnseen` → `--ig-brand-gradient` (Spec 10 §1.10), didashuda → `--ig-stroke`.
 - Viewer: progress bar-ho dar bolo, tap chap/rost — story-i qabli/badi, hold — pauza, swipe/tugma — useri badi, `Esc` — bastan.
 
 ## AC
