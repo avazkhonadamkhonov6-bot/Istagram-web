@@ -212,6 +212,7 @@ Loyiha tayyor hisob meshavad, agar:
 
 | Fayl | Chi dorad |
 |---|---|
+| [TASKS.md](TASKS.md) | 36 vazifa bo ID (BE/FE/QA), kas, ruz, "Tayyor, agar" — har kadom Issue-i GitHub |
 | [ROADMAP.md](ROADMAP.md) | Versiyaho v0.1 → v2.0: chi, kay, kriteriyai tayyori |
 | [PLAN.md](PLAN.md) | Naqshai 4 ruz, soat ba soat, baroi A va B |
 | [PROGRESS.md](PROGRESS.md) | Chi tayyor, chi dar jarayon, chi monda |

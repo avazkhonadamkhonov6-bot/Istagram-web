@@ -1,6 +1,6 @@
 # Spec 11 — Infra va bovarinoki (Redis, BullMQ, Worker, Health, CI)
 
-**Ma'sul:** B (Redis/Queue/Worker), A (CI, health, Sentry) · **Ruz:** 1–2 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz (BE-03, BE-09, BE-12) · **Prioritet:** P0
 
 ## 1. docker-compose (lokali)
 

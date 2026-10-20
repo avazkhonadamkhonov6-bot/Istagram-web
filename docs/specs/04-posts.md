@@ -1,6 +1,6 @@
 # Spec 04 — Posts, Like, Comment, Saved
 
-**Ma'sul:** B · **Ruz:** 1 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-07, Ruzi 2) · 🟩 Abubakr — front (FE-07, FE-08, Ruzi 2) · **Prioritet:** P0
 
 ## Ob'ekti Post (javob)
 ```ts

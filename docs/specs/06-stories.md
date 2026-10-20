@@ -1,6 +1,6 @@
 # Spec 06 — Stories
 
-**Ma'sul:** B · **Ruz:** 2 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-10, Ruzi 2) · 🟩 Abubakr — front (FE-16, Ruzi 3) · **Prioritet:** P0
 
 ## Qoidaho
 - Story 24 soat zinda ast: `expiresAt = createdAt + 24h`. Hamai query-ho: `expiresAt > now()`.

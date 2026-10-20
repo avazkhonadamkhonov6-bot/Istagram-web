@@ -1,6 +1,6 @@
 # Spec 02 — Users, Profil va Follow
 
-**Ma'sul:** A · **Ruz:** 1 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-05, Ruzi 1) · 🟩 Abubakr — front (FE-09, FE-10, Ruzi 2) · **Prioritet:** P0
 
 ## Endpoint-ho — Profil
 

@@ -1,6 +1,6 @@
 # Spec 01 — Auth (username + parol)
 
-**Ma'sul:** A · **Ruz:** 1 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-04, Ruzi 1) · 🟩 Abubakr — front (FE-06, Ruzi 2) · **Prioritet:** P0
 
 ## Maqsad
 User bo **username va parol** ruyxat meshavad va vorid meshavad. Ikta useri bo yak username **imkonnopazir** ast.

@@ -1,6 +1,6 @@
 # Spec 10 — Frontend: dizayn, rangho, sahifaho
 
-**Ma'sul:** A + B · **Ruz:** 3–4 · **Prioritet:** P0
+**Ma'sul:** 🟩 Abubakr — asosi (Ruzi 1–4) · 🟦 Avaz — BFF, socket, Direct, bovarinoki (Ruzi 3–4) · **Prioritet:** P0
 
 > Pesh az kod: `node_modules/next/dist/docs/` (Next.js 16) — xususan `16-proxy.md`, `03-layouts-and-pages.md`, `12-images.md`.
 

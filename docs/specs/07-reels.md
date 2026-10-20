@@ -1,6 +1,6 @@
 # Spec 07 — Reels
 
-**Ma'sul:** B · **Ruz:** 2 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-11, Ruzi 3) · 🟩 Abubakr — front (FE-20, Ruzi 4) · **Prioritet:** P0
 
 ## Qoidaho
 - Reel = `Post` bo `type = REEL` va **aniq 1 video** (≤ 90 son., 9:16 tavsiya).

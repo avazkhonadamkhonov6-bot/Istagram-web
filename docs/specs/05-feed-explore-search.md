@@ -1,6 +1,6 @@
 # Spec 05 — Feed, Explore, Search
 
-**Ma'sul:** A · **Ruz:** 2 · **Prioritet:** P0
+**Ma'sul:** 🟦 Avaz — backend (BE-08, Ruzi 2) · 🟩 Abubakr — front (FE-07, FE-11) · **Prioritet:** P0
 
 ## Feed — `GET /feed?cursor&limit=10`
 - Postho (type `POST` **va** `REEL`) az userhoe ki man follow kardaam **+ posthoi xudam**.
