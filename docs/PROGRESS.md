@@ -15,11 +15,11 @@
 ## RUZI 1
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [ ] | BE-01 Monorepo | [ ] | FE-01 Tayyori, Next 16 docs |
-| [ ] | BE-02 Kontrakt (Zod) — **to 12:30** | [ ] | FE-02 Rangho, dark, shadcn |
-| [ ] | BE-03 Docker, Prisma, infra, CI | [ ] | FE-03 Komponenthoi UI |
+| [ ] | BE-01 Monorepo | [x] | FE-01 Tayyori, Next 16 docs |
+| [ ] | BE-02 Kontrakt (Zod) — **to 12:30** | [x] | FE-02 Rangho, dark, shadcn |
+| [ ] | BE-03 Docker, Prisma, infra, CI | [x] | FE-03 Komponenthoi UI |
 | [ ] | BE-04 Auth API | [ ] | FE-04 MSW mock |
-| [ ] | BE-05 Users + Follow API | [ ] | FE-05 Layout |
+| [ ] | BE-05 Users + Follow API | [x] | FE-05 Layout |
 
 ## RUZI 2
 | | Avaz | | Abubakr |
