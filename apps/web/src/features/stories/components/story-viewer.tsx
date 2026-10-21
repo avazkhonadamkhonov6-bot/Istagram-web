@@ -1,14 +1,15 @@
 "use client";
 import Image from "next/image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Pause, Play, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Send, Pause, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { Spinner } from "@/components/ui/spinner";
 import { useMe } from "@/features/auth/hooks";
+import { replyStory } from "@/features/social/api";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { usePost } from "@/features/posts/hooks";
 import { isVideoFile, mediaUrl } from "@/lib/media";
@@ -26,6 +27,7 @@ export function StoryViewer({ username }: { username: string }) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(5000);
   const [liking, setLiking] = useState(false);
+  const [reply, setReply] = useState("");
   const video = useRef<HTMLVideoElement>(null);
   const users = useMemo(
     () => query.data?.filter((u) => u.stories.length) ?? [],
@@ -36,7 +38,12 @@ export function StoryViewer({ username }: { username: string }) {
   const story = user?.stories[index];
   const repost = usePost(story?.postId ?? 0, !!story?.postId);
   const file = story?.fileName ?? repost.data?.images[0];
-  const activePause = paused || holding;
+  const sendReply = useMutation({
+    mutationFn: ({ id, text }: { id: number; text: string }) => replyStory(id, text),
+    onSuccess: () => { setReply(""); toast("Reply sent"); void qc.invalidateQueries({ queryKey: ["chats"] }); },
+    onError: () => toast.error("Could not send reply."),
+  });
+  const activePause = paused || holding || reply.length > 0 || sendReply.isPending;
   const storyId = story?.id;
   const storyUserId = story?.userId;
   const heldAt = useRef(0);
@@ -59,6 +66,7 @@ export function StoryViewer({ username }: { username: string }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") router.push("/");
+      if (e.target instanceof HTMLElement && e.target.closest("input, textarea")) return;
       if (e.key === "ArrowRight") move(1);
       if (e.key === "ArrowLeft") move(-1);
       if (e.code === "Space") {
@@ -205,6 +213,10 @@ export function StoryViewer({ username }: { username: string }) {
           />
         </div>
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-3 bg-ig-media-blur p-4">
+          {story.userId !== me?.userId && <form className="flex min-w-0 flex-1 items-center gap-2" onSubmit={(e) => { e.preventDefault(); if (reply.trim()) sendReply.mutate({ id: story.id, text: reply.trim() }); }}>
+            <input aria-label="Reply to story" placeholder={`Reply to ${username}…`} value={reply} maxLength={1000} onChange={(e) => setReply(e.target.value)} className="min-w-0 flex-1 rounded-full border border-ig-text-on-media/60 bg-transparent px-4 py-3 text-sm outline-none" />
+            {reply.trim() && <button type="submit" aria-label="Send reply" disabled={sendReply.isPending}><Send className="size-5" /></button>}
+          </form>}
           {story.userId === me?.userId ? (
             <p className="text-sm">
               {story.viewerDto.viewCount ?? 0} views ·{" "}

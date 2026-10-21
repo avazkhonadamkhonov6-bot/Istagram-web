@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { REALTIME_URL } from "@/lib/backend-config";
 
 /**
  * Next 16 proxy (sobiq middleware):
@@ -7,11 +8,11 @@ import { NextResponse, type NextRequest } from "next/server";
  *    (Dar rejimi mock — NEXT_PUBLIC_API_MOCKING=on — tekshirishi cookie xomush.)
  */
 const AUTH_PAGES = ["/login", "/signup"];
-const PUBLIC_PREFIXES = ["/dev"];
+const PUBLIC_PREFIXES = ["/dev", "/brand/", "/auth/"];
 
 function buildCsp(nonce: string) {
   const isDev = process.env.NODE_ENV === "development";
-  const ws = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:4000";
+  const ws = REALTIME_URL;
   const wsOrigin = ws.replace(/^http/, "ws");
   return [
     "default-src 'self'",

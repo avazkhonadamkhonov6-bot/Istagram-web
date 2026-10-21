@@ -288,6 +288,7 @@
 
   /* Семантические утилиты Instagram для Tailwind 4 */
   --color-ig-bg: rgb(var(--ig-primary-background));
+  --color-ig-bg-primary: rgb(var(--ig-primary-background));
   --color-ig-bg-secondary: rgb(var(--ig-secondary-background));
   --color-ig-bg-highlight: rgb(var(--ig-highlight-background));
   --color-ig-bg-elevated: rgb(var(--ig-elevated-background));

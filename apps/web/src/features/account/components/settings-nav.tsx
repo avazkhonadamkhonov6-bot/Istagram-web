@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/accounts/edit", label: "Edit profile" },
   { href: "/accounts/password", label: "Change password" },
+  { href: "/accounts/privacy", label: "Account privacy" },
+  { href: "/accounts/blocked", label: "Blocked accounts" },
+  { href: "/accounts/muted", label: "Muted accounts" },
+  { href: "/accounts/restricted", label: "Restricted accounts" },
+  { href: "/accounts/close-friends", label: "Close friends" },
+  { href: "/accounts/favorites", label: "Favorites" },
+  { href: "/accounts/activity", label: "Your activity" },
+  { href: "/accounts/archive", label: "Archive" },
 ];
 
 export function SettingsNav() {

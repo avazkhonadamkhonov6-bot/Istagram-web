@@ -37,6 +37,12 @@ export function MoreMenu({ compact }: { compact: boolean }) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" className="w-64">
+        {[
+          ["/accounts/privacy", "Account privacy"],
+          ["/accounts/favorites", "Favorites"],
+          ["/accounts/activity", "Your activity"],
+          ["/accounts/archive", "Archive"],
+        ].map(([href, label]) => <DropdownMenuItem key={href} asChild><Link href={href}>{label}</Link></DropdownMenuItem>)}
         <DropdownMenuItem asChild>
           <Link href="/accounts/edit">
             <Settings className="size-5" />

@@ -8,8 +8,9 @@ import { apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, re
  * - Login/register faqat tavassuti /api/auth/* (vagarna token ba JS merasid)
  */
 const BLOCKED = new Set(["account/login", "account/register", "account/ws-ticket"]);
-const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id"];
-const PASS_RESPONSE_HEADERS = ["content-type", "content-length", "cache-control", "etag", "last-modified", "x-request-id"];
+const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id", "range", "if-range"];
+// fetch decompresses upstream bodies; the original Content-Length no longer matches.
+const PASS_RESPONSE_HEADERS = ["content-type", "cache-control", "etag", "last-modified", "x-request-id", "accept-ranges", "content-range"];
 
 async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   const { path } = await ctx.params;
@@ -58,6 +59,7 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
 }
 
 export const GET = handle;
+export const HEAD = handle;
 export const POST = handle;
 export const PUT = handle;
 export const PATCH = handle;

@@ -54,7 +54,7 @@ export function StoriesTray() {
               href={`/stories/${encodeURIComponent(u.userName)}`}
               className="flex w-[66px] shrink-0 flex-col items-center gap-2"
             >
-              <StoryRing state={u.hasUnseen ? "unseen" : "seen"}>
+              <StoryRing state={u.hasUnseen ? u.hasCloseFriends ? "close-friends" : "unseen" : "seen"}>
                 <SmallAvatar
                   src={mediaUrl(u.userImage)}
                   name={u.userName}

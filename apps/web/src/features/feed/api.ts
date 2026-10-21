@@ -1,6 +1,8 @@
 import {
   commentDtoSchema,
   favoriteResultSchema,
+  followResultSchema,
+  type FollowResult,
   likeResultSchema,
   postDtoSchema,
   suggestionSchema,
@@ -47,7 +49,7 @@ export const getSuggestions = () =>
   });
 
 export const followUser = (userId: string) =>
-  api<boolean>(
+  api<FollowResult>(
     `/FollowingRelationShip/add-following-relation-ship?followingUserId=${userId}`,
-    { method: "POST" },
+    { method: "POST", schema: followResultSchema },
   );

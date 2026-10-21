@@ -105,7 +105,7 @@ export function PostGrid({
     );
 
   const all = data?.pages.flat() ?? [];
-  const items = filter === "reels" ? all.filter((p) => p.isReel) : all;
+  const items = all;
 
   if (items.length === 0) {
     return (

@@ -5,7 +5,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   outputDir: "test-results/mock",
   testDir: "./qa",
-  testMatch: "abubakr.spec.ts",
+  testMatch: ["abubakr.spec.ts", "render-integration.spec.ts"],
   timeout: 60_000,
   expect: { timeout: 15_000 },
   workers: 1,

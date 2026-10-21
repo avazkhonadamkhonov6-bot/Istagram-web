@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useHydrated } from "@/lib/use-hydrated";
+import { closeSocket } from "@/lib/socket";
 import * as authApi from "./api";
 
 export const authKeys = {
@@ -9,12 +11,14 @@ export const authKeys = {
 };
 
 export function useMe() {
-  return useQuery({
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: authKeys.me,
     queryFn: authApi.getMyProfile,
     staleTime: 5 * 60_000,
     retry: false,
   });
+  return { ...query, data: hydrated ? query.data : undefined };
 }
 
 export function useLogout() {
@@ -24,6 +28,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: authApi.logout,
     onSettled: () => {
+      closeSocket();
       qc.clear();
       router.replace("/login");
       router.refresh();

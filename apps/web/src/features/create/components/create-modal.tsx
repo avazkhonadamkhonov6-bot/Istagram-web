@@ -95,6 +95,8 @@ export function CreateModal() {
   const [step, setStep] = useState(0);
   const [ratio, setRatio] = useState("auto");
   const [caption, setCaption] = useState("");
+  const [location, setLocation] = useState("");
+  const [closeFriends, setCloseFriends] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -110,11 +112,12 @@ export function CreateModal() {
       const form = new FormData();
       if (kind === "story") {
         form.set("Image", media[0].file);
-        return api("/Story/AddStories", { method: "POST", body: form });
+        return api(`/Story/AddStories?CloseFriends=${closeFriends}`, { method: "POST", body: form });
       }
       for (const item of media)
         form.append("Images", await crop(item.file, ratio));
       if (caption.trim()) form.set("Content", caption.trim());
+      if (location.trim()) form.set("Location", location.trim());
       return api("/Post/add-post", {
         method: "POST",
         body: form,
@@ -398,6 +401,11 @@ export function CreateModal() {
                   <p className="text-right text-xs text-ig-text-secondary">
                     {caption.length}/2,200
                   </p>
+                  {kind !== "story" && <label className="block text-sm">
+                    Add location
+                    <input aria-label="Add location" maxLength={100} value={location} onChange={(e) => setLocation(e.target.value)} className="mt-2 w-full rounded-lg border border-ig-stroke bg-transparent px-3 py-2" />
+                  </label>}
+                  {kind === "story" && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={closeFriends} onChange={(e) => setCloseFriends(e.target.checked)} />Close friends only</label>}
                   {kind === "story" && (
                     <p className="text-xs text-ig-text-secondary">
                       Your story will be visible for 24 hours.

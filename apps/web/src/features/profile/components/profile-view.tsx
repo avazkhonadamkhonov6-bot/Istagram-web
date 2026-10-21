@@ -14,7 +14,7 @@ import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { formatCount } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { useIsFollowing, useProfile, useToggleFollow } from "../hooks";
+import { useFollowStatus, useProfile, useToggleFollow } from "../hooks";
 import { FollowListModal } from "./follow-list-modal";
 import { PostGrid } from "./post-grid";
 
@@ -27,19 +27,20 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 function FollowButton({ profile }: { profile: UserProfile }) {
-  const { data: following } = useIsFollowing(profile.userId, true);
+  const { data: status, isPending } = useFollowStatus(profile.userId);
   const toggle = useToggleFollow(profile);
-  const isFollowing = following === true;
+  const isFollowing = status === "following";
+  const requested = status === "requested";
 
   return (
     <Button
       type="button"
-      variant={isFollowing ? "secondary" : "primary"}
-      disabled={toggle.isPending}
-      onClick={() => toggle.mutate(isFollowing)}
+      variant={isFollowing || requested ? "secondary" : "primary"}
+      disabled={toggle.isPending || isPending}
+      onClick={() => toggle.mutate(isFollowing || requested)}
       className="px-6"
     >
-      {isFollowing ? "Following" : "Follow"}
+      {requested ? "Requested" : isFollowing ? "Following" : "Follow"}
     </Button>
   );
 }
@@ -60,6 +61,16 @@ function MessageButton({ userId }: { userId: string }) {
       Message
     </Button>
   );
+}
+
+function ProfilePosts({ profile, tab, isSelf }: { profile: UserProfile; tab: Tab; isSelf: boolean }) {
+  const status = useFollowStatus(profile.userId, profile.isPrivate && !isSelf);
+  if (profile.isPrivate && !isSelf) {
+    if (status.isPending) return <div className="py-12 text-center text-ig-text-secondary">Loading profile…</div>;
+    if (status.isError) return <div className="py-12 text-center"><Button variant="borderless" onClick={() => void status.refetch()}>Retry access check</Button></div>;
+    if (status.data !== "following") return <div className="py-16 text-center"><h2 className="font-semibold">This account is private</h2><p className="mt-2 text-sm text-ig-text-secondary">Follow this account to see their photos and videos.</p></div>;
+  }
+  return <PostGrid key={tab} kind={tab} userId={profile.userId} filter={tab === "saved" ? undefined : tab} />;
 }
 
 export function ProfileView({
@@ -214,12 +225,7 @@ export function ProfileView({
         ))}
       </div>
 
-      <PostGrid
-        key={tab}
-        kind={tab === "saved" ? "saved" : "posts"}
-        userId={profile.userId}
-        filter={tab === "saved" ? undefined : tab}
-      />
+      <ProfilePosts key={tab} profile={profile} tab={tab} isSelf={isSelf} />
 
       {modal ? (
         <FollowListModal

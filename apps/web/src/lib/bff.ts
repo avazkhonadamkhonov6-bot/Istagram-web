@@ -1,9 +1,10 @@
 import "server-only";
+import { DEFAULT_BACKEND_URL } from "./backend-config";
 import { cookies } from "next/headers";
 
 /** Funksiyahoi server-i BFF (TZ §5.3): brauzer hech vaqt ba NestJS mustaqim murojiat namekunad. */
 
-export const API_URL = process.env.API_URL ?? "http://localhost:4000";
+export const API_URL = process.env.API_URL ?? DEFAULT_BACKEND_URL;
 export const ACCESS_COOKIE = "access_token";
 // API dar Render (free) ba'd az 15 daq. bekori "xob" meravad, bedorshavi to ~50 s
 const TIMEOUT_MS = 60_000;
@@ -11,7 +12,7 @@ const WEEK_SECONDS = 7 * 24 * 60 * 60;
 
 export type Envelope<T> = { data: T | null; errors: string[]; statusCode: number; code?: string };
 
-/** Fetch ba NestJS bo timeout 10 s va x-request-id */
+/** Fetch ba NestJS bo timeout 60 s va x-request-id */
 export function apiFetch(path: string, init: RequestInit & { token?: string; requestId?: string } = {}) {
   const { token, requestId, headers, ...rest } = init;
   const h = new Headers(headers);

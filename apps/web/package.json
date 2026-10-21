@@ -11,7 +11,9 @@
     "dev:mock": "NEXT_PUBLIC_API_MOCKING=on next dev",
     "typecheck": "next typegen && tsc --noEmit",
     "test:qa": "playwright test -c playwright.abubakr.config.ts",
-    "test:qa:live": "playwright test -c playwright.abubakr-live.config.ts"
+    "test:qa:live": "playwright test -c playwright.abubakr-live.config.ts",
+    "test:render:contract": "pnpm --filter @repo/shared build && node qa/render-contract.mjs",
+    "test:render:ui": "playwright test -c playwright.render.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

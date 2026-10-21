@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 import type { CommentDto, PostDto } from "@repo/shared";
 import { toast } from "@/components/ui/toast";
+import { getFavoritesFeed } from "@/features/social/api";
 import * as feedApi from "./api";
 
 export const feedKeys = {
@@ -24,7 +25,7 @@ function patchPost(
   postId: number,
   patch: (p: PostDto) => PostDto,
 ) {
-  qc.setQueryData<FeedData>(feedKeys.feed, (old) =>
+  qc.setQueriesData<FeedData>({ queryKey: feedKeys.feed }, (old) =>
     old
       ? {
           ...old,
@@ -36,13 +37,13 @@ function patchPost(
   );
 }
 
-export function useFeed() {
+export function useFeed(mode: "following" | "favorites" = "following") {
   return useInfiniteQuery({
-    queryKey: feedKeys.feed,
-    queryFn: ({ pageParam }) => feedApi.getFeedPage(pageParam),
+    queryKey: mode === "following" ? feedKeys.feed : [...feedKeys.feed, "favorites"],
+    queryFn: ({ pageParam }) => mode === "favorites" ? getFavoritesFeed(pageParam) : feedApi.getFeedPage(pageParam),
     initialPageParam: 1,
     getNextPageParam: (last, all) =>
-      last.length < feedApi.FEED_PAGE_SIZE ? undefined : all.length + 1,
+      last.length < (mode === "favorites" ? 12 : feedApi.FEED_PAGE_SIZE) ? undefined : all.length + 1,
   });
 }
 
@@ -52,7 +53,7 @@ export function useToggleLike() {
     mutationFn: (post: PostDto) => feedApi.likePost(post.postId),
     onMutate: async (post) => {
       await qc.cancelQueries({ queryKey: feedKeys.feed });
-      const snapshot = qc.getQueryData<FeedData>(feedKeys.feed);
+      const snapshot = qc.getQueriesData<FeedData>({ queryKey: feedKeys.feed });
       patchPost(qc, post.postId, (p) => ({
         ...p,
         postLike: !p.postLike,
@@ -61,7 +62,7 @@ export function useToggleLike() {
       return { snapshot };
     },
     onError: (_err, _post, ctx) => {
-      if (ctx?.snapshot) qc.setQueryData(feedKeys.feed, ctx.snapshot);
+      ctx?.snapshot.forEach(([key, value]) => qc.setQueryData(key, value));
       toast.error("Could not update the post. Try again.");
     },
     onSuccess: (res, post) =>
@@ -79,7 +80,7 @@ export function useToggleFavorite() {
     mutationFn: (post: PostDto) => feedApi.favoritePost(post.postId),
     onMutate: async (post) => {
       await qc.cancelQueries({ queryKey: feedKeys.feed });
-      const snapshot = qc.getQueryData<FeedData>(feedKeys.feed);
+      const snapshot = qc.getQueriesData<FeedData>({ queryKey: feedKeys.feed });
       patchPost(qc, post.postId, (p) => ({
         ...p,
         postFavorite: !p.postFavorite,
@@ -87,7 +88,7 @@ export function useToggleFavorite() {
       return { snapshot };
     },
     onError: (_err, _post, ctx) => {
-      if (ctx?.snapshot) qc.setQueryData(feedKeys.feed, ctx.snapshot);
+      ctx?.snapshot.forEach(([key, value]) => qc.setQueryData(key, value));
       toast.error("Could not update the post. Try again.");
     },
     onSuccess: (res, post) =>

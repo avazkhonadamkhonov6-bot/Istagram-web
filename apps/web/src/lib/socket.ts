@@ -1,6 +1,7 @@
 "use client";
 
 import { io, type Socket } from "socket.io-client";
+import { REALTIME_URL } from "./backend-config";
 
 /**
  * Yak socket baroi tamomi ilova (Spec 08).
@@ -8,7 +9,7 @@ import { io, type Socket } from "socket.io-client";
  * - Server ulanishro qat' kard (ticket-i kuhna) → pas az 3 s az nav.
  * - Pas az reconnect — refetch (onReconnect), chunki paymhoi vaqti qat'shavi dar DB hastand.
  */
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:4000";
+const WS_URL = REALTIME_URL;
 
 let socket: Socket | null = null;
 const reconnectListeners = new Set<() => void>();
