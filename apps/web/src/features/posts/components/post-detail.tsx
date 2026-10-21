@@ -5,6 +5,9 @@ import { PostOptions } from "./post-options";
 import { SharePostDialog } from "./share-post-dialog";
 import type { CommentDto, PostDto } from "@repo/shared";
 import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/toast";
+import { likeComment, pinComment } from "@/features/social/api";
 import { useRef, useState } from "react";
 import {
   Bookmark,
@@ -33,16 +36,25 @@ import {
 function CommentRow({
   comment,
   canDelete,
+  canPin,
   isReply,
   onReply,
   onDelete,
 }: {
   comment: CommentDto;
   canDelete: boolean;
+  canPin?: boolean;
   isReply?: boolean;
   onReply: () => void;
   onDelete: () => void;
 }) {
+  const qc = useQueryClient();
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["comments", comment.postId] });
+    void qc.invalidateQueries({ queryKey: ["replies"] });
+  };
+  const like = useMutation({ mutationFn: () => likeComment(comment.postCommentId), onSuccess: refresh, onError: () => toast.error("Could not update comment like.") });
+  const pin = useMutation({ mutationFn: () => pinComment(comment.postCommentId), onSuccess: refresh, onError: () => toast.error("Could not pin comment. You can pin up to three comments.") });
   return (
     <div className="flex gap-3 py-2">
       <SmallAvatar
@@ -59,6 +71,9 @@ function CommentRow({
         </p>
         <div className="mt-1 flex gap-3 text-xs text-ig-text-secondary">
           <span>{formatRelativeTime(Date.parse(comment.dateCommented))}</span>
+          {comment.isPinned && <span>Pinned</span>}
+          {comment.likeCount > 0 && <span>{comment.likeCount} likes</span>}
+          {canPin && <button type="button" disabled={pin.isPending} onClick={() => pin.mutate()}>{comment.isPinned ? "Unpin" : "Pin"}</button>}
           <button type="button" onClick={onReply} className="font-semibold">
             Reply
           </button>
@@ -73,6 +88,7 @@ function CommentRow({
           ) : null}
         </div>
       </div>
+      <button type="button" className="self-start p-1" aria-label={comment.isLiked ? "Unlike comment" : "Like comment"} disabled={like.isPending} onClick={() => like.mutate()}><Heart className={cn("size-3.5", comment.isLiked && "text-ig-badge")} fill={comment.isLiked ? "currentColor" : "none"} /></button>
     </div>
   );
 }
@@ -97,6 +113,7 @@ function CommentThread({
     <div>
       <CommentRow
         comment={comment}
+        canPin={canModerate}
         canDelete={canModerate || meId === comment.userId}
         onReply={() => onReply(comment.postCommentId, comment.userName)}
         onDelete={() => onDelete(comment.postCommentId)}
@@ -145,7 +162,7 @@ export function PostDetail({
     isPending,
     isError,
   } = usePost(postId, valid, initialPost);
-  const comments = useComments(postId, valid);
+  const comments = useComments(postId, valid && !post?.commentsDisabled);
   const { data: me } = useMe();
   const like = usePostLike(postId);
   const favorite = usePostFavorite(postId);
@@ -195,7 +212,7 @@ export function PostDetail({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = text.trim();
-    if (!value) return;
+    if (!value || post.commentsDisabled) return;
     addComment.mutate(
       { text: value, parentId: replyTo?.id },
       {
@@ -286,10 +303,11 @@ export function PostDetail({
             </div>
           ) : null}
 
-          {comments.isPending ? (
+          {post.commentsDisabled && <p className="py-6 text-center text-sm text-ig-text-secondary">Comments are turned off.</p>}
+          {!post.commentsDisabled && comments.isPending ? (
             <Skeleton className="mt-2 h-10 w-full" />
           ) : null}
-          {roots.map((c) => (
+          {!post.commentsDisabled && roots.map((c) => (
             <CommentThread
               key={c.postCommentId}
               comment={c}
@@ -299,7 +317,7 @@ export function PostDetail({
               onDelete={(id) => deleteComment.mutate(id)}
             />
           ))}
-          {comments.hasNextPage ? (
+          {!post.commentsDisabled && comments.hasNextPage ? (
             <button
               type="button"
               onClick={() => void comments.fetchNextPage()}
@@ -309,7 +327,7 @@ export function PostDetail({
               Load more comments
             </button>
           ) : null}
-          {!comments.isPending && roots.length === 0 ? (
+          {!post.commentsDisabled && !comments.isPending && roots.length === 0 ? (
             <p className="py-6 text-center text-sm text-ig-text-secondary">
               No comments yet.
             </p>
@@ -350,16 +368,16 @@ export function PostDetail({
               />
             </button>
           </div>
-          <p className="text-sm font-semibold">
+          {!post.hideLikeCount && <p className="text-sm font-semibold">
             {formatCount(post.postLikeCount)}{" "}
             {post.postLikeCount === 1 ? "like" : "likes"}
-          </p>
+          </p>}
           <p className="text-xs text-ig-text-secondary">
             {formatRelativeTime(Date.parse(post.datePublished))}
           </p>
         </div>
 
-        <form
+        {!post.commentsDisabled && <form
           onSubmit={submit}
           className={cn(
             "flex items-center gap-2 border-t border-ig-separator px-4 py-3",
@@ -396,7 +414,7 @@ export function PostDetail({
               Post
             </button>
           ) : null}
-        </form>
+        </form>}
       </div>
     </div>
   );

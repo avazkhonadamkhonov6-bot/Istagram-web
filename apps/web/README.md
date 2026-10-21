@@ -84,3 +84,51 @@ Root layout намеренно ожидает запрос: существующ
 cookie напрямую; первая фотография ленты загружается с приоритетом.
 
 Результаты и ограничения API: [QA-02](../../docs/qa/QA-02.md).
+
+## Общий backend на Render
+
+Фронтенд использует https://istagram-web.onrender.com через серверный BFF;
+Swagger: https://istagram-web.onrender.com/swagger. HTTP и Socket.IO должны
+указывать на один backend, чтобы у всех разработчиков были общие данные.
+
+В `apps/web/.env.local` (не коммитится):
+
+```dotenv
+API_URL=https://istagram-web.onrender.com
+NEXT_PUBLIC_WS_URL=https://istagram-web.onrender.com
+NEXT_PUBLIC_API_MOCKING=off
+```
+
+После изменения env перезапустите Next.js и войдите заново: токен локальной
+базы не действует на Render. `.env.local` имеет приоритет над `.env`.
+Локальный API можно выбрать, заменив оба URL на `http://localhost:4000`.
+`dev:mock` явно включает MSW и предназначен для изолированной UI-проверки.
+
+Проверка реального контракта без изменения постов/подписок/сообщений:
+
+```bash
+pnpm --filter web test:render:contract
+```
+
+По умолчанию используется demo-аккаунт из seed. Для другого аккаунта задайте
+`QA_RENDER_USERNAME` и `QA_RENDER_PASSWORD` через окружение; токен не выводится.
+
+UI-регрессия, включая новые сценарии Spec 14/15:
+
+```bash
+pnpm --filter web dev:mock
+# в другом терминале
+QA_BASE_URL=http://localhost:3000 pnpm --filter web test:qa
+```
+
+Production UI smoke с настоящим Render, без публикаций/лайков/подписок:
+
+```bash
+pnpm --filter web build
+pnpm --filter web start --port 3001
+# в другом терминале
+pnpm --filter web test:render:ui
+```
+
+Изменения партнёра и границы адаптации:
+[RENDER-INTEGRATION](../../docs/qa/RENDER-INTEGRATION.md).

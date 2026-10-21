@@ -42,7 +42,7 @@
 | FE-21 | Avaz | 4 | Playwright e2e | tayyor |
 | FE-22 | Abubakr | 4 | Pardoz va responsive | tayyor |
 | QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
-| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |  |
+| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 | qisman (API / QA-02) |
 | FE-23 | Avaz | 4 | Direct-i Spec 14: group chat, dil-i paym, reply, paymi ovozi, javob ba story | tayyor |
 | FE-24 | Avaz | 4 | `/accounts/*`: Privacy + follow requests, Blocked, Muted, Restricted, Close friends, Archive | tayyor |
 | FE-25 | Avaz | 4 | `/explore/locations/[name]`, `features/social/api.ts` (hamai endpoint-hoi Spec 14), ShareDialog, ReportDialog | tayyor |
@@ -389,7 +389,9 @@
 
 **Tayyor, agar:**
 - [ ] Hamai AC-hoi in spec-ho tekshirida shudand
-- [ ] Lighthouse: TZ §9 band 11
+- [x] Lighthouse: TZ §9 band 11
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
 
 ### FE-23 · Direct-i Spec 14
 <!-- who:avaz day:4 type:frontend -->

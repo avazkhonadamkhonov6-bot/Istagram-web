@@ -19,7 +19,7 @@ function FeedSkeleton() {
   );
 }
 
-export function Feed() {
+export function Feed({ mode = "following" }: { mode?: "following" | "favorites" }) {
   const {
     data,
     isPending,
@@ -28,7 +28,7 @@ export function Feed() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useFeed();
+  } = useFeed(mode);
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function Feed() {
   if (posts.length === 0) {
     return (
       <p className="py-10 text-center text-sm text-ig-text-secondary">
-        No posts yet. Follow people to see their posts here.
+        No posts yet. Follow people or add them to Favorites to see posts here.
       </p>
     );
   }

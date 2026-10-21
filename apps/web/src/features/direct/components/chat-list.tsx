@@ -33,7 +33,7 @@ export function ChatList({ className }: { className?: string }) {
         </span>
       </header>
       <NotesTray />
-      <h2 className="px-6 pb-2 text-base font-bold">Messages</h2>
+      <h2 className="px-6 pb-4 pt-3 text-base font-bold">Messages</h2>
 
       <div className="flex-1 overflow-y-auto">
         {isPending &&

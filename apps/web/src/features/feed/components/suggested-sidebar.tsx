@@ -34,7 +34,7 @@ function SuggestedRow({ user }: { user: Suggestion }) {
         onClick={() => follow.mutate(user.id)}
         className="text-xs font-semibold text-ig-link-action disabled:text-ig-text-secondary"
       >
-        {follow.isSuccess ? "Following" : "Follow"}
+        {follow.isSuccess ? follow.data.isRequested ? "Requested" : "Following" : "Follow"}
       </button>
     </li>
   );

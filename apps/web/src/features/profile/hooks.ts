@@ -6,15 +6,17 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { getUserReels, getFollowStatus } from "@/features/social/api";
 import type { UserProfile } from "@repo/shared";
 import { toast } from "@/components/ui/toast";
 import * as profileApi from "./api";
 
-export type GridKind = "posts" | "saved";
+export type GridKind = "posts" | "saved" | "reels";
 export type FollowListKind = "followers" | "following";
 
 export const profileKeys = {
   byName: (username: string) => ["profile", username.toLowerCase()] as const,
+  followStatus: (id: string) => ["follow-status", id] as const,
   isFollow: (id: string) => ["is-follow", id] as const,
   grid: (kind: GridKind, id: string) => ["profile-grid", kind, id] as const,
   list: (kind: FollowListKind, id: string) =>
@@ -43,7 +45,9 @@ export function useGridPosts(kind: GridKind, userId: string) {
     queryFn: ({ pageParam }) =>
       kind === "saved"
         ? profileApi.getSavedPage(pageParam)
-        : profileApi.getUserPosts(userId, pageParam),
+        : kind === "reels"
+          ? getUserReels(userId, pageParam)
+          : profileApi.getUserPosts(userId, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last, all) =>
       last.length < profileApi.GRID_PAGE_SIZE ? undefined : all.length + 1,
@@ -58,6 +62,10 @@ export function useFollowList(kind: FollowListKind, userId: string) {
         ? profileApi.getSubscribers(userId)
         : profileApi.getSubscriptions(userId),
   });
+}
+
+export function useFollowStatus(userId: string, enabled = true) {
+  return useQuery({ queryKey: profileKeys.followStatus(userId), queryFn: () => getFollowStatus(userId), enabled });
 }
 
 export function useToggleFollow(profile: UserProfile) {
@@ -114,6 +122,8 @@ export function useToggleFollow(profile: UserProfile) {
     },
     onSuccess: (res) => {
       qc.setQueryData(profileKeys.isFollow(profile.userId), res.isFollowing);
+      qc.setQueryData(profileKeys.followStatus(profile.userId), res.isRequested ? "requested" : res.isFollowing ? "following" : "none");
+      void qc.invalidateQueries({ queryKey: ["feed"] });
       qc.setQueryData<UserProfile | null>(
         profileKeys.byName(profile.userName),
         (old) =>

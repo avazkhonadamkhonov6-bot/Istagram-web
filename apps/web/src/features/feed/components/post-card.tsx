@@ -115,6 +115,7 @@ export function PostCard({
         <PostOptions postId={post.postId} userId={post.userId} />
       </header>
 
+      {post.location && <Link href={`/explore/locations/${encodeURIComponent(post.location)}`} className="mb-2 block text-xs text-ig-text-secondary">{post.location}</Link>}
       <div
         className="relative aspect-[4/5] w-full select-none overflow-hidden rounded-sm border border-ig-separator bg-ig-bg-secondary"
         onDoubleClick={onDoubleTap}
@@ -222,10 +223,10 @@ export function PostCard({
         </button>
       </div>
 
-      <p className="text-sm font-semibold">
+      {!post.hideLikeCount && <p className="text-sm font-semibold">
         {formatCount(post.postLikeCount)}{" "}
         {post.postLikeCount === 1 ? "like" : "likes"}
-      </p>
+      </p>}
 
       {post.content ? (
         <p className="mt-1 text-sm">
@@ -245,7 +246,7 @@ export function PostCard({
         </p>
       ) : null}
 
-      {post.commentCount > 0 ? (
+      {!post.commentsDisabled && post.commentCount > 0 ? (
         <Link
           href={`/p/${post.postId}`}
           className="mt-1 block text-sm text-ig-text-secondary"
@@ -254,7 +255,7 @@ export function PostCard({
         </Link>
       ) : null}
 
-      <form onSubmit={submitComment} className="mt-2 flex items-center gap-2">
+      {!post.commentsDisabled && <form onSubmit={submitComment} className="mt-2 flex items-center gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -271,7 +272,7 @@ export function PostCard({
             Post
           </button>
         ) : null}
-      </form>
+      </form>}
       {share && (
         <SharePostDialog
           postId={post.postId}

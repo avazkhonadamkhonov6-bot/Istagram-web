@@ -5,7 +5,7 @@
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
 **Hozir (2026-10-22):** API dar Render: https://istagram-web.onrender.com (Swagger — `/swagger`), baza umumi — Avaz va Abubakr bo yak maʼlumot kor mekunand. Backend-i [Spec 16](specs/16-zang-va-efir.md) (zang, paymi ovozi / video, efir) tayyor, e2e 48/48. Navbat — FE-30 (Avaz), FE-31 (Abubakr), FE-26, FE-29.
-**Pesh az in:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
+**Frontend Abubakr:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: frontend va QA nav shud — [QA-02](qa/QA-02.md); chand talab ba kontrakti API vobasta ast
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -42,10 +42,10 @@
 ## RUZI 4
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [ ] | FE-18 Create modal |
-| [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [ ] | FE-20 Reels |
-| [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [ ] | FE-22 Pardoz, responsive |
-| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [ ] | QA-02 |
+| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [~] | FE-18 Create modal |
+| [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [x] | FE-20 Reels |
+| [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [x] | FE-22 Pardoz, responsive |
+| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [~] | QA-02 |
 | [x] | FE-23 Direct-i Spec 14 (group, dil, reply, ovoz, story) | [ ] | FE-26 UI-i Spec 14 |
 | [x] | FE-24 `/accounts/*` (privacy, blocked, muted, restricted, close friends, archive) | | |
 | [x] | FE-25 `/explore/locations/[name]`, `social/api.ts`, Share / Report dialog | | |

@@ -17,24 +17,38 @@ import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { mediaUrl } from "@/lib/media";
 import { toast } from "@/components/ui/toast";
+import { removeFollower } from "@/features/social/api";
 import { followUser, unfollowUser } from "../api";
 import {
   useFollowList,
-  useIsFollowing,
+  useFollowStatus,
   profileKeys,
   type FollowListKind,
 } from "../hooks";
 
-function Row({ user, isMe }: { user: UserShort; isMe: boolean }) {
+function Row({ user, isMe, ownerId, removable }: { user: UserShort; isMe: boolean; ownerId: string; removable: boolean }) {
   const qc = useQueryClient();
-  const { data: following } = useIsFollowing(user.id, !isMe);
+  const { data: status } = useFollowStatus(user.id, !isMe);
+  const following = status === "following";
+  const requested = status === "requested";
   const follow = useMutation({
-    mutationFn: () => (following ? unfollowUser(user.id) : followUser(user.id)),
+    mutationFn: () => (following || requested ? unfollowUser(user.id) : followUser(user.id)),
     onSuccess: (result) => {
       qc.setQueryData(profileKeys.isFollow(user.id), result.isFollowing);
+      qc.setQueryData(profileKeys.followStatus(user.id), result.isRequested ? "requested" : result.isFollowing ? "following" : "none");
       void qc.invalidateQueries({ queryKey: ["profile"] });
     },
     onError: () => toast.error("Could not update following. Try again."),
+  });
+
+  const remove = useMutation({
+    mutationFn: () => removeFollower(user.id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: profileKeys.list("followers", ownerId) });
+      void qc.invalidateQueries({ queryKey: ["profile"] });
+      void qc.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: () => toast.error("Could not remove follower."),
   });
 
   return (
@@ -55,15 +69,15 @@ function Row({ user, isMe }: { user: UserShort; isMe: boolean }) {
           {user.fullName}
         </span>
       </div>
-      {isMe ? null : (
+      {removable ? <Button variant="secondary" disabled={remove.isPending} onClick={() => remove.mutate()}>Remove</Button> : isMe ? null : (
         <Button
           type="button"
-          variant={following ? "secondary" : "primary"}
+          variant={following || requested ? "secondary" : "primary"}
           disabled={follow.isPending}
           onClick={() => follow.mutate()}
           className="px-4"
         >
-          {following ? "Following" : "Follow"}
+          {requested ? "Requested" : following ? "Following" : "Follow"}
         </Button>
       )}
     </li>
@@ -122,7 +136,7 @@ export function FollowListModal({
         <ul className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
           {isPending ? <Skeleton className="mt-2 h-10 w-full" /> : null}
           {items.map((u) => (
-            <Row key={u.id} user={u} isMe={u.id === me?.userId} />
+            <Row key={u.id} user={u} isMe={u.id === me?.userId} ownerId={userId} removable={kind === "followers" && userId === me?.userId && u.id !== me?.userId} />
           ))}
           {!isPending && items.length === 0 ? (
             <li className="py-8 text-center text-sm text-ig-text-secondary">

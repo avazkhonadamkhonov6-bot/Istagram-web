@@ -1,6 +1,6 @@
 import { StoriesTray } from "@/features/stories/components/stories-tray";
 import { WidgetBoundary } from "@/components/widget-boundary";
-import { Feed } from "@/features/feed/components/feed";
+import { HomeFeed } from "@/features/feed/components/home-feed";
 import { SuggestedSidebar } from "@/features/feed/components/suggested-sidebar";
 
 export default function HomePage() {
@@ -10,7 +10,7 @@ export default function HomePage() {
         <WidgetBoundary name="Stories">
           <StoriesTray />
         </WidgetBoundary>
-        <Feed />
+        <HomeFeed />
       </div>
       <aside className="hidden w-[319px] shrink-0 min-[1160px]:block">
         <WidgetBoundary name="Suggestions">

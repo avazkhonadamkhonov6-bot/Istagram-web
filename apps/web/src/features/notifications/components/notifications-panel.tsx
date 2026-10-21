@@ -12,6 +12,8 @@ import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
+import { acceptRequest, declineRequest } from "@/features/social/api";
+import { toast } from "@/components/ui/toast";
 import { followUser } from "@/features/profile/api";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
@@ -41,6 +43,14 @@ function group(date: string) {
 function NotificationRow({ item }: { item: NotificationDto }) {
   const close = useUiStore((s) => s.closePanel);
   const qc = useQueryClient();
+  const request = useMutation({
+    mutationFn: (accept: boolean) => accept ? acceptRequest(item.actor.id) : declineRequest(item.actor.id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["follow-requests"] });
+      void qc.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: () => toast.error("Could not update follow request."),
+  });
   const follow = useMutation({
     mutationFn: () => followUser(item.actor.id),
     onSuccess: () => {
@@ -69,7 +79,10 @@ function NotificationRow({ item }: { item: NotificationDto }) {
           {formatRelativeTime(Date.parse(item.createdAt))}
         </span>
       </div>
-      {item.post ? (
+      {item.type === "FOLLOW_REQUEST" ? (
+        request.isSuccess ? <span className="text-xs text-ig-text-secondary">{request.variables ? "Confirmed" : "Deleted"}</span> :
+        <div className="flex shrink-0 gap-2"><Button size="sm" disabled={request.isPending} onClick={() => request.mutate(true)}>Confirm</Button><Button size="sm" variant="secondary" disabled={request.isPending} onClick={() => request.mutate(false)}>Delete</Button></div>
+      ) : item.post ? (
         <Link
           href={`/p/${item.post.postId}`}
           onClick={close}
