@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Camera } from "lucide-react";
+import { SmallAvatar } from "@/features/feed/components/small-avatar";
+import { mediaUrl } from "@/lib/media";
+import { InstagramGlyph } from "@/components/ui/instagram-glyph";
 import { useMe } from "@/features/auth/hooks";
 import { useDirectUnreadCount } from "@/features/direct/hooks";
 import { CURRENT_USERNAME } from "@/lib/constants";
@@ -31,7 +33,7 @@ export function Sidebar() {
   const profileHref = `/${myUsername}`;
 
   // Когда открыта панель Search / Notifications, sidebar сжимается до 72px
-  const compact = panel !== null;
+  const compact = panel !== null || pathname.startsWith("/direct");
   const labelCls = compact ? "hidden" : "hidden min-[1264px]:inline";
 
   return (
@@ -46,17 +48,12 @@ export function Sidebar() {
         href="/"
         onClick={closePanel}
         aria-label="Instagram"
-        className="mb-4 mt-6 flex h-10 items-center rounded-lg px-3 hover:bg-ig-hover-overlay"
+        className="mb-7 mt-7 flex h-10 items-center rounded-lg px-3 hover:bg-ig-hover-overlay"
       >
-        <Camera className={cn("size-6", compact ? "" : "min-[1264px]:hidden")} />
-        <span
-          className={cn(
-            "font-logo text-[28px] leading-none",
-            compact ? "hidden" : "hidden min-[1264px]:inline",
-          )}
-        >
-          Instagram
-        </span>
+        <InstagramGlyph
+          className={cn("size-6", compact ? "" : "min-[1264px]:hidden")}
+        />
+        <span className={cn("ig-wordmark w-[110px] h-10", compact ? "hidden" : "hidden min-[1264px]:inline-block")} aria-hidden />
       </Link>
 
       <ul className="flex flex-col gap-1">
@@ -74,7 +71,7 @@ export function Sidebar() {
           const active = isItemActive(item, pathname, panel);
           const Icon = item.icon;
           const rowCls = cn(
-            "flex w-full items-center gap-4 rounded-lg p-3 text-base transition-colors hover:bg-ig-hover-overlay",
+            "ig-nav-item group flex w-full items-center gap-4 rounded-lg p-3 text-base transition-colors hover:bg-ig-hover-overlay",
             active ? "font-semibold" : "font-normal",
           );
 
@@ -85,11 +82,25 @@ export function Sidebar() {
           const content = (
             <>
               <span className="relative inline-flex shrink-0">
-                <Icon
-                  className="size-6 shrink-0"
-                  strokeWidth={active ? 2.75 : 2}
-                  fill={active && item.fillWhenActive ? "currentColor" : "none"}
-                />
+                {item.key === "profile" ? (
+                  <SmallAvatar
+                    src={mediaUrl(me?.image)}
+                    name={myUsername}
+                    className={cn(
+                      "size-6",
+                      active &&
+                        "ring-2 ring-ig-text ring-offset-2 ring-offset-ig-bg",
+                    )}
+                  />
+                ) : (
+                  <Icon
+                    className="size-6 shrink-0 transition-transform duration-200 group-hover:scale-105"
+                    strokeWidth={active ? 2.75 : 2}
+                    fill={
+                      active && item.fillWhenActive ? "currentColor" : "none"
+                    }
+                  />
+                )}
                 {hasBadge ? (
                   <span
                     aria-label="Unread"

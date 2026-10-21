@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from "react";
+import { CreateLauncher } from "@/components/layout/create-launcher";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { SidePanel } from "@/components/layout/side-panel";
@@ -17,10 +18,11 @@ export default function MainLayout({
         <TopBar />
         <SidePanel />
       </Suspense>
-      <main className="flex-1 pb-[50px] pt-[60px] md:ml-[72px] md:pb-0 md:pt-0 min-[1264px]:ml-[245px]">
+      <main className="ig-main min-w-0 flex-1 pb-[50px] pt-[60px] md:ml-[72px] md:pb-0 md:pt-0 min-[1264px]:ml-[245px]">
         {children}
       </main>
       {modal}
+      <CreateLauncher />
       <Suspense fallback={null}>
         <BottomNav />
       </Suspense>

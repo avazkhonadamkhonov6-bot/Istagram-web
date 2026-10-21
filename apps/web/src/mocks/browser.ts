@@ -1,12 +1,19 @@
-let started = false;
+let starting: Promise<void> | undefined;
 
-export async function initMocks() {
-  if (typeof window === "undefined") return;
-  if (process.env.NEXT_PUBLIC_API_MOCKING !== "on") return;
-  if (started) return;
-  started = true;
-
-  const { setupWorker } = await import("msw/browser");
-  const { handlers } = await import("./handlers");
-  await setupWorker(...handlers).start({ onUnhandledRequest: "bypass" });
+/** Share startup across Strict Mode effects so no request outruns the worker. */
+export function initMocks(): Promise<void> {
+  if (
+    typeof window === "undefined" ||
+    process.env.NEXT_PUBLIC_API_MOCKING !== "on"
+  )
+    return Promise.resolve();
+  starting ??= (async () => {
+    const { setupWorker } = await import("msw/browser");
+    const { handlers } = await import("./handlers");
+    await setupWorker(...handlers).start({ onUnhandledRequest: "bypass" });
+  })().catch((error) => {
+    starting = undefined;
+    throw error;
+  });
+  return starting;
 }

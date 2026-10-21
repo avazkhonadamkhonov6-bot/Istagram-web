@@ -1,6 +1,6 @@
 "use client";
 
-import { Radio } from "lucide-react";
+import { ChevronDown, Radio } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -22,9 +22,9 @@ export function ChatList({ className }: { className?: string }) {
 
   return (
     <aside className={cn("flex h-full flex-col border-r border-ig-separator", className)}>
-      <header className="flex items-center justify-between px-6 pb-3 pt-9">
-        <h1 className="text-xl font-bold">{me?.userName ?? " "}</h1>
-        <span className="flex items-center gap-4">
+      <header className="flex min-h-[100px] shrink-0 items-center justify-between gap-4 px-6 pb-3 pt-6">
+        <h1 className="flex min-w-0 items-center gap-2 text-xl font-bold"><span className="truncate">{me?.userName ?? "Instagram"}</span><ChevronDown aria-hidden className="size-4 shrink-0" /></h1>
+        <span className="flex shrink-0 items-center gap-4">
           {/* Efiri mustaqim (Spec 16 §3) */}
           <Link href="/live" aria-label="Live videos" className="text-ig-icon">
             <Radio className="size-6" />
@@ -39,9 +39,9 @@ export function ChatList({ className }: { className?: string }) {
         {isPending &&
           Array.from({ length: 6 }, (_, i) => (
             <div key={i} className="flex items-center gap-3 px-6 py-2">
-              <Skeleton className="size-14 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-3 w-32" />
+              <Skeleton className="size-14 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3 w-32 max-w-full" />
                 <Skeleton className="h-3 w-20" />
               </div>
             </div>
@@ -78,7 +78,7 @@ export function ChatList({ className }: { className?: string }) {
               key={chat.chatId}
               href={`/direct/t/${chat.chatId}`}
               className={cn(
-                "flex items-center gap-3 px-6 py-2 hover:bg-ig-hover-overlay",
+                "flex items-center gap-3 px-6 py-3 transition-colors hover:bg-ig-hover-overlay",
                 activeId === chat.chatId && "bg-ig-bg-highlight",
               )}
             >

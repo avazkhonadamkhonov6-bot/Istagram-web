@@ -1,21 +1,41 @@
 "use client";
 
 import type { UserShort } from "@repo/shared";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "@/components/ui/icons";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { mediaUrl } from "@/lib/media";
-import { followUser } from "../api";
-import { useFollowList, type FollowListKind } from "../hooks";
+import { toast } from "@/components/ui/toast";
+import { followUser, unfollowUser } from "../api";
+import {
+  useFollowList,
+  useIsFollowing,
+  profileKeys,
+  type FollowListKind,
+} from "../hooks";
 
 function Row({ user, isMe }: { user: UserShort; isMe: boolean }) {
-  const follow = useMutation({ mutationFn: () => followUser(user.id) });
+  const qc = useQueryClient();
+  const { data: following } = useIsFollowing(user.id, !isMe);
+  const follow = useMutation({
+    mutationFn: () => (following ? unfollowUser(user.id) : followUser(user.id)),
+    onSuccess: (result) => {
+      qc.setQueryData(profileKeys.isFollow(user.id), result.isFollowing);
+      void qc.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: () => toast.error("Could not update following. Try again."),
+  });
 
   return (
     <li className="flex items-center gap-3 py-2">
@@ -25,7 +45,10 @@ function Row({ user, isMe }: { user: UserShort; isMe: boolean }) {
         className="size-11"
       />
       <div className="min-w-0 flex-1 text-sm">
-        <Link href={`/${user.userName}`} className="block truncate font-semibold">
+        <Link
+          href={`/${user.userName}`}
+          className="block truncate font-semibold"
+        >
           {user.userName}
         </Link>
         <span className="block truncate text-ig-text-secondary">
@@ -35,12 +58,12 @@ function Row({ user, isMe }: { user: UserShort; isMe: boolean }) {
       {isMe ? null : (
         <Button
           type="button"
-          variant={follow.isSuccess ? "secondary" : "primary"}
-          disabled={follow.isPending || follow.isSuccess}
+          variant={following ? "secondary" : "primary"}
+          disabled={follow.isPending}
           onClick={() => follow.mutate()}
           className="px-4"
         >
-          {follow.isSuccess ? "Following" : "Follow"}
+          {following ? "Following" : "Follow"}
         </Button>
       )}
     </li>
@@ -63,14 +86,6 @@ export function FollowListModal({
 
   const close = () => router.replace(`/${username}`);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") router.replace(`/${username}`);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [router, username]);
-
   const q = query.trim().toLowerCase();
   const items = (data ?? []).filter(
     (u) =>
@@ -80,25 +95,20 @@ export function FollowListModal({
   );
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "var(--ig-modal-overlay)" }}
-      onClick={close}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) close();
+      }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={kind === "followers" ? "Followers" : "Following"}
-        onClick={(e) => e.stopPropagation()}
-        className="flex h-[min(70vh,500px)] w-full max-w-[400px] flex-col overflow-hidden rounded-xl bg-ig-bg-elevated"
-      >
-        <header className="flex items-center justify-between border-b border-ig-separator px-4 py-3">
-          <h2 className="mx-auto text-base font-semibold">
+      <DialogContent className="flex h-[min(70dvh,500px)] flex-col">
+        <header className="border-b border-ig-separator px-4 py-3 text-center">
+          <DialogTitle>
             {kind === "followers" ? "Followers" : "Following"}
-          </h2>
-          <button type="button" aria-label="Close" onClick={close}>
-            <X className="size-5" />
-          </button>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Search people in this list.
+          </DialogDescription>
         </header>
         <div className="px-4 py-2">
           <input
@@ -120,7 +130,7 @@ export function FollowListModal({
             </li>
           ) : null}
         </ul>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

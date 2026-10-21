@@ -2,7 +2,9 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createContext, Suspense, useContext, useEffect, useState, type ReactNode } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { CallLayer } from "@/features/rtc/components/call-layer";
+import { useUiStore } from "@/store/ui.store";
 import { initMocks } from "@/mocks/browser";
 import { makeQueryClient } from "./query-client";
 
@@ -15,15 +17,55 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   const nested = useContext(NestedContext);
   const [client] = useState(makeQueryClient);
   const [ready, setReady] = useState(!mockingEnabled);
+  const [mockError, setMockError] = useState(false);
 
   useEffect(() => {
     if (!mockingEnabled) return;
     initMocks()
-      .catch(() => undefined)
-      .finally(() => setReady(true));
+      .then(() => setReady(true))
+      .catch(() => setMockError(true));
   }, []);
 
-  if (!ready) return null;
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem("ig-theme");
+    } catch {}
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    useUiStore
+      .getState()
+      .setTheme(
+        stored === "dark" || stored === "light"
+          ? stored
+          : media.matches
+            ? "dark"
+            : "light",
+      );
+  }, []);
+
+  if (mockError)
+    return (
+      <div role="alert" className="p-8 text-center">
+        Could not start preview data.{" "}
+        <button
+          onClick={() => window.location.reload()}
+          className="text-ig-link-action"
+        >
+          Try again
+        </button>
+      </div>
+    );
+
+  if (!ready)
+    return (
+      <div
+        className="grid min-h-dvh place-items-center"
+        role="status"
+        aria-label="Loading"
+      >
+        <Spinner />
+      </div>
+    );
 
   return (
     <QueryClientProvider client={client}>

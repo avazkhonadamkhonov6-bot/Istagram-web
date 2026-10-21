@@ -1,0 +1,92 @@
+/* Instagram web surfaces: neutral canvas, compact forms and restrained motion. */
+:root { color-scheme: light; }
+.dark, .__ig-dark-mode { color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not(.light) { color-scheme: dark; } }
+body { margin: 0; }
+button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled), [role="button"] { cursor: pointer; }
+button:disabled { cursor: default; }
+a, button { touch-action: manipulation; }
+:focus-visible { outline: 2px solid rgb(var(--ig-primary-button)); outline-offset: 3px; }
+.ig-wordmark {
+  flex-shrink: 0;
+  background: currentColor;
+  mask: url('/brand/instagram-wordmark.svg') center / contain no-repeat;
+}
+.ig-nav-item { min-height: 48px; margin-block: 4px; }
+.ig-main { transition: margin-left 200ms var(--ig-animation-move-in); }
+@media (min-width: 768px) { .ig-direct-list { width: 320px; flex-shrink: 0; } }
+@media (min-width: 1100px) { .ig-direct-list { width: 397px; } }
+@media (min-width: 1264px) {
+  body:has(.ig-direct-shell) .ig-main { margin-left: 72px; }
+}
+.auth-page {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 24px;
+  background: rgb(var(--ig-primary-background));
+}
+.auth-main {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding-block: 24px 48px;
+}
+.auth-column { display: flex; width: 420px; max-width: 100%; flex: none; flex-direction: column; gap: 10px; }
+.auth-card { display: flex; flex-direction: column; align-items: center; border: 1px solid rgb(var(--ig-stroke)); padding: 36px 40px 32px; }
+.auth-switch { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; border: 1px solid rgb(var(--ig-stroke)); padding: 26px 16px; font-size: 15px; line-height: 22px; }
+.auth-signup { flex: 1 0 auto; margin: 0 auto 36px; }
+.auth-signup .auth-card { padding-top: 32px; }
+.auth-card h1 .ig-wordmark { width: 210px; height: 75px; }
+.auth-form { gap: 10px; }
+.auth-form button[type="submit"] { height: 44px; font-size: 15px; }
+.auth-divider { display: flex; width: 100%; align-items: center; gap: 18px; margin: 22px 0; color: rgb(var(--ig-secondary-text)); font-size: 13px; font-weight: 600; }
+.auth-divider span { height: 1px; flex: 1; background: rgb(var(--ig-separator)); }
+.auth-form input { height: 48px; border-radius: 5px; padding-top: 18px; padding-bottom: 4px; padding-left: 12px; border-color: rgb(var(--ig-stroke)); background: rgb(var(--ig-secondary-background)); font-size: 16px; }
+.auth-form input:focus { border-color: rgb(var(--ig-focus-stroke)); }
+.auth-form input + label { left: 13px; font-size: 14px; }
+.auth-form input:focus + label, .auth-form input:not(:placeholder-shown) + label { top: 5px; transform: none; font-size: 11px; }
+.auth-form input:-webkit-autofill { -webkit-text-fill-color: rgb(var(--ig-primary-text)); box-shadow: 0 0 0 1000px rgb(var(--ig-secondary-background)) inset; }
+.auth-footer { width: 100%; max-width: 1000px; margin-top: auto; padding-top: 16px; text-align: center; font-size: 12px; line-height: 16px; color: rgb(var(--ig-secondary-text)); }
+.auth-footer a:hover { text-decoration: underline; }
+.login-presentation { position: relative; width: 430px; height: 580px; flex: none; }
+.login-phone { position: absolute; width: 264px; height: 538px; overflow: hidden; border: 6px solid #252525; border-radius: 38px; background: rgb(var(--ig-primary-background)); box-shadow: 0 0 0 1px #777, 0 16px 32px #0002; }
+.login-phone-back { left: 12px; top: 4px; transform: rotate(-7deg); }
+.login-phone-front { right: 6px; bottom: 0; transform: rotate(5deg); }
+.login-phone-notch { position: absolute; z-index: 2; top: 7px; left: 50%; width: 78px; height: 19px; border-radius: 15px; transform: translateX(-50%); background: #111; }
+.login-story-caption { position: absolute; inset: auto 16px 50px; color: white; font-size: 25px; line-height: 30px; font-weight: 600; text-shadow: 0 2px 12px #0008; }
+.login-preview-avatar { width: 28px; height: 28px; border: 2px solid transparent; border-radius: 50%; background: linear-gradient(white, white) padding-box, var(--ig-brand-gradient) border-box; }
+.login-preview-media { position: relative; height: 315px; overflow: hidden; }
+.login-preview-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.login-photo-two { animation: ig-login-crossfade 12s ease-in-out infinite; }
+.login-home-indicator { position: absolute; bottom: 7px; left: 50%; width: 90px; height: 4px; border-radius: 4px; transform: translateX(-50%); background: currentColor; }
+.ig-dialog-overlay[data-state="open"] { animation: ig-fade-in 180ms ease-out; }
+.ig-dialog-overlay[data-state="closed"] { animation: ig-fade-in 150ms ease-in reverse; }
+.ig-dialog-content[data-state="open"] { animation: ig-dialog-enter 200ms var(--fds-animation-enter-exit-in); }
+.ig-dialog-content[data-state="closed"] { animation: ig-dialog-enter 150ms ease-in reverse; }
+.ig-post-action { transition: opacity 150ms, transform 150ms; }
+.ig-post-action:hover { opacity: .65; }
+.ig-post-action:active { transform: scale(.9); }
+.ig-liked svg { animation: ig-like-pop 300ms ease-out; }
+@keyframes ig-like-pop { 0%, 100% { scale: 1; } 40% { scale: 1.22; } 75% { scale: .95; } }
+@keyframes ig-dialog-enter { from { opacity: 0; scale: 1.08; } to { opacity: 1; scale: 1; } }
+@keyframes ig-login-crossfade { 0%, 40%, 100% { opacity: 0; } 50%, 90% { opacity: 1; } }
+@media (max-width: 960px) { .login-presentation { display: none; } .auth-main { padding-block: 12px 40px; } }
+@media (max-width: 450px) {
+  .auth-page { padding: 20px 16px; }
+  .auth-main { align-items: flex-start; padding-top: 16px; }
+  .auth-card, .auth-switch { border: 0; }
+  .auth-card { padding-inline: 12px; }
+  .auth-column { width: 100%; }
+  .auth-signup { margin-bottom: 16px; }
+  .auth-footer { padding-top: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .login-photo-two { opacity: 1; }
+}

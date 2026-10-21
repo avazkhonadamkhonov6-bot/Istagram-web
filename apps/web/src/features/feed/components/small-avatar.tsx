@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export function SmallAvatar({
@@ -10,8 +11,10 @@ export function SmallAvatar({
   className?: string;
 }) {
   return src ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
+      unoptimized
+      width={150}
+      height={150}
       src={src}
       alt={name}
       className={cn("size-8 rounded-full object-cover", className)}

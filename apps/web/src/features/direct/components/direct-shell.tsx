@@ -16,8 +16,8 @@ export function DirectShell({ children }: { children: ReactNode }) {
   useNotificationsRealtime();
 
   return (
-    <div className="flex h-[calc(100dvh-110px)] md:h-dvh">
-      <ChatList className={cn("w-full md:w-[397px] md:shrink-0", activeId !== null && "hidden md:flex")} />
+    <div className="ig-direct-shell flex h-[calc(100dvh-110px)] min-w-0 md:h-dvh">
+      <ChatList className={cn("ig-direct-list w-full md:w-[320px] min-[1100px]:w-[397px] md:shrink-0", activeId !== null && "hidden md:flex")} />
       <div className={cn("min-w-0 flex-1", activeId === null && "hidden md:flex")}>{children}</div>
     </div>
   );

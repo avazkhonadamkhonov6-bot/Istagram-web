@@ -1,12 +1,14 @@
+import { getServerPost } from "@/lib/server-api";
 import { Suspense } from "react";
 import { PostDetail } from "@/features/posts/components/post-detail";
 import { PostModal } from "@/features/posts/components/post-modal";
 
 async function ModalContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const initialPost = await getServerPost(Number(id));
   return (
     <PostModal>
-      <PostDetail postId={Number(id)} />
+      <PostDetail postId={Number(id)} initialPost={initialPost} />
     </PostModal>
   );
 }

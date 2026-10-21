@@ -1,0 +1,2 @@
+import { Skeleton } from "@/components/ui/skeleton";
+export default function Loading() { return <div className="mx-auto max-w-[470px] space-y-4 px-4 py-8" aria-label="Loading"><div className="flex gap-4">{[1,2,3,4].map(i=><Skeleton key={i} className="size-14 rounded-full" />)}</div><Skeleton className="h-10 w-48" /><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="h-4 w-2/3" /></div>; }

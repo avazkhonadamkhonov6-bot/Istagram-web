@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import type { PostDto } from "@repo/shared";
 import Link from "next/link";
@@ -34,8 +35,7 @@ function Tile({ post, big }: { post: PostDto; big: boolean }) {
           className="absolute inset-0 size-full object-cover"
         />
       ) : url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image unoptimized width={480} height={480}
           src={url}
           alt={post.title || `Post by ${post.userName}`}
           className="absolute inset-0 size-full object-cover"
@@ -53,7 +53,7 @@ function Tile({ post, big }: { post: PostDto; big: boolean }) {
 }
 
 export function ExploreGrid({ tag }: { tag?: string }) {
-  const { data, isPending, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const { data, isPending, isError, hasNextPage, isFetchingNextPage, fetchNextPage, refetch } =
     useExploreFeed(tag);
   const sentinel = useRef<HTMLDivElement>(null);
 
@@ -89,7 +89,7 @@ export function ExploreGrid({ tag }: { tag?: string }) {
   if (isError) {
     return (
       <p className="py-16 text-center text-sm text-ig-text-secondary">
-        Couldn&apos;t load posts. Try again later.
+        Couldn&apos;t load posts. <button onClick={() => void refetch()} className="font-semibold text-ig-link-action">Try again</button>
       </p>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Search, Send } from "lucide-react";
 import { Heart } from "@/components/ui/icons";
 import { useUiStore } from "@/store/ui.store";
 
@@ -15,21 +16,36 @@ export function TopBar() {
         href="/"
         onClick={closePanel}
         aria-label="Instagram"
-        className="font-logo text-[28px] leading-none"
+        className="ig-wordmark block h-10 w-[110px]"
       >
-        Instagram
       </Link>
-      <button
-        type="button"
-        aria-label="Notifications"
-        onClick={() => togglePanel("notifications")}
-        className="rounded-lg p-2 hover:bg-ig-hover-overlay"
-      >
-        <Heart
-          className="size-6"
-          fill={panel === "notifications" ? "currentColor" : "none"}
-        />
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          aria-label="Search"
+          onClick={() => togglePanel("search")}
+          className="rounded-lg p-2 hover:bg-ig-hover-overlay"
+        >
+          <Search className="size-6" />
+        </button>
+        <Link
+          href="/direct/inbox"
+          aria-label="Messages"
+          className="rounded-lg p-2 hover:bg-ig-hover-overlay"
+        >
+          <Send className="size-6" />
+        </Link>
+        <button
+          type="button"
+          aria-label="Notifications"
+          onClick={() => togglePanel("notifications")}
+          className="rounded-lg p-2 hover:bg-ig-hover-overlay"
+        >
+          <Heart
+            className="size-6"
+            fill={panel === "notifications" ? "currentColor" : "none"}
+          />
+        </button>
+      </div>
     </header>
   );
 }
