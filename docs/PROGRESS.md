@@ -4,7 +4,7 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** backend (e2e 18/18) + FE-13, FE-15, FE-17 tayyor dar branch-i `avaz` → navbat: FE-19, FE-21, QA-01 (Avaz) · FE-06… (Abubakr)
+**Hozir:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -42,9 +42,9 @@
 | | Avaz | | Abubakr |
 |---|---|---|---|
 | [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [ ] | FE-18 Create modal |
-| [ ] | FE-19 Bovarinokii front | [ ] | FE-20 Reels |
-| [ ] | FE-21 Playwright | [ ] | FE-22 Pardoz, responsive |
-| [ ] | QA-01 | [ ] | QA-02 |
+| [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [ ] | FE-20 Reels |
+| [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [ ] | FE-22 Pardoz, responsive |
+| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [ ] | QA-02 |
 | [ ] | README, `v0.2`, demo | | |
 
 ## Qaydho / masalaho
@@ -57,3 +57,5 @@
 - 2026-10-21: FE-13/15/17 dar brauzer sanjida shud (login, cookie-i httpOnly, `document.cookie` xoli, CSP bo nonce, paym dar realtime < 1 s, unsend, New message, mobil 375px, logout). Ticket-i Socket: `POST /Account/ws-ticket` (60 s), gateway JWT-i asosiro qabul namekunad.
 - 2026-10-21: Typing, Seen, share post va badge-i notifications — nest, chunki dar kontrakti Spec 12 endpoint/event nadorand (P1).
 - 2026-10-21 (baroi Abubakr): `src/components/layout/sidebar.tsx` — `usePathname()` berun az `<Suspense>` (Next 16 `cacheComponents` ogohi "Blocking Route" medihad). `CURRENT_USERNAME = "me"` boyad az `GET /api/UserProfile/get-my-profile` ivaz shavad. Aksho: `/api/images/<fileName>` (`lib/media.ts`), login: `POST /api/auth/login`.
+- 2026-10-21: FE-19/FE-21/QA-01 tayyor. Dar QA 5 xato yoft va islohshud (parol dar log, rate limit dar BFF, offline rollback, ruyxati chat, status 201) — [QA-01](qa/QA-01.md).
+- 2026-10-21 (baroi Abubakr): `OfflineBanner` (`src/components/offline-banner.tsx`) hozir faqat dar Direct ast — onro ba root layout guzored. `WidgetBoundary` baroi Stories/Suggestions/PostCard tayyor ast. Bo FE-07/FE-09/FE-18 senariyahoi Playwright-i post/like/follow ba UI guzaronida meshavand.

@@ -42,6 +42,8 @@ export function useSendMessage(chatId: number) {
   const key = directKeys.messages(chatId);
 
   return useMutation({
+    // Offline → xato (rollback + toast, Spec 10 AC7), na pauza
+    networkMode: "always",
     mutationFn: ({ text, file }: { text: string; file?: File }) => directApi.sendMessage(chatId, text, file),
     onMutate: async ({ text, file }) => {
       if (file || !me) return { id: null };
@@ -70,7 +72,7 @@ export function useSendMessage(chatId: number) {
     },
     onError: (_err, _vars, ctx) => {
       if (ctx?.id) qc.setQueryData<UiMessage[]>(key, (old = []) => old.filter((m) => m.messageId !== ctx.id));
-      toast.error("Paym firistoda nashud");
+      toast.error("Couldn't send message");
     },
   });
 }
@@ -79,6 +81,7 @@ export function useDeleteMessage(chatId: number) {
   const qc = useQueryClient();
   const key = directKeys.messages(chatId);
   return useMutation({
+    networkMode: "always",
     mutationFn: (messageId: number) => directApi.deleteMessage(messageId),
     onMutate: async (messageId) => {
       await qc.cancelQueries({ queryKey: key });
@@ -88,7 +91,7 @@ export function useDeleteMessage(chatId: number) {
     },
     onError: (_e, _v, ctx) => {
       qc.setQueryData(key, ctx?.prev);
-      toast.error("Paym hazf nashud");
+      toast.error("Couldn't unsend message");
     },
     onSettled: () => qc.invalidateQueries({ queryKey: directKeys.chats }),
   });
@@ -114,7 +117,7 @@ export function useDirectRealtime(activeChatId: number | null) {
       );
       void qc.invalidateQueries({ queryKey: directKeys.chats });
       if (active.current !== msg.chatId) {
-        toast(msg.userName, { description: msg.messageText ?? "Fayl firistod" });
+        toast(msg.userName, { description: msg.messageText ?? "Sent an attachment" });
       }
     };
     const onDeleted = ({ messageId, chatId }: { messageId: number; chatId: number }) => {

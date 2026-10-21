@@ -1,0 +1,10 @@
+/* Rangi paymho az tokenhoi Spec 10 §1.7 (dar globals.css) — dar komponentho rangi hardcode nest (AC2) */
+.ig-bubble-out {
+  background-color: rgb(var(--ig-outgoing-message-bubble));
+  color: rgb(var(--ig-text-on-color));
+}
+
+.ig-bubble-in {
+  background-color: rgb(var(--ig-incoming-message-bubble));
+  color: rgb(var(--ig-primary-text));
+}

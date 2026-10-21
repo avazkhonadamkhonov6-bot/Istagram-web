@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { apiFetch, clearToken, forbiddenOrigin, isSameOrigin, json, readToken, upstreamError } from "@/lib/bff";
+import { apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, readToken, upstreamError } from "@/lib/bff";
 
 /**
  * BFF-proxy: /api/<Controller>/<action> → API_URL/<Controller>/<action>
@@ -25,7 +25,7 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
     const v = req.headers.get(name);
     if (v) headers.set(name, v);
   }
-  const ip = req.headers.get("x-forwarded-for");
+  const ip = clientIp(req);
   if (ip) headers.set("x-forwarded-for", ip);
 
   const isImage = path[0] === "images";

@@ -47,7 +47,7 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
       setSelected(null);
       router.push(`/direct/t/${chatId}`);
     } catch {
-      toast.error("Chat sohta nashud");
+      toast.error("Couldn't start chat");
     } finally {
       setCreating(false);
     }
