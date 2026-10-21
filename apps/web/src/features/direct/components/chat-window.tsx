@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Heart, ImageIcon, LogOut, Mic, Pencil, Reply, Square, Trash2, X } from "lucide-react";
+import { ChevronLeft, Heart, ImageIcon, LogOut, Mic, Pencil, Phone, Reply, Send, Trash2, Video, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +9,8 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { startCall, useCallStore } from "@/features/rtc/call-store";
+import { formatDuration } from "@/features/rtc/peer";
 import { ApiError } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
@@ -30,47 +32,12 @@ import {
   useTypingEmitter,
   type UiMessage,
 } from "../hooks";
+import { CallMessage, VideoMessage, VoiceMessage } from "./message-media";
+import { mediaDuration, useVoiceRecorder, VideoMessageDialog } from "./recorders";
 
 const GAP_MS = 15 * 60_000;
-const AUDIO_TYPES = ["audio/webm", "audio/ogg", "audio/mp4"];
 /** Spec 15 §3 */
 const EDIT_WINDOW_MS = 15 * 60_000;
-
-/** Paymi ovozi bo MediaRecorder (Spec 14 §4, <= 10 MB) */
-function useVoiceRecorder(onDone: (file: File) => void) {
-  const [recording, setRecording] = useState(false);
-  const rec = useRef<MediaRecorder | null>(null);
-
-  async function start() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = AUDIO_TYPES.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
-      const r = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      const chunks: Blob[] = [];
-      r.ondataavailable = (e) => chunks.push(e.data);
-      r.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const type = (r.mimeType || "audio/webm").split(";")[0]!;
-        const blob = new Blob(chunks, { type });
-        if (blob.size > 0) onDone(new File([blob], `voice.${type.split("/")[1]}`, { type }));
-      };
-      r.start();
-      rec.current = r;
-      setRecording(true);
-    } catch {
-      toast.error("Microphone is not available");
-    }
-  }
-
-  function stop() {
-    rec.current?.stop();
-    rec.current = null;
-    setRecording(false);
-  }
-
-  useEffect(() => () => rec.current?.stop(), []);
-  return { recording, start, stop };
-}
 
 export function ChatWindow({ chatId }: { chatId: number }) {
   const router = useRouter();
@@ -91,7 +58,9 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const voice = useVoiceRecorder((file) => send.mutate({ text: "", file }));
+  const voice = useVoiceRecorder((file, durationSec) => send.mutate({ text: "", file, durationSec }));
+  const [videoOpen, setVideoOpen] = useState(false);
+  const inCall = useCallStore((st) => st.phase !== "idle" && st.phase !== "ended");
 
   const chat = chats?.find((c) => c.chatId === chatId);
   const peer = chat ? peerOf(chat, me?.userId) : null;
@@ -122,11 +91,13 @@ export function ChatWindow({ chatId }: { chatId: number }) {
     typing.stop();
   }
 
-  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (file) send.mutate({ text: "", file, replyTo });
+    const reply = replyTo;
     setReplyTo(null);
+    if (!file) return;
+    send.mutate({ text: "", file, replyTo: reply, durationSec: await mediaDuration(file) });
   }
 
   async function removeChat() {
@@ -175,6 +146,24 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             </span>
             <button
               type="button"
+              aria-label="Audio call"
+              disabled={inCall}
+              onClick={() => void startCall(chatId, "AUDIO")}
+              className="text-ig-icon disabled:opacity-40"
+            >
+              <Phone className="size-6" />
+            </button>
+            <button
+              type="button"
+              aria-label="Video call"
+              disabled={inCall}
+              onClick={() => void startCall(chatId, "VIDEO")}
+              className="text-ig-icon disabled:opacity-40"
+            >
+              <Video className="size-6" />
+            </button>
+            <button
+              type="button"
               aria-label={isGroup ? "Leave group" : "Delete chat"}
               onClick={removeChat}
               className="text-ig-icon hover:text-ig-error"
@@ -197,6 +186,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
           <MessageList
             messages={messages}
             myId={me?.userId}
+            chatId={chatId}
             isGroup={isGroup}
             onUnsend={(id) => remove.mutate(id)}
             onLike={(id) => like.mutate(id)}
@@ -246,46 +236,58 @@ export function ChatWindow({ chatId }: { chatId: number }) {
 
       <form onSubmit={submit} className="m-4 flex items-center gap-3 rounded-full border border-ig-stroke px-4 py-2">
         {voice.recording ? (
-          <span className="flex flex-1 items-center gap-2 py-1.5 text-sm text-ig-error" aria-live="polite">
-            <span className="size-2 animate-pulse rounded-full bg-ig-error" />
-            Recording...
-          </span>
-        ) : (
-          <input
-            ref={inputRef}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              if (e.target.value) typing.onInput();
-            }}
-            placeholder="Message..."
-            maxLength={1000}
-            className="flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
-          />
-        )}
-        {text.trim() && !voice.recording ? (
-          <button type="submit" className="text-sm font-semibold text-ig-link hover:text-ig-link-action">
-            {editing ? "Save" : "Send"}
-          </button>
+          <>
+            <button type="button" aria-label="Cancel recording" onClick={voice.cancel} className="text-ig-icon hover:text-ig-error">
+              <X className="size-5" />
+            </button>
+            <span className="flex flex-1 items-center gap-2 py-1.5 text-sm" aria-live="polite">
+              <span className="size-2 animate-pulse rounded-full bg-ig-error" />
+              <span className="tabular-nums">{formatDuration(voice.elapsed)}</span>
+              <span className="text-ig-text-secondary">Recording...</span>
+            </span>
+            <button type="button" aria-label="Send voice message" onClick={voice.stop} className="text-ig-link hover:text-ig-link-action">
+              <Send className="size-5" />
+            </button>
+          </>
         ) : (
           <>
-            <button
-              type="button"
-              aria-label={voice.recording ? "Stop recording" : "Record voice message"}
-              onClick={voice.recording ? voice.stop : voice.start}
-              className={cn("text-ig-icon", voice.recording && "text-ig-error")}
-            >
-              {voice.recording ? <Square className="size-5" fill="currentColor" /> : <Mic className="size-6" />}
-            </button>
-            {!voice.recording && (
-              <button type="button" aria-label="Send photo or video" onClick={() => fileRef.current?.click()} className="text-ig-icon">
-                {send.isPending ? <Spinner /> : <ImageIcon className="size-6" />}
+            <input
+              ref={inputRef}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                if (e.target.value) typing.onInput();
+              }}
+              placeholder="Message..."
+              maxLength={1000}
+              className="flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
+            />
+            {text.trim() ? (
+              <button type="submit" className="text-sm font-semibold text-ig-link hover:text-ig-link-action">
+                {editing ? "Save" : "Send"}
               </button>
+            ) : (
+              <>
+                <button type="button" aria-label="Record voice message" onClick={() => void voice.start()} className="text-ig-icon">
+                  <Mic className="size-6" />
+                </button>
+                <button type="button" aria-label="Record video message" onClick={() => setVideoOpen(true)} className="text-ig-icon">
+                  <Video className="size-6" />
+                </button>
+                <button type="button" aria-label="Send photo or video" onClick={() => fileRef.current?.click()} className="text-ig-icon">
+                  {send.isPending ? <Spinner /> : <ImageIcon className="size-6" />}
+                </button>
+              </>
             )}
           </>
         )}
-        <input ref={fileRef} type="file" accept="image/*,video/mp4,video/webm" hidden onChange={onFile} />
+        <input ref={fileRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" hidden onChange={(e) => void onFile(e)} />
       </form>
+      <VideoMessageDialog
+        open={videoOpen}
+        onOpenChange={setVideoOpen}
+        onSend={(file, durationSec) => send.mutate({ text: "", file, durationSec })}
+      />
     </section>
   );
 }
@@ -293,6 +295,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
 function MessageList({
   messages,
   myId,
+  chatId,
   isGroup,
   onUnsend,
   onLike,
@@ -301,6 +304,7 @@ function MessageList({
 }: {
   messages: UiMessage[];
   myId?: string;
+  chatId: number;
   isGroup: boolean;
   onUnsend: (id: number) => void;
   onLike: (id: number) => void;
@@ -335,6 +339,7 @@ function MessageList({
         const isAudio = m.fileType === "audio";
         const liked = !!myId && m.likes.includes(myId);
         const media = (file && !isAudio) || m.sharedPost || m.story;
+        const isCall = !!m.call;
         const editable = mine && !!m.messageText && !file && now - new Date(m.sendMassageDate).getTime() < EDIT_WINDOW_MS;
         return (
           <li key={m.messageId} className="flex flex-col">
@@ -359,20 +364,21 @@ function MessageList({
                   onDoubleClick={() => !m.pending && onLike(m.messageId)}
                   className={cn(
                     "overflow-hidden rounded-[22px] text-[15px]",
-                    media ? "" : "px-3 py-2",
+                    media || isAudio || isCall ? "" : "px-3 py-2",
                     mine ? "ig-bubble-out" : "ig-bubble-in",
                     m.pending && "opacity-60",
                   )}
                 >
                   {file &&
                     (isAudio ? (
-                      <audio src={file} controls className="h-10 w-60 max-w-full" />
-                    ) : isVideoFile(m.file!) ? (
-                      <video src={file} controls className="max-h-80 w-full" />
+                      <VoiceMessage src={file} durationSec={m.durationSec} mine={mine} />
+                    ) : m.fileType === "video" || isVideoFile(m.file!) ? (
+                      <VideoMessage src={file} durationSec={m.durationSec} />
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={file} alt="" className="max-h-80 w-full object-cover" />
                     ))}
+                  {m.call && <CallMessage call={m.call} mine={mine} chatId={chatId} />}
                   {m.sharedPost && <SharedPostCard post={m.sharedPost} />}
                   {m.story && <StoryCard story={m.story} mine={mine} />}
                   {m.messageText && <p className={cn("whitespace-pre-wrap break-words", media && "px-3 py-2")}>{m.messageText}</p>}

@@ -8,8 +8,18 @@ import { apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, re
  * - Login/register faqat tavassuti /api/auth/* (vagarna token ba JS merasid)
  */
 const BLOCKED = new Set(["account/login", "account/register", "account/ws-ticket"]);
-const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id"];
-const PASS_RESPONSE_HEADERS = ["content-type", "content-length", "cache-control", "etag", "last-modified", "x-request-id"];
+// range / content-range: audio va video-ro Safari faqat bo darxosthoi qismi (206) bozi mekunad
+const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id", "range"];
+const PASS_RESPONSE_HEADERS = [
+  "content-type",
+  "content-length",
+  "cache-control",
+  "etag",
+  "last-modified",
+  "x-request-id",
+  "accept-ranges",
+  "content-range",
+];
 
 async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   const { path } = await ctx.params;

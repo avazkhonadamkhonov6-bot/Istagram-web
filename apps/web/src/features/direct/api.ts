@@ -21,12 +21,14 @@ export const getMessages = (chatId: number) =>
 export const createChat = (receiverUserId: string) =>
   api<number>(`/Chat/create-chat?receiverUserId=${encodeURIComponent(receiverUserId)}`, { method: "POST" });
 
-export function sendMessage(chatId: number, text: string, file?: File, replyToId?: number) {
+export function sendMessage(chatId: number, text: string, file?: File, replyToId?: number, durationSec?: number) {
   const form = new FormData();
   form.set("ChatId", String(chatId));
   if (text) form.set("MessageText", text);
   if (file) form.set("File", file);
   if (replyToId) form.set("ReplyToMessageId", String(replyToId));
+  // Spec 16 §1: davomnokii paymi ovozi / video
+  if (file && durationSec !== undefined) form.set("Duration", String(Math.min(3600, Math.max(0, Math.round(durationSec)))));
   return api<MessageDto>("/Chat/send-message", { method: "PUT", body: form, schema: messageDtoSchema });
 }
 

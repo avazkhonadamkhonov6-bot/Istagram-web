@@ -78,7 +78,7 @@ UI: "Audio call · 3:12", "Video call ended", "Missed video call", tugmai "Call 
 4. Tamoshobin: offer → answer → `live:signal`; ICE — har du taraf.
 5. `live:viewer-left` → muallif connection-i hamon tamoshobinro mebandad. `live:ended` → tamoshobin "Live video ended" mebinad.
 
-**Mahdudiyatho:** muallif offline (15 s) → efir худкор tamom meshavad; restart-i server → hamai efirho tamom. Efir nigoh doshta nameshavad (Instagram "Share to story"-ro dar in versiya nadorem).
+**Mahdudiyatho:** muallif offline (15 s) → efir xudkor tamom meshavad; restart-i server → hamai efirho tamom. Efir nigoh doshta nameshavad (Instagram "Share to story"-ro dar in versiya nadorem).
 
 **UI misli Instagram:** dar Create → "LIVE"; ekrani efir — video-i purra, "LIVE" (surx) va shumorai tamoshobinho dar bolo, comment-ho dar poyon (ba bolo meravand), dil-ho (animatsiya), tugmai "End"; tamoshobin: ruyxat dar story tray bo halqai surxi "LIVE", comment, dil, tugmai X.
 
@@ -93,11 +93,10 @@ UI: "Audio call · 3:12", "Video call ended", "Missed video call", tugmai "Call 
 | Direct: paymi ovozi | navishtan bo `MediaRecorder` (pahsh karda nigoh dor / kashidan — bekor), `Duration`, player bo mavj va vaqt | Avaz (FE-30) |
 | Direct: paymi video | navishtani video to 60 s yo intixobi fayl, `Duration`, player | Avaz (FE-30) |
 | Direct: zang | ikonkahoi telefon / kamera dar header, ekrani zang, zangi voridshavanda (modal dar har sahifa + ringtone), mute / kamera / end, paymi "zang" dar chat, "Call back" | Avaz (FE-30) |
-| Efir: muallif | Create → "LIVE", preview, `start-live`, comment-ho, dil-ho, shumorai tamoshobinho, "End" | Abubakr (FE-31) |
-| Efir: tamoshobin | halqai "LIVE" dar story tray (`get-lives`), sahifai tamosho, comment, dil, "Live video ended" | Abubakr (FE-31) |
-| Notifications | matni `LIVE_STARTED`: "started a live video." → klik → sahifai efir | Abubakr (FE-31) |
+| Efir: sahifaho | `/live` (ruyxat + "Go live"), `/live/new` (muallif: preview, unvon, comment-ho, dil-ho, tamoshobinho, "End"), `/live/[id]` (tamosho, comment, dil, "Live video ended") | Avaz (FE-30) — tayyor |
+| Efir: darvozaho | Create → "Live", halqai "LIVE" dar story tray, klik bar notification-i `LIVE_STARTED`, nishon dar profil | Abubakr (FE-31) |
 
-Kodi umumii WebRTC (`useCall`, `useLive`, `getIceServers`) dar `apps/web/src/features/rtc/` — Avaz dar FE-30 menavisad, Abubakr dar FE-31 istifoda mebarad.
+Kodi WebRTC dar `apps/web/src/features/rtc/`: `api.ts`, `peer.ts` (RTCPeerConnection, navbati signal-ho), `call-store.ts` (zang), `live.ts` (`useLiveHost`, `useLiveViewer`), `components/call-layer.tsx` (qabati global dar `QueryProvider`), `components/live-views.tsx`.
 
 ## 6. Kriteriyahoi qabul
 
