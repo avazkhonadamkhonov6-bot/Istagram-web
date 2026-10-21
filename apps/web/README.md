@@ -37,3 +37,50 @@ Import: `@/…` = `src/…` (`tsconfig.json`).
 - Rangho faqat az tokenho (Spec 10 §1), rangi hardcode nest.
 - Ikonkaho — faqat SVG (`lucide-react`), **emoji istifoda nabared**.
 - Ma'lumot faqat tavassuti `/api/*` (BFF yo mock). Tipho — az `@repo/shared`.
+
+## Запуск интерфейса Abubakr
+
+Из корня проекта, Node.js 22+:
+
+```sh
+pnpm install
+pnpm --filter web dev:mock
+```
+
+Mock-режим работает без API и базы данных. Для настоящего API используйте
+`NEXT_PUBLIC_API_MOCKING=off` в `apps/web/.env`, запустите backend по инструкции
+`apps/api/README.md`, затем `pnpm --filter web dev`. После смены режима сервер
+Next.js нужно перезапустить. Если pnpm не установлен, используйте
+`npx --yes pnpm@10.34.7` вместо `pnpm`.
+
+Проверки frontend:
+
+```sh
+pnpm --filter web typecheck
+pnpm --filter web lint
+pnpm --filter web build
+node apps/web/qa/check-design.mjs
+```
+
+Отдельный набор QA-02, без изменения тестов Direct/BFF Avaz:
+
+```sh
+# Сервер web запущен в mock-режиме на 3000.
+pnpm --filter web test:qa
+# Сервер web запущен без mocks; тестовые user1/password123 созданы seed.
+# Запускайте на отдельной тестовой базе: тесты создают посты и меняют профиль.
+QA_LIVE_URL=http://127.0.0.1:3000 pnpm --filter web test:qa:live
+```
+
+Для Playwright нужен Chromium: `pnpm --filter web exec playwright install chromium`.
+Lighthouse: скрипт `qa/lighthouse.mjs` принимает `LIGHTHOUSE_MODULE` (путь к
+`lighthouse/core/index.js` из временной установки Lighthouse) и `QA_LIVE_URL`.
+Он использует тестовый аккаунт seed и сохраняет отчёты в `/tmp`.
+
+Root layout намеренно ожидает запрос: существующая nonce CSP требует свежего
+серверного HTML. Статический shell блокировал бы запуск JavaScript в production.
+Защита proxy/BFF сохранена; токены доступны только серверу. Изображения через
+защищённый BFF используют `next/image` с `unoptimized`, чтобы браузер передавал
+cookie напрямую; первая фотография ленты загружается с приоритетом.
+
+Результаты и ограничения API: [QA-02](../../docs/qa/QA-02.md).

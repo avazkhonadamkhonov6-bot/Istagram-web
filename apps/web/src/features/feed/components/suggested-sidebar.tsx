@@ -1,5 +1,6 @@
 "use client";
 
+import { useMe } from "@/features/auth/hooks";
 import type { Suggestion } from "@repo/shared";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/media";
@@ -17,7 +18,10 @@ function SuggestedRow({ user }: { user: Suggestion }) {
         className="size-11"
       />
       <div className="min-w-0 flex-1 text-sm">
-        <Link href={`/${user.userName}`} className="block truncate font-semibold">
+        <Link
+          href={`/${user.userName}`}
+          className="block truncate font-semibold"
+        >
           {user.userName}
         </Link>
         <span className="block truncate text-ig-text-secondary">
@@ -38,19 +42,45 @@ function SuggestedRow({ user }: { user: Suggestion }) {
 
 export function SuggestedSidebar() {
   const { data } = useSuggestions();
-
-  if (!data || data.length === 0) return null;
+  const { data: me } = useMe();
 
   return (
     <section aria-label="Suggested for you">
+      {me && (
+        <div className="mb-7 flex items-center gap-3 pt-3">
+          <SmallAvatar
+            src={mediaUrl(me.image)}
+            name={me.userName}
+            className="size-11"
+          />
+          <div className="min-w-0 flex-1">
+            <Link href={`/${me.userName}`} className="block font-semibold">
+              {me.userName}
+            </Link>
+            <p className="truncate text-ig-text-secondary">{me.fullName}</p>
+          </div>
+          <Link
+            href="/accounts/edit"
+            className="text-xs font-semibold text-ig-link-action"
+          >
+            Edit profile
+          </Link>
+        </div>
+      )}
       <h2 className="mb-2 text-sm font-semibold text-ig-text-secondary">
         Suggested for you
       </h2>
       <ul>
-        {data.slice(0, 5).map((user) => (
+        {(data ?? []).slice(0, 5).map((user) => (
           <SuggestedRow key={user.id} user={user} />
         ))}
       </ul>
+      <p className="mt-8 text-xs leading-5 text-ig-text-secondary">
+        Share the moments that matter.
+      </p>
+      <p className="mt-4 text-xs uppercase text-ig-text-secondary">
+        Instagram Web
+      </p>
     </section>
   );
 }

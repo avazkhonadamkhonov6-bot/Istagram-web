@@ -45,10 +45,10 @@ export function DialogContent({
 }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-ig-fade bg-ig-overlay" />
+      <DialogPrimitive.Overlay className="ig-dialog-overlay fixed inset-0 z-50 bg-ig-overlay" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-ig-bg-elevated text-ig-text shadow-ig-strong outline-none",
+          "ig-dialog-content fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-ig-bg-elevated text-ig-text shadow-ig-strong outline-none",
           className,
         )}
         {...props}

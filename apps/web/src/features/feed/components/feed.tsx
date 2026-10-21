@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useFeed } from "../hooks";
-import { PostCard } from "./post-card";
+import { WindowedPost } from "./windowed-post";
 
 function FeedSkeleton() {
   return (
@@ -82,8 +82,8 @@ export function Feed() {
 
   return (
     <>
-      {posts.map((post) => (
-        <PostCard key={post.postId} post={post} />
+      {posts.map((post, index) => (
+        <WindowedPost key={post.postId} post={post} index={index} />
       ))}
       <div ref={sentinel} className="flex h-10 items-center justify-center">
         {isFetchingNextPage ? <Spinner className="size-5" /> : null}

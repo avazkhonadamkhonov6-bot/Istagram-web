@@ -9,6 +9,7 @@ import {
   type QueryClient,
 } from "@tanstack/react-query";
 import type { CommentDto, PostDto } from "@repo/shared";
+import { toast } from "@/components/ui/toast";
 import * as feedApi from "./api";
 
 export const feedKeys = {
@@ -61,6 +62,7 @@ export function useToggleLike() {
     },
     onError: (_err, _post, ctx) => {
       if (ctx?.snapshot) qc.setQueryData(feedKeys.feed, ctx.snapshot);
+      toast.error("Could not update the post. Try again.");
     },
     onSuccess: (res, post) =>
       patchPost(qc, post.postId, (p) => ({
@@ -86,6 +88,7 @@ export function useToggleFavorite() {
     },
     onError: (_err, _post, ctx) => {
       if (ctx?.snapshot) qc.setQueryData(feedKeys.feed, ctx.snapshot);
+      toast.error("Could not update the post. Try again.");
     },
     onSuccess: (res, post) =>
       patchPost(qc, post.postId, (p) => ({

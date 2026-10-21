@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import type { PostDto } from "@repo/shared";
 import Link from "next/link";
@@ -25,8 +26,10 @@ function Thumb({ post }: { post: PostDto }) {
           className="size-full object-cover"
         />
       ) : url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
+          unoptimized
+          width={480}
+          height={640}
           src={url}
           alt={post.title || `Post by ${post.userName}`}
           className="size-full object-cover"
@@ -52,8 +55,15 @@ export function PostGrid({
   userId: string;
   filter?: "posts" | "reels";
 }) {
-  const { data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useGridPosts(kind, userId);
+  const {
+    data,
+    isPending,
+    isError,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useGridPosts(kind, userId);
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -81,23 +91,43 @@ export function PostGrid({
     );
   }
 
+  if (isError)
+    return (
+      <div className="py-12 text-center">
+        <p>Could not load posts.</p>
+        <button
+          className="mt-2 font-semibold text-ig-link-action"
+          onClick={() => void refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    );
+
   const all = data?.pages.flat() ?? [];
-  const items =
-    filter === "reels"
-      ? all.filter((p) => p.isReel)
-      : filter === "posts"
-        ? all.filter((p) => !p.isReel)
-        : all;
+  const items = filter === "reels" ? all.filter((p) => p.isReel) : all;
 
   if (items.length === 0) {
     return (
-      <p className="py-16 text-center text-sm text-ig-text-secondary">
-        {kind === "saved"
-          ? "No saved posts yet."
-          : filter === "reels"
-            ? "No reels yet."
-            : "No posts yet."}
-      </p>
+      <div className="py-16 text-center text-sm text-ig-text-secondary">
+        <p>
+          {kind === "saved"
+            ? "No saved posts yet."
+            : filter === "reels"
+              ? "No reels yet."
+              : "No posts yet."}
+        </p>
+        {hasNextPage && (
+          <button
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+            className="mt-4 text-ig-link-action"
+          >
+            Load more
+          </button>
+        )}
+        <div ref={sentinel} className="h-8" />
+      </div>
     );
   }
 

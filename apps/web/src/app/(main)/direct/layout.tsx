@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { DirectShell } from "@/features/direct/components/direct-shell";
-import { QueryProvider } from "@/lib/providers";
 import "./direct.css";
 
 export default function DirectLayout({ children }: LayoutProps<"/direct">) {
@@ -17,6 +16,6 @@ export default function DirectLayout({ children }: LayoutProps<"/direct">) {
       >
         <DirectShell>{children}</DirectShell>
       </Suspense>
-    </QueryProvider>
+    </>
   );
 }

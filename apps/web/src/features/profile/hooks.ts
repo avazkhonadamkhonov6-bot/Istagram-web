@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { UserProfile } from "@repo/shared";
+import { toast } from "@/components/ui/toast";
 import * as profileApi from "./api";
 
 export type GridKind = "posts" | "saved";
@@ -20,8 +21,9 @@ export const profileKeys = {
     ["follow-list", kind, id] as const,
 };
 
-export function useProfile(username: string) {
+export function useProfile(username: string, initialData?: UserProfile) {
   return useQuery({
+    initialData,
     queryKey: profileKeys.byName(username),
     queryFn: () => profileApi.getProfileByUsername(username),
   });
@@ -65,6 +67,51 @@ export function useToggleFollow(profile: UserProfile) {
       currentlyFollowing
         ? profileApi.unfollowUser(profile.userId)
         : profileApi.followUser(profile.userId),
+    onMutate: async (currentlyFollowing) => {
+      await qc.cancelQueries({
+        queryKey: profileKeys.byName(profile.userName),
+      });
+      await qc.cancelQueries({
+        queryKey: profileKeys.isFollow(profile.userId),
+      });
+      const previousProfile = qc.getQueryData(
+        profileKeys.byName(profile.userName),
+      );
+      const previousFollowing = qc.getQueryData(
+        profileKeys.isFollow(profile.userId),
+      );
+      qc.setQueryData(
+        profileKeys.isFollow(profile.userId),
+        !currentlyFollowing,
+      );
+      qc.setQueryData<UserProfile>(
+        profileKeys.byName(profile.userName),
+        (old) =>
+          old
+            ? {
+                ...old,
+                subscribersCount: Math.max(
+                  0,
+                  old.subscribersCount + (currentlyFollowing ? -1 : 1),
+                ),
+              }
+            : old,
+      );
+      return { previousProfile, previousFollowing };
+    },
+    onError: (_error, _following, context) => {
+      toast.error("Could not update following. Try again.");
+      if (context) {
+        qc.setQueryData(
+          profileKeys.byName(profile.userName),
+          context.previousProfile,
+        );
+        qc.setQueryData(
+          profileKeys.isFollow(profile.userId),
+          context.previousFollowing,
+        );
+      }
+    },
     onSuccess: (res) => {
       qc.setQueryData(profileKeys.isFollow(profile.userId), res.isFollowing);
       qc.setQueryData<UserProfile | null>(

@@ -1,5 +1,10 @@
 import { http, HttpResponse } from "msw";
-import type { CommentDto } from "@repo/shared";
+import {
+  postDtoSchema,
+  messageDtoSchema,
+  userStoriesSchema,
+  type CommentDto,
+} from "@repo/shared";
 import {
   createMockComment,
   createMockNotification,
@@ -45,14 +50,34 @@ const mockUsers = [
 ];
 
 const mockPosts = [
-  createMockPost({ postId: 1, userId: mockUsers[1].id, userName: mockUsers[1].userName }),
-  createMockPost({ postId: 2, userId: mockUsers[2].id, userName: mockUsers[2].userName }),
-  createMockPost({ postId: 3, userId: mockMe.userId, userName: mockMe.userName }),
+  createMockPost({
+    postId: 1,
+    userId: mockUsers[1].id,
+    userName: mockUsers[1].userName,
+  }),
+  createMockPost({
+    postId: 2,
+    userId: mockUsers[2].id,
+    userName: mockUsers[2].userName,
+  }),
+  createMockPost({
+    postId: 3,
+    userId: mockMe.userId,
+    userName: mockMe.userName,
+  }),
 ];
 
 const mockStories = [
-  createMockStories({ userId: mockMe.userId, userName: mockMe.userName, hasUnseen: false }),
-  createMockStories({ userId: mockUsers[1].id, userName: mockUsers[1].userName, hasUnseen: true }),
+  createMockStories({
+    userId: mockMe.userId,
+    userName: mockMe.userName,
+    hasUnseen: false,
+  }),
+  createMockStories({
+    userId: mockUsers[1].id,
+    userName: mockUsers[1].userName,
+    hasUnseen: true,
+  }),
 ];
 
 const mockNotifications = [
@@ -69,7 +94,7 @@ const mockHashtags = [
   { name: "food", postsCount: 310 },
 ];
 
-// 30 постов для проверки сетки Explore. Клоны (postId >= 1000) в модалке не откроются.
+// Distinct posts remain addressable from Explore and its post modal.
 const explorePool = Array.from({ length: 30 }, (_, i) => {
   const p = mockPosts[i % mockPosts.length];
   return { ...p, postId: p.postId + 1000 * Math.floor(i / mockPosts.length) };
@@ -102,8 +127,166 @@ const userHistory: {
 }[] = [];
 const textHistory: { id: number; text: string; createdAt: string }[] = [];
 
+const mockFiles = new Map<string, File>();
+
 export const handlers = [
-      http.get("/api/Post/get-explore-posts", ({ request }) =>
+  // FE-07 / Spec 13: Share dialog uses these two existing Direct endpoints.
+  http.post("/api/Chat/create-chat", ({ request }) => {
+    const id = new URL(request.url).searchParams.get("receiverUserId");
+    const receiver = mockUsers.find((u) => u.id === id);
+    if (!receiver)
+      return HttpResponse.json(
+        { data: null, errors: ["User not found"], statusCode: 404 },
+        { status: 404 },
+      );
+    return HttpResponse.json({
+      data: mockUsers.indexOf(receiver) + 1,
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+  http.put("/api/Chat/send-message", async ({ request }) => {
+    const form = await request.formData();
+    const postId = Number(form.get("SharedPostId"));
+    const post = [...mockPosts, ...explorePool].find(
+      (p) => p.postId === postId,
+    );
+    if (!post)
+      return HttpResponse.json(
+        { data: null, errors: ["Post not found"], statusCode: 404 },
+        { status: 404 },
+      );
+    const message = messageDtoSchema.parse({
+      messageId: Date.now(),
+      chatId: Number(form.get("ChatId")),
+      userId: mockMe.userId,
+      userName: mockMe.userName,
+      userImage: mockMe.image,
+      messageText: null,
+      file: null,
+      sendMassageDate: new Date().toISOString(),
+      sharedPost: {
+        postId: post.postId,
+        image: post.images[0] ?? null,
+        userName: post.userName,
+      },
+    });
+    return HttpResponse.json({ data: message, errors: [], statusCode: 200 });
+  }),
+  http.delete("/api/Post/delete-post", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("id"));
+    const index = mockPosts.findIndex(
+      (p) => p.postId === id && p.userId === mockMe.userId,
+    );
+    if (index < 0)
+      return HttpResponse.json(
+        { data: null, errors: ["Not allowed"], statusCode: 403 },
+        { status: 403 },
+      );
+    mockPosts.splice(index, 1);
+    mockMe.postCount--;
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
+  http.post("/api/Post/add-post", async ({ request }) => {
+    const form = await request.formData();
+    const files = form
+      .getAll("Images")
+      .filter((f): f is File => f instanceof File);
+    if (!files.length || files.length > 10)
+      return HttpResponse.json(
+        { data: null, errors: ["Choose 1–10 files"], statusCode: 400 },
+        { status: 400 },
+      );
+    const post = createMockPost({
+      postId: Math.max(...mockPosts.map((p) => p.postId)) + 1,
+      userId: mockMe.userId,
+      userName: mockMe.userName,
+      content: String(form.get("Content") ?? ""),
+      images: files.map((f) => {
+        const name = `upload-${crypto.randomUUID()}-${f.name}`;
+        mockFiles.set(name, f);
+        return name;
+      }),
+      isReel: files.length === 1 && files[0].type.startsWith("video/"),
+      postLikeCount: 0,
+      commentCount: 0,
+      comments: [],
+    });
+    mockPosts.unshift(post);
+    mockMe.postCount++;
+    return HttpResponse.json({
+      data: postDtoSchema.parse(post),
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+  http.get("/api/Post/get-reels", ({ request }) =>
+    pagedMock(
+      mockPosts.filter((p) => p.isReel),
+      new URL(request.url).searchParams,
+    ),
+  ),
+  http.post("/api/Post/view-post", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("postId"));
+    const post = mockPosts.find((p) => p.postId === id);
+    return HttpResponse.json({
+      data: { viewCount: post?.postView ?? 1 },
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+  http.post("/api/Story/AddStories", async ({ request }) => {
+    const form = await request.formData();
+    const file = form.get("Image");
+    if (!(file instanceof File))
+      return HttpResponse.json(
+        { data: null, errors: ["Select a file"], statusCode: 400 },
+        { status: 400 },
+      );
+    const name = `story-${crypto.randomUUID()}-${file.name}`;
+    mockFiles.set(name, file);
+    const entry = createMockStories({
+      userId: mockMe.userId,
+      userName: mockMe.userName,
+    });
+    entry.stories[0].fileName = name;
+    const own = mockStories.find((u) => u.userId === mockMe.userId);
+    if (own) own.stories.push(entry.stories[0]);
+    else mockStories.unshift(entry);
+    userStoriesSchema.parse(own ?? entry);
+    return HttpResponse.json({
+      data: "Story added",
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+  http.post("/api/Story/add-story-view", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("StoryId"));
+    for (const u of mockStories) {
+      const story = u.stories.find((s) => s.id === id);
+      if (story) story.viewed = true;
+      u.hasUnseen = u.stories.some((s) => !s.viewed);
+    }
+    return HttpResponse.json({
+      data: { id: 1, viewUserId: mockMe.userId, storyId: id },
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+  http.post("/api/Story/LikeStory", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("storyId"));
+    const story = mockStories
+      .flatMap((u) => u.stories)
+      .find((s) => s.id === id);
+    if (story) story.liked = !story.liked;
+    return HttpResponse.json({
+      data: story?.liked ? "Liked" : "Unliked",
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.get("/api/Post/get-explore-posts", ({ request }) =>
     pagedMock(explorePool, new URL(request.url).searchParams),
   ),
 
@@ -195,7 +378,7 @@ export const handlers = [
     return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
   }),
 
-     http.put("/api/UserProfile/update-user-profile", async ({ request }) => {
+  http.put("/api/UserProfile/update-user-profile", async ({ request }) => {
     const body = (await request.json()) as { about?: string; gender?: 0 | 1 };
     Object.assign(mockMe, body);
     return HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 });
@@ -226,42 +409,66 @@ export const handlers = [
     });
   }),
 
-    http.get("/api/images/:name", () =>
-    new HttpResponse(
+  http.get("/api/images/:name", ({ params }) => {
+    const file = mockFiles.get(String(params.name));
+    if (file)
+      return new HttpResponse(file, { headers: { "Content-Type": file.type } });
+    return new HttpResponse(
       '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="100%" height="100%" fill="#8e8e8e"/></svg>',
       { headers: { "Content-Type": "image/svg+xml" } },
-    ),
+    );
+  }),
+
+  http.post(
+    "/api/FollowingRelationShip/add-following-relation-ship",
+    ({ request }) => {
+      followed.add(
+        new URL(request.url).searchParams.get("followingUserId") ?? "",
+      );
+      return HttpResponse.json({
+        data: { isFollowing: true, subscribersCount: 100 + followed.size },
+        errors: [],
+        statusCode: 200,
+      });
+    },
   ),
 
-     http.post("/api/FollowingRelationShip/add-following-relation-ship", ({ request }) => {
-    followed.add(new URL(request.url).searchParams.get("followingUserId") ?? "");
-    return HttpResponse.json({
-      data: { isFollowing: true, subscribersCount: 100 + followed.size },
-      errors: [],
-      statusCode: 200,
-    });
-  }),
+  http.delete(
+    "/api/FollowingRelationShip/delete-following-relation-ship",
+    ({ request }) => {
+      followed.delete(
+        new URL(request.url).searchParams.get("followingUserId") ?? "",
+      );
+      return HttpResponse.json({
+        data: { isFollowing: false, subscribersCount: 100 + followed.size },
+        errors: [],
+        statusCode: 200,
+      });
+    },
+  ),
 
-  http.delete("/api/FollowingRelationShip/delete-following-relation-ship", ({ request }) => {
-    followed.delete(new URL(request.url).searchParams.get("followingUserId") ?? "");
-    return HttpResponse.json({
-      data: { isFollowing: false, subscribersCount: 100 + followed.size },
-      errors: [],
-      statusCode: 200,
-    });
-  }),
-
-  http.get("/api/UserProfile/get-is-follow-user-profile-by-id", ({ request }) => {
-    const id = new URL(request.url).searchParams.get("followingUserId") ?? "";
-    return HttpResponse.json({ data: followed.has(id), errors: [], statusCode: 200 });
-  }),
+  http.get(
+    "/api/UserProfile/get-is-follow-user-profile-by-id",
+    ({ request }) => {
+      const id = new URL(request.url).searchParams.get("followingUserId") ?? "";
+      return HttpResponse.json({
+        data: followed.has(id),
+        errors: [],
+        statusCode: 200,
+      });
+    },
+  ),
 
   http.get("/api/FollowingRelationShip/get-subscribers", () =>
     HttpResponse.json({ data: mockUsers, errors: [], statusCode: 200 }),
   ),
 
   http.get("/api/FollowingRelationShip/get-subscriptions", () =>
-    HttpResponse.json({ data: mockUsers.slice(1), errors: [], statusCode: 200 }),
+    HttpResponse.json({
+      data: mockUsers.slice(1),
+      errors: [],
+      statusCode: 200,
+    }),
   ),
 
   http.get("/api/Post/get-posts", ({ request }) => {
@@ -324,6 +531,8 @@ export const handlers = [
   http.get("/api/UserProfile/get-user-profile-by-id", ({ request }) => {
     const id = new URL(request.url).searchParams.get("id") ?? mockMe.userId;
     const found = mockUsers.find((u) => u.id === id);
+    if (id === mockMe.userId)
+      return HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 });
     const profile = createMockUserProfile({
       userId: id,
       userName: found?.userName ?? "ali",
@@ -333,7 +542,9 @@ export const handlers = [
   }),
 
   http.get("/api/User/get-users", ({ request }) => {
-    const q = (new URL(request.url).searchParams.get("UserName") ?? "").toLowerCase();
+    const q = (
+      new URL(request.url).searchParams.get("UserName") ?? ""
+    ).toLowerCase();
     const filtered = q
       ? mockUsers.filter(
           (u) =>
@@ -372,27 +583,25 @@ export const handlers = [
     }),
   ),
 
-  http.get("/api/Post/get-explore-posts", () =>
-    HttpResponse.json({
-      pageNumber: 1,
-      pageSize: 24,
-      totalPage: 1,
-      totalRecord: mockPosts.length,
-      data: mockPosts,
-      errors: [],
-      statusCode: 200,
-    }),
-  ),
-
   http.get("/api/Post/get-post-by-id", ({ request }) => {
     const id = Number(new URL(request.url).searchParams.get("id") ?? "1");
-    const post = mockPosts.find((p) => p.postId === id) ?? mockPosts[0];
+    const post = [...mockPosts, ...explorePool].find((p) => p.postId === id);
+    if (!post)
+      return HttpResponse.json(
+        { data: null, errors: ["Post not found"], statusCode: 404 },
+        { status: 404 },
+      );
     return HttpResponse.json({ data: post, errors: [], statusCode: 200 });
   }),
 
   http.post("/api/Post/like-post", ({ request }) => {
     const id = Number(new URL(request.url).searchParams.get("postId") ?? "1");
-    const post = mockPosts.find((p) => p.postId === id) ?? mockPosts[0];
+    const post = [...mockPosts, ...explorePool].find((p) => p.postId === id);
+    if (!post)
+      return HttpResponse.json(
+        { data: null, errors: ["Post not found"], statusCode: 404 },
+        { status: 404 },
+      );
     post.postLike = !post.postLike;
     post.postLikeCount += post.postLike ? 1 : -1;
     return HttpResponse.json({
@@ -403,8 +612,17 @@ export const handlers = [
   }),
 
   http.post("/api/Post/add-post-favorite", async ({ request }) => {
-    const body = (await request.json().catch(() => ({ postId: 1 }))) as { postId: number };
-    const post = mockPosts.find((p) => p.postId === body.postId) ?? mockPosts[0];
+    const body = (await request.json().catch(() => ({ postId: 1 }))) as {
+      postId: number;
+    };
+    const post = [...mockPosts, ...explorePool].find(
+      (p) => p.postId === body.postId,
+    );
+    if (!post)
+      return HttpResponse.json(
+        { data: null, errors: ["Post not found"], statusCode: 404 },
+        { status: 404 },
+      );
     post.postFavorite = !post.postFavorite;
     return HttpResponse.json({
       data: { isFavorite: post.postFavorite },
@@ -413,7 +631,7 @@ export const handlers = [
     });
   }),
 
-    http.post("/api/Post/add-comment", async ({ request }) => {
+  http.post("/api/Post/add-comment", async ({ request }) => {
     const body = (await request.json()) as {
       postId: number;
       comment: string;
@@ -427,7 +645,9 @@ export const handlers = [
     });
     commentStore.push(created);
     if (created.parentId) {
-      const parent = commentStore.find((c) => c.postCommentId === created.parentId);
+      const parent = commentStore.find(
+        (c) => c.postCommentId === created.parentId,
+      );
       if (parent) parent.replyCount += 1;
     }
     const post = mockPosts.find((p) => p.postId === body.postId);
@@ -479,7 +699,8 @@ export const handlers = [
         if (parent) parent.replyCount = Math.max(0, parent.replyCount - 1);
       }
       const post = mockPosts.find((p) => p.postId === target.postId);
-      if (post) post.commentCount = Math.max(0, post.commentCount - removed.length);
+      if (post)
+        post.commentCount = Math.max(0, post.commentCount - removed.length);
     }
     return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
   }),
@@ -501,12 +722,19 @@ export const handlers = [
   ),
 
   http.get("/api/Notification/get-unread-count", () =>
-    HttpResponse.json({ data: { count: 1 }, errors: [], statusCode: 200 }),
+    HttpResponse.json({
+      data: { count: mockNotifications.filter((n) => !n.isRead).length },
+      errors: [],
+      statusCode: 200,
+    }),
   ),
 
-  http.put("/api/Notification/read-all", () =>
-    HttpResponse.json({ data: true, errors: [], statusCode: 200 }),
-  ),
+  http.put("/api/Notification/read-all", () => {
+    mockNotifications.forEach((n) => {
+      n.isRead = true;
+    });
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
 
   http.get("/api/Chat/get-unread-count", () =>
     HttpResponse.json({ data: { count: 0 }, errors: [], statusCode: 200 }),

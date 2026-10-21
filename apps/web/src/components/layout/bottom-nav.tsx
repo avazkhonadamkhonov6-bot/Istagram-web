@@ -1,5 +1,7 @@
 "use client";
 
+import { SmallAvatar } from "@/features/feed/components/small-avatar";
+import { mediaUrl } from "@/lib/media";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMe } from "@/features/auth/hooks";
@@ -41,13 +43,23 @@ export function BottomNav() {
           "flex h-full flex-1 items-center justify-center",
           active ? "text-ig-text" : "text-ig-text-secondary",
         );
-        const icon = (
-          <Icon
-            className="size-6"
-            strokeWidth={active ? 2.75 : 2}
-            fill={active && item.fillWhenActive ? "currentColor" : "none"}
-          />
-        );
+        const icon =
+          item.key === "profile" ? (
+            <SmallAvatar
+              src={mediaUrl(me?.image)}
+              name={myUsername}
+              className={cn(
+                "size-6",
+                active && "ring-2 ring-ig-text ring-offset-2 ring-offset-ig-bg",
+              )}
+            />
+          ) : (
+            <Icon
+              className="size-6"
+              strokeWidth={active ? 2.75 : 2}
+              fill={active && item.fillWhenActive ? "currentColor" : "none"}
+            />
+          );
 
         return item.kind === "link" ? (
           <Link
