@@ -2,16 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMe } from "@/features/auth/hooks";
+import { CURRENT_USERNAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
 import { BOTTOM_NAV_KEYS, NAV_ITEMS, isItemActive } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { data: me } = useMe();
   const panel = useUiStore((s) => s.panel);
   const closePanel = useUiStore((s) => s.closePanel);
   const setCreateOpen = useUiStore((s) => s.setCreateOpen);
 
+  const myUsername = me?.userName ?? CURRENT_USERNAME;
+  const profileHref = `/${myUsername}`;
   const items = NAV_ITEMS.filter((item) => BOTTOM_NAV_KEYS.includes(item.key));
 
   return (
@@ -19,7 +24,17 @@ export function BottomNav() {
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-40 flex h-[50px] items-center justify-around border-t border-ig-separator bg-ig-bg md:hidden"
     >
-      {items.map((item) => {
+      {items.map((rawItem) => {
+        const item =
+          rawItem.key === "profile" && rawItem.kind === "link"
+            ? {
+                ...rawItem,
+                href: profileHref,
+                match: (p: string) =>
+                  p === profileHref || p.startsWith(`${profileHref}/`),
+              }
+            : rawItem;
+
         const active = isItemActive(item, pathname, panel);
         const Icon = item.icon;
         const cls = cn(

@@ -18,13 +18,13 @@
 | [x] | BE-01 Monorepo (pnpm 10, NestJS 11, tsconfig strict) | [x] | FE-01 Tayyori, Next 16 docs |
 | [x] | BE-02 Kontrakt (Zod) — Spec 12, `packages/shared` | [x] | FE-02 Rangho, dark, shadcn |
 | [x] | BE-03 Prisma + migratsiya, infra, CI, docker-compose (faqat Postgres) | [x] | FE-03 Komponenthoi UI |
-| [x] | BE-04 Account API | [ ] | FE-04 MSW mock |
+| [x] | BE-04 Account API | [x] | FE-04 MSW mock |
 | [x] | BE-05 User, UserProfile, FollowingRelationShip | [x] | FE-05 Layout |
 
 ## RUZI 2
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [ ] | FE-06 Login / Signup |
+| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [x] | FE-06 Login / Signup |
 | [x] | BE-07 Post, like, comment, favorite | [ ] | FE-07 Feed + PostCard |
 | [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [ ] | FE-08 Post modal |
 | [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [ ] | FE-09 Profil |

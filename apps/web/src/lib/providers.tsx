@@ -1,10 +1,24 @@
 "use client";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { initMocks } from "@/mocks/browser";
 import { makeQueryClient } from "./query-client";
+
+const mockingEnabled = process.env.NEXT_PUBLIC_API_MOCKING === "on";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [client] = useState(makeQueryClient);
+  const [ready, setReady] = useState(!mockingEnabled);
+
+  useEffect(() => {
+    if (!mockingEnabled) return;
+    initMocks()
+      .catch(() => undefined)
+      .finally(() => setReady(true));
+  }, []);
+
+  if (!ready) return null;
+
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
