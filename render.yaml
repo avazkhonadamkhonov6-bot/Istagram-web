@@ -1,21 +1,20 @@
-# Render Blueprint: API-i umumi (NestJS) + PostgreSQL. Ba'd az push: Render → New → Blueprint → hamin repo.
-# Frontend (Avaz va Abubakr) dar kompyuteri xud: apps/web/.env.local → API_URL va NEXT_PUBLIC_WS_URL = URL-i hamin service.
+# Render Blueprint: API-i umumi (NestJS) + PostgreSQL. Nomho bo xizmathoi mavjuda dar Render yakxela-and
+# (Istagram-web, instagram-db), DATABASE_URL-ro Render худаш az baza meguzorad.
+# Har `git push` ba main → Render худкор deploy mekunad (Auto-Deploy: On Commit); maʼlumoti baza nigoh doshta meshavad.
+# Frontend (Avaz va Abubakr) dar kompyuteri xud: apps/web/.env.local → API_URL va NEXT_PUBLIC_WS_URL = https://istagram-web.onrender.com
 services:
   - type: web
-    name: instagram-api
+    name: Istagram-web
     runtime: node
     plan: free
-    region: frankfurt
+    region: oregon
     branch: main
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @repo/shared build && pnpm --filter api build
-    # Migratsiyaho dar har start (dar plan-i free preDeploy nest)
+    # NODE_ENV=production namemonem: pnpm install devDependencies-ro (nest, prisma, ts-node) lozim dorad
+    buildCommand: pnpm install --frozen-lockfile; pnpm run build
+    # Migratsiyaho + seed-i yakbora (agar baza xoli boshad) + API
     startCommand: pnpm start
     healthCheckPath: /health
     envVars:
-      - key: NODE_VERSION
-        value: "22"
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: instagram-db
@@ -33,6 +32,4 @@ services:
 databases:
   - name: instagram-db
     plan: free
-    region: frankfurt
-    databaseName: instagram
-    user: instagram
+    region: oregon
