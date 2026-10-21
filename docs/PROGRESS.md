@@ -4,7 +4,7 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** hujjatho tayyor → **BE-01** (Avaz) · **FE-01** (Abubakr)
+**Hozir:** backend tayyor va sanjida shud (e2e 18/18, [Spec 12](specs/12-api-kontrakt.md)) → **API freeze**, navbat: FE-13 BFF (Avaz) · **FE-01** (Abubakr)
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -15,26 +15,26 @@
 ## RUZI 1
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [ ] | BE-01 Monorepo | [ ] | FE-01 Tayyori, Next 16 docs |
-| [ ] | BE-02 Kontrakt (Zod) — **to 12:30** | [ ] | FE-02 Rangho, dark, shadcn |
-| [ ] | BE-03 Docker, Prisma, infra, CI | [ ] | FE-03 Komponenthoi UI |
-| [ ] | BE-04 Auth API | [ ] | FE-04 MSW mock |
-| [ ] | BE-05 Users + Follow API | [ ] | FE-05 Layout |
+| [x] | BE-01 Monorepo (pnpm 10, NestJS 11, tsconfig strict) | [ ] | FE-01 Tayyori, Next 16 docs |
+| [x] | BE-02 Kontrakt (Zod) — Spec 12, `packages/shared` | [ ] | FE-02 Rangho, dark, shadcn |
+| [x] | BE-03 Prisma + migratsiya, infra, CI, docker-compose (faqat Postgres) | [ ] | FE-03 Komponenthoi UI |
+| [x] | BE-04 Account API | [ ] | FE-04 MSW mock |
+| [x] | BE-05 User, UserProfile, FollowingRelationShip | [ ] | FE-05 Layout |
 
 ## RUZI 2
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [ ] | BE-06 Media API | [ ] | FE-06 Login / Signup |
-| [ ] | BE-07 Posts, Like, Comment, Saved | [ ] | FE-07 Feed + PostCard |
-| [ ] | BE-08 Feed, Explore, Search | [ ] | FE-08 Post modal |
-| [ ] | BE-09 Realtime + Notifications | [ ] | FE-09 Profil |
-| [ ] | BE-10 Stories API | [ ] | FE-10 Edit profile + parol |
+| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [ ] | FE-06 Login / Signup |
+| [x] | BE-07 Post, like, comment, favorite | [ ] | FE-07 Feed + PostCard |
+| [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [ ] | FE-08 Post modal |
+| [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [ ] | FE-09 Profil |
+| [x] | BE-10 Story API | [ ] | FE-10 Edit profile + parol |
 
 ## RUZI 3
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [ ] | BE-11 Direct + Reels API | [ ] | FE-11 Explore, Search |
-| [ ] | BE-12 Seed, e2e, API freeze | [ ] | FE-12 Notifications panel |
+| [x] | BE-11 Chat + Reels + Location API | [ ] | FE-11 Explore, Search |
+| [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [ ] | FE-12 Notifications panel |
 | [ ] | FE-13 BFF + proxy + CSP | [ ] | FE-14 Mock xomush, integratsiya |
 | [ ] | FE-15 Socket + realtime | [ ] | FE-16 Stories |
 
@@ -48,6 +48,9 @@
 | [ ] | README, `v0.2`, demo | | |
 
 ## Qaydho / masalaho
+- 2026-10-21: Kontrakti API ivaz shud — endpoint-ho aynan misli Swagger-i "Web Api" (`/Account/*`, `/Post/*`, `/Chat/*`...): [Spec 12](specs/12-api-kontrakt.md). URL/DTO-hoi spec-hoi 01–09 digar amal namekunand; qoidahoi amniyat boqi memonand.
+- 2026-10-21: To P1 buridashud: Redis/BullMQ, Notifications, presign S3, refresh token (Spec 12 §10).
+- 2026-10-21: Docker nest; PostgreSQL 18-i lokali (port 5432) istifoda meshavad. Ogoz: `pnpm --filter api db:deploy`, `pnpm --filter api db:seed`, `pnpm --filter api dev`, test: `pnpm --filter api test`.
 - 2026-10-20: Dar kompyuteri Avaz **pnpm** va **Docker** hanuz nasb nashudaand → BE-01 / BE-03.
 - 2026-10-20: Muhlati 4 ruz zich ast — tartibi buridan dar PLAN.md.
 - 2026-10-20: Counter-ho dar PostgreSQL (Redis faqat kesh); CAPTCHA, Meilisearch, Kafka, K8s — berun az 4 ruz (ROADMAP).

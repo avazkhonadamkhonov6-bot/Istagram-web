@@ -30,3 +30,6 @@ pnpm-debug.log*
 .DS_Store
 *.pem
 .vercel
+
+# faylhoi bor-shuda (aks/video)
+apps/api/uploads/
