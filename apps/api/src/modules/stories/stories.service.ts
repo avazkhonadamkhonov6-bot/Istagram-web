@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ErrorCode, GetStoryDto, GetStoryViewDto, STORY_TTL_MS, UserStories } from '@repo/shared';
+import { ErrorCode, GetStoryDto, GetStoryViewDto, HighlightDto, STORY_TTL_MS, UserStories } from '@repo/shared';
 import { badRequest, forbidden, notFound } from '../../common/app-exception';
 import { userShortSelect } from '../../common/mappers';
 import { PrismaService } from '../../infra/prisma.service';
 import { StorageService } from '../../infra/storage.service';
+import { ChatService } from '../chat/chat.service';
 import { FollowsService } from '../follows/follows.service';
 import { PostsService } from '../posts/posts.service';
+import { RelationsService } from '../relations/relations.service';
 
 const storyInclude = (me: string) =>
   ({
@@ -20,6 +22,11 @@ type StoryRow = Prisma.StoryGetPayload<{ include: ReturnType<typeof storyInclude
 
 const alive = () => ({ expiresAt: { gt: new Date() } });
 
+/** Story-i close friends — faqat baroi muallif va close friends-i u (Spec 14 §3) */
+const audience = (me: string): Prisma.StoryWhereInput => ({
+  OR: [{ closeFriends: false }, { userId: me }, { user: { relations: { some: { targetId: me, type: 'CLOSE_FRIEND' } } } }],
+});
+
 @Injectable()
 export class StoriesService {
   constructor(
@@ -27,6 +34,8 @@ export class StoriesService {
     private readonly storage: StorageService,
     private readonly follows: FollowsService,
     private readonly posts: PostsService,
+    private readonly relations: RelationsService,
+    private readonly chat: ChatService,
   ) {}
 
   private toDto(s: StoryRow, me: string): GetStoryDto {
@@ -47,6 +56,9 @@ export class StoriesService {
         viewCount: isOwner ? s._count.views : null,
         viewLike: isOwner ? s._count.likes : null,
       },
+      closeFriends: s.closeFriends,
+      userName: s.user.userName,
+      expiresAt: s.expiresAt.toISOString(),
     };
   }
 
@@ -55,21 +67,27 @@ export class StoriesService {
     for (const s of rows) {
       let entry = byUser.get(s.userId);
       if (!entry) {
-        entry = { userId: s.userId, userName: s.user.userName, userImage: s.user.avatar, hasUnseen: false, stories: [] };
+        entry = { userId: s.userId, userName: s.user.userName, userImage: s.user.avatar, hasUnseen: false, stories: [], hasCloseFriends: false };
         byUser.set(s.userId, entry);
       }
       const dto = this.toDto(s, me);
       entry.stories.push(dto);
       if (!dto.viewed) entry.hasUnseen = true;
+      if (dto.closeFriends) entry.hasCloseFriends = true;
     }
     return [...byUser.values()];
   }
 
-  /** Tray: avval xudam, ba'd `hasUnseen`, ba'd story-i navtarin (Spec 06) */
+  /** Tray: avval xudam, ba'd `hasUnseen`, ba'd story-i navtarin (Spec 06); mute va blok nest (Spec 14) */
   async feed(me: string): Promise<UserStories[]> {
-    const ids = await this.follows.followingIds(me);
+    const [ids, muted, blocked] = await Promise.all([
+      this.follows.followingIds(me),
+      this.relations.targetIds(me, 'MUTE_STORIES'),
+      this.relations.blockedIds(me),
+    ]);
+    const hidden = new Set([...muted, ...blocked]);
     const rows = await this.prisma.story.findMany({
-      where: { userId: { in: [me, ...ids] }, ...alive() },
+      where: { userId: { in: [me, ...ids.filter((id) => !hidden.has(id))] }, ...alive(), ...audience(me) },
       include: storyInclude(me),
       orderBy: { createdAt: 'asc' },
     });
@@ -84,13 +102,15 @@ export class StoriesService {
 
   async forUser(me: string, userId: string): Promise<UserStories> {
     const user = await this.prisma.user.findUnique({ where: { id: userId }, select: userShortSelect });
-    if (!user) throw notFound(ErrorCode.USER_NOT_FOUND);
+    if (!user || (await this.relations.isBlockedEither(me, userId))) throw notFound(ErrorCode.USER_NOT_FOUND);
+    const empty = { userId, userName: user.userName, userImage: user.avatar, hasUnseen: false, stories: [], hasCloseFriends: false };
+    if (!(await this.follows.canView(me, userId))) return empty;
     const rows = await this.prisma.story.findMany({
-      where: { userId, ...alive() },
+      where: { userId, ...alive(), ...audience(me) },
       include: storyInclude(me),
       orderBy: { createdAt: 'asc' },
     });
-    return this.group(rows, me)[0] ?? { userId, userName: user.userName, userImage: user.avatar, hasUnseen: false, stories: [] };
+    return this.group(rows, me)[0] ?? empty;
   }
 
   async getById(me: string, id: number) {
@@ -99,12 +119,18 @@ export class StoriesService {
     return this.toDto(s, me);
   }
 
-  async add(me: string, file: Express.Multer.File | undefined, postId?: number) {
+  /** Archive-i story: hamai story-hoi man, hatto guzashta (Spec 14 §3) */
+  async archive(me: string) {
+    const rows = await this.prisma.story.findMany({ where: { userId: me }, include: storyInclude(me), orderBy: { createdAt: 'desc' } });
+    return rows.map((s) => this.toDto(s, me));
+  }
+
+  async add(me: string, file: Express.Multer.File | undefined, postId?: number, closeFriends = false) {
     if (!file && !postId) throw badRequest(ErrorCode.MEDIA_REQUIRED);
     if (postId) await this.posts.assertExists(postId);
     const fileName = file ? await this.storage.save(file, 'media') : null;
     await this.prisma.story.create({
-      data: { userId: me, fileName, postId: postId ?? null, expiresAt: new Date(Date.now() + STORY_TTL_MS) },
+      data: { userId: me, fileName, postId: postId ?? null, closeFriends, expiresAt: new Date(Date.now() + STORY_TTL_MS) },
     });
     return 'Story added';
   }
@@ -142,5 +168,84 @@ export class StoriesService {
       update: {},
     });
     return { id: v.id, viewUserId: v.viewerId, storyId: v.storyId };
+  }
+
+  /** Ruyxati binandagon baroi muallif */
+  async viewers(me: string, storyId: number) {
+    const s = await this.prisma.story.findUnique({ where: { id: storyId }, select: { userId: true } });
+    if (!s) throw notFound(ErrorCode.STORY_NOT_FOUND);
+    if (s.userId !== me) throw forbidden();
+    const [views, likes] = await Promise.all([
+      this.prisma.storyView.findMany({ where: { storyId }, orderBy: { createdAt: 'desc' }, select: { viewer: { select: userShortSelect } } }),
+      this.prisma.storyLike.findMany({ where: { storyId }, select: { userId: true } }),
+    ]);
+    const liked = new Set(likes.map((l) => l.userId));
+    return views.map((v) => ({ ...v.viewer, liked: liked.has(v.viewer.id) }));
+  }
+
+  replyToStory(me: string, storyId: number, text: string) {
+    return this.chat.replyToStory(me, storyId, text);
+  }
+
+  // ---- Highlights (Spec 14 §3) ----
+
+  async highlights(me: string, userId: string): Promise<HighlightDto[]> {
+    if (!(await this.follows.canView(me, userId))) return [];
+    const rows = await this.prisma.highlight.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        _count: { select: { stories: true } },
+        stories: { take: 1, orderBy: { story: { createdAt: 'desc' } }, select: { story: { select: { fileName: true } } } },
+      },
+    });
+    return rows.map((h) => ({ id: h.id, title: h.title, cover: h.stories[0]?.story.fileName ?? null, storiesCount: h._count.stories }));
+  }
+
+  async highlightStories(me: string, id: number) {
+    const h = await this.prisma.highlight.findUnique({ where: { id }, select: { userId: true } });
+    if (!h || !(await this.follows.canView(me, h.userId))) throw notFound(ErrorCode.HIGHLIGHT_NOT_FOUND);
+    const rows = await this.prisma.story.findMany({
+      where: { highlights: { some: { highlightId: id } }, ...audience(me) },
+      include: storyInclude(me),
+      orderBy: { createdAt: 'asc' },
+    });
+    return rows.map((s) => this.toDto(s, me));
+  }
+
+  private async assertOwnStories(me: string, storyIds: number[]) {
+    const n = await this.prisma.story.count({ where: { id: { in: storyIds }, userId: me } });
+    if (n !== new Set(storyIds).size) throw forbidden();
+  }
+
+  async addHighlight(me: string, title: string, storyIds: number[]) {
+    await this.assertOwnStories(me, storyIds);
+    const h = await this.prisma.highlight.create({
+      data: { userId: me, title, stories: { create: [...new Set(storyIds)].map((storyId) => ({ storyId })) } },
+      select: { id: true },
+    });
+    return h.id;
+  }
+
+  async updateHighlight(me: string, id: number, title?: string, storyIds?: number[]) {
+    const h = await this.prisma.highlight.findFirst({ where: { id, userId: me }, select: { id: true } });
+    if (!h) throw notFound(ErrorCode.HIGHLIGHT_NOT_FOUND);
+    if (storyIds) await this.assertOwnStories(me, storyIds);
+    await this.prisma.$transaction(async (tx) => {
+      if (title) await tx.highlight.update({ where: { id }, data: { title } });
+      if (storyIds) {
+        await tx.highlightStory.deleteMany({ where: { highlightId: id } });
+        await tx.highlightStory.createMany({ data: [...new Set(storyIds)].map((storyId) => ({ highlightId: id, storyId })) });
+      }
+    });
+    return true;
+  }
+
+  async deleteHighlight(me: string, id: number) {
+    const { count } = await this.prisma.highlight.deleteMany({ where: { id, userId: me } });
+    if (count === 0) throw notFound(ErrorCode.HIGHLIGHT_NOT_FOUND);
+    return true;
   }
 }

@@ -1,5 +1,6 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { mkdirSync } from 'node:fs';
 import { AppConfig } from './infra/config';
@@ -14,6 +15,20 @@ export function configureApp(app: NestExpressApplication, config: AppConfig) {
 
   const storage = app.get(StorageService);
   mkdirSync(storage.root, { recursive: true });
+  // Fayli gumshuda az disk (restart-i Render) — avval az DB bargardonida meshavad
+  app.use('/images', (req: Request, _res: Response, next: NextFunction) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    let name: string;
+    try {
+      name = decodeURIComponent(req.path.slice(1));
+    } catch {
+      return next();
+    }
+    storage.restore(name).then(
+      () => next(),
+      () => next(),
+    );
+  });
   app.useStaticAssets(storage.root, { prefix: '/images/', maxAge: '365d', immutable: true });
 
   const doc = new DocumentBuilder()

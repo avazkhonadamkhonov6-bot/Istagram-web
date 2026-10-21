@@ -6,7 +6,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "start": "pnpm --filter api db:deploy && pnpm --filter api start:render"
   },
   "devDependencies": {
     "turbo": "^2"

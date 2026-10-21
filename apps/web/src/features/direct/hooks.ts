@@ -4,6 +4,8 @@ import { SocketEvent, type ChatDto, type MessageDto, type TypingPayload } from "
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
+import { ApiError } from "@/lib/api-client";
+import { formatRelativeTime } from "@/lib/format";
 import { getSocket, onReconnect } from "@/lib/socket";
 import * as directApi from "./api";
 
@@ -88,8 +90,16 @@ export const useChats = () => useQuery({ queryKey: directKeys.chats, queryFn: di
 export const useMessages = (chatId: number) =>
   useQuery<UiMessage[]>({ queryKey: directKeys.messages(chatId), queryFn: () => directApi.getMessages(chatId) });
 
-/** Tarafi digari chat (1:1) */
+/** Tarafi digari chat (1:1); baroi group — nom va aksi a'zoi avval (Spec 14 §4) */
 export function peerOf(chat: ChatDto, myId: string | undefined) {
+  if (chat.isGroup) {
+    const others = chat.members.filter((m) => m.id !== myId);
+    return {
+      id: null,
+      userName: chat.title || others.map((m) => m.userName).join(", ") || "Group",
+      image: others[0]?.avatar ?? null,
+    };
+  }
   const isSender = chat.sendUserId === myId;
   return {
     id: isSender ? chat.receiveUserId : chat.sendUserId,
@@ -100,6 +110,76 @@ export function peerOf(chat: ChatDto, myId: string | undefined) {
 
 let tempId = -1;
 
+type SendVars = { text: string; file?: File; replyTo?: MessageDto | null };
+
+/** Tahriri paym (Spec 15 §3) — optimistic + rollback */
+export function useEditMessage(chatId: number) {
+  const qc = useQueryClient();
+  const key = directKeys.messages(chatId);
+  return useMutation({
+    networkMode: "always",
+    mutationFn: ({ messageId, text }: { messageId: number; text: string }) => directApi.editMessage(messageId, text),
+    onMutate: async ({ messageId, text }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<UiMessage[]>(key);
+      qc.setQueryData<UiMessage[]>(key, (old = []) =>
+        old.map((m) => (m.messageId === messageId ? { ...m, messageText: text, editedAt: new Date().toISOString() } : m)),
+      );
+      return { prev };
+    },
+    onSuccess: (msg) => {
+      qc.setQueryData<UiMessage[]>(key, (old = []) => old.map((m) => (m.messageId === msg.messageId ? msg : m)));
+      void qc.invalidateQueries({ queryKey: directKeys.chats });
+    },
+    onError: (err, _v, ctx) => {
+      qc.setQueryData(key, ctx?.prev);
+      toast.error(err instanceof ApiError && err.code === "EDIT_WINDOW_EXPIRED" ? "Messages can only be edited for 15 minutes" : "Couldn't edit message");
+    },
+  });
+}
+
+/** "Active now" / "Active 5m ago" (Spec 15 §4) */
+export function activityLabel(isOnline: boolean, lastActiveAt: string | null) {
+  if (isOnline) return "Active now";
+  if (!lastActiveAt) return null;
+  const ago = Date.now() - new Date(lastActiveAt).getTime();
+  // Instagram holati kuhnatar az 1 ruzro nishon namedihad
+  if (ago > 24 * 3600_000) return null;
+  const rel = formatRelativeTime(lastActiveAt);
+  return rel === "now" ? "Active now" : `Active ${rel} ago`;
+}
+
+/** Dil-i paym (double-tap) — toggle, optimistic (Spec 14 §4) */
+export function useLikeMessage(chatId: number) {
+  const qc = useQueryClient();
+  const { data: me } = useMe();
+  const key = directKeys.messages(chatId);
+  return useMutation({
+    networkMode: "always",
+    mutationFn: (messageId: number) => directApi.likeMessage(messageId),
+    onMutate: async (messageId) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<UiMessage[]>(key);
+      const myId = me?.userId;
+      if (myId) {
+        qc.setQueryData<UiMessage[]>(key, (old = []) =>
+          old.map((m) =>
+            m.messageId === messageId
+              ? { ...m, likes: m.likes.includes(myId) ? m.likes.filter((id) => id !== myId) : [...m.likes, myId] }
+              : m,
+          ),
+        );
+      }
+      return { prev };
+    },
+    onSuccess: (msg) => qc.setQueryData<UiMessage[]>(key, (old = []) => old.map((m) => (m.messageId === msg.messageId ? msg : m))),
+    onError: (_e, _v, ctx) => {
+      qc.setQueryData(key, ctx?.prev);
+      toast.error("Couldn't like message");
+    },
+  });
+}
+
 /** Optimistic: paym favran namoyon meshavad; xato → rollback + toast (Spec 10 §7) */
 export function useSendMessage(chatId: number) {
   const qc = useQueryClient();
@@ -109,8 +189,8 @@ export function useSendMessage(chatId: number) {
   return useMutation({
     // Offline → xato (rollback + toast, Spec 10 AC7), na pauza
     networkMode: "always",
-    mutationFn: ({ text, file }: { text: string; file?: File }) => directApi.sendMessage(chatId, text, file),
-    onMutate: async ({ text, file }) => {
+    mutationFn: ({ text, file, replyTo }: SendVars) => directApi.sendMessage(chatId, text, file, replyTo?.messageId),
+    onMutate: async ({ text, file, replyTo }) => {
       if (file || !me) return { id: null };
       await qc.cancelQueries({ queryKey: key });
       const id = tempId--;
@@ -124,6 +204,13 @@ export function useSendMessage(chatId: number) {
         file: null,
         sharedPost: null,
         sendMassageDate: new Date().toISOString(),
+        fileType: null,
+        likes: [],
+        replyTo: replyTo ? { messageId: replyTo.messageId, userName: replyTo.userName, text: replyTo.messageText } : null,
+        story: null,
+        editedAt: null,
+        durationSec: null,
+        call: null,
         pending: true,
       };
       qc.setQueryData<UiMessage[]>(key, (old = []) => [...old, optimistic]);
@@ -196,7 +283,12 @@ export function useDirectRealtime(activeChatId: number | null) {
       qc.setQueryData<ChatDto[]>(directKeys.chats, (old) => old?.map((c) => (c.chatId === chatId ? { ...c, peerReadAt: readAt } : c)));
     };
 
+    const onUpdated = (msg: MessageDto) => {
+      qc.setQueryData<UiMessage[]>(directKeys.messages(msg.chatId), (old) => old?.map((m) => (m.messageId === msg.messageId ? msg : m)));
+    };
+
     socket.on(SocketEvent.MESSAGE_NEW, onNew);
+    socket.on(SocketEvent.MESSAGE_UPDATED, onUpdated);
     socket.on(SocketEvent.MESSAGE_DELETED, onDeleted);
     socket.on(SocketEvent.CHAT_READ, onRead);
     const off = onReconnect(() => {
@@ -205,6 +297,7 @@ export function useDirectRealtime(activeChatId: number | null) {
     });
     return () => {
       socket.off(SocketEvent.MESSAGE_NEW, onNew);
+      socket.off(SocketEvent.MESSAGE_UPDATED, onUpdated);
       socket.off(SocketEvent.MESSAGE_DELETED, onDeleted);
       socket.off(SocketEvent.CHAT_READ, onRead);
       off();

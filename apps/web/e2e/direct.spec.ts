@@ -92,7 +92,8 @@ test("direct: unread, Seen, typing va toast-i notification (Spec 13)", async ({ 
 
   // A paym mefiristad → B nuqtai "Unread" mebinad
   await a.context.request.put("/api/Chat/send-message", { multipart: { ChatId: String(chatId), MessageText: "Naxonda" } });
-  await expect(pageB.getByLabel("Unread")).toBeVisible();
+  // Nuqta dar ruyxati chat-ho (dar sidebar ham badge-i "Unread" hast)
+  await expect(pageB.getByRole("link", { name: new RegExp(a.me.userName) }).getByLabel("Unread")).toBeVisible();
 
   // A chat-ro mekushoyad; B chat-ro mekushoyad → A "Seen" mebinad
   const pageA = await a.context.newPage();
