@@ -88,8 +88,16 @@ export const useChats = () => useQuery({ queryKey: directKeys.chats, queryFn: di
 export const useMessages = (chatId: number) =>
   useQuery<UiMessage[]>({ queryKey: directKeys.messages(chatId), queryFn: () => directApi.getMessages(chatId) });
 
-/** Tarafi digari chat (1:1) */
+/** Tarafi digari chat (1:1); baroi group — nom va aksi a'zoi avval (Spec 14 §4) */
 export function peerOf(chat: ChatDto, myId: string | undefined) {
+  if (chat.isGroup) {
+    const others = chat.members.filter((m) => m.id !== myId);
+    return {
+      id: null,
+      userName: chat.title || others.map((m) => m.userName).join(", ") || "Group",
+      image: others[0]?.avatar ?? null,
+    };
+  }
   const isSender = chat.sendUserId === myId;
   return {
     id: isSender ? chat.receiveUserId : chat.sendUserId,
@@ -100,6 +108,39 @@ export function peerOf(chat: ChatDto, myId: string | undefined) {
 
 let tempId = -1;
 
+type SendVars = { text: string; file?: File; replyTo?: MessageDto | null };
+
+/** Dil-i paym (double-tap) — toggle, optimistic (Spec 14 §4) */
+export function useLikeMessage(chatId: number) {
+  const qc = useQueryClient();
+  const { data: me } = useMe();
+  const key = directKeys.messages(chatId);
+  return useMutation({
+    networkMode: "always",
+    mutationFn: (messageId: number) => directApi.likeMessage(messageId),
+    onMutate: async (messageId) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<UiMessage[]>(key);
+      const myId = me?.userId;
+      if (myId) {
+        qc.setQueryData<UiMessage[]>(key, (old = []) =>
+          old.map((m) =>
+            m.messageId === messageId
+              ? { ...m, likes: m.likes.includes(myId) ? m.likes.filter((id) => id !== myId) : [...m.likes, myId] }
+              : m,
+          ),
+        );
+      }
+      return { prev };
+    },
+    onSuccess: (msg) => qc.setQueryData<UiMessage[]>(key, (old = []) => old.map((m) => (m.messageId === msg.messageId ? msg : m))),
+    onError: (_e, _v, ctx) => {
+      qc.setQueryData(key, ctx?.prev);
+      toast.error("Couldn't like message");
+    },
+  });
+}
+
 /** Optimistic: paym favran namoyon meshavad; xato → rollback + toast (Spec 10 §7) */
 export function useSendMessage(chatId: number) {
   const qc = useQueryClient();
@@ -109,8 +150,8 @@ export function useSendMessage(chatId: number) {
   return useMutation({
     // Offline → xato (rollback + toast, Spec 10 AC7), na pauza
     networkMode: "always",
-    mutationFn: ({ text, file }: { text: string; file?: File }) => directApi.sendMessage(chatId, text, file),
-    onMutate: async ({ text, file }) => {
+    mutationFn: ({ text, file, replyTo }: SendVars) => directApi.sendMessage(chatId, text, file, replyTo?.messageId),
+    onMutate: async ({ text, file, replyTo }) => {
       if (file || !me) return { id: null };
       await qc.cancelQueries({ queryKey: key });
       const id = tempId--;
@@ -124,6 +165,10 @@ export function useSendMessage(chatId: number) {
         file: null,
         sharedPost: null,
         sendMassageDate: new Date().toISOString(),
+        fileType: null,
+        likes: [],
+        replyTo: replyTo ? { messageId: replyTo.messageId, userName: replyTo.userName, text: replyTo.messageText } : null,
+        story: null,
         pending: true,
       };
       qc.setQueryData<UiMessage[]>(key, (old = []) => [...old, optimistic]);
@@ -196,7 +241,12 @@ export function useDirectRealtime(activeChatId: number | null) {
       qc.setQueryData<ChatDto[]>(directKeys.chats, (old) => old?.map((c) => (c.chatId === chatId ? { ...c, peerReadAt: readAt } : c)));
     };
 
+    const onUpdated = (msg: MessageDto) => {
+      qc.setQueryData<UiMessage[]>(directKeys.messages(msg.chatId), (old) => old?.map((m) => (m.messageId === msg.messageId ? msg : m)));
+    };
+
     socket.on(SocketEvent.MESSAGE_NEW, onNew);
+    socket.on(SocketEvent.MESSAGE_UPDATED, onUpdated);
     socket.on(SocketEvent.MESSAGE_DELETED, onDeleted);
     socket.on(SocketEvent.CHAT_READ, onRead);
     const off = onReconnect(() => {
@@ -205,6 +255,7 @@ export function useDirectRealtime(activeChatId: number | null) {
     });
     return () => {
       socket.off(SocketEvent.MESSAGE_NEW, onNew);
+      socket.off(SocketEvent.MESSAGE_UPDATED, onUpdated);
       socket.off(SocketEvent.MESSAGE_DELETED, onDeleted);
       socket.off(SocketEvent.CHAT_READ, onRead);
       off();

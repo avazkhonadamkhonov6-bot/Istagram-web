@@ -43,6 +43,10 @@
 | FE-22 | Abubakr | 4 | Pardoz va responsive |  |
 | QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
 | QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |  |
+| FE-23 | Avaz | 4 | Direct-i Spec 14: group chat, dil-i paym, reply, paymi ovozi, javob ba story | tayyor |
+| FE-24 | Avaz | 4 | `/accounts/*`: Privacy + follow requests, Blocked, Muted, Restricted, Close friends, Archive | tayyor |
+| FE-25 | Avaz | 4 | `/explore/locations/[name]`, `features/social/api.ts` (hamai endpoint-hoi Spec 14), ShareDialog, ReportDialog | tayyor |
+| FE-26 | Abubakr | 4 | UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) |  |
 
 ---
 
@@ -374,3 +378,47 @@
 **Tayyor, agar:**
 - [ ] Hamai AC-hoi in spec-ho tekshirida shudand
 - [ ] Lighthouse: TZ §9 band 11
+
+### FE-23 · Direct-i Spec 14
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §4, §7
+
+**Tayyor, agar:**
+- [x] "New message": 2+ user → group chat (`/Chat/create-group`), nomi guruh; header "N members", "Leave group"
+- [x] Dil-i paym: double-tap / tugma, optimistic + rollback, realtime `message:updated`; rangi dil `--ig-badge` (#FF3040)
+- [x] Reply ba paym (`ReplyToMessageId`), namoishi "You replied to ..."
+- [x] Paymi ovozi (MediaRecorder → `audio/webm|ogg|mp4`), `<audio>` dar chat; javob ba story (`MessageDto.story`)
+- [x] Dar brauzer sanjida shud: group chat, dil, reply
+
+### FE-24 · /accounts/* (Privacy va amniyat)
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §1, §2, §3
+
+**Tayyor, agar:**
+- [x] `/accounts/privacy`: toggle-i "Private account" (`update-privacy`), darxosthoi follow (Confirm / Delete)
+- [x] `/accounts/blocked|muted|restricted|close-friends`: ruyxat + Unblock / Unmute / Unrestrict / Remove; close friends — justuju va Add
+- [x] `/accounts/archive`: tab-hoi POSTS / STORIES
+- [x] Dar brauzer sanjida shud (private on/off, close friends, archive)
+
+### FE-25 · Location, social API, Share / Report
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §2, §7
+
+**Tayyor, agar:**
+- [x] `/explore/locations/[name]` — grid-i postho bo infinite scroll (sanjida shud)
+- [x] `features/social/api.ts` — funksiyahoi hamai endpoint-hoi Spec 14 baroi Abubakr
+- [x] `ShareDialog` (`features/direct/components/share-dialog.tsx`, props: `share`, `onClose`) va `ReportDialog` (`features/social/components/report-dialog.tsx`)
+
+### FE-26 · UI-i Spec 14 dar sahifahoi Abubakr
+<!-- who:abubakr day:4 type:frontend -->
+**Spec:** 14 §7 · API: `features/social/api.ts` (tayyor)
+
+- Stories tray + viewer (gradient / didashuda / sabz-i close friends), like, javob (`replyStory`), share (`ShareDialog`)
+- Reels, Create (Post 1–10, Reel, Story + Close friends, location, tag), Notifications (Confirm / Delete-i follow request)
+- Profil: tab-i TAGGED, highlights, qulf baroi private, menyui "..." (Block, Restrict, Mute, Report, Close friends)
+- Post menu: Edit, Archive, Pin, Hide like count, Turn off commenting, Delete, Report, Add to collection; Saved → collections
+- Comment: dil-i comment (`likeComment`), linki `@mention` va `#hashtag`; linki location → `/explore/locations/[name]`
+- Dar `more-menu` / `settings-nav` linkho ba `/accounts/privacy` va digar sahifahoi FE-24
+
+**Tayyor, agar:**
+- [ ] Spec 14 AC1–AC8 az UI kor mekunand

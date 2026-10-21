@@ -81,21 +81,23 @@
 
 `PRIVATE_ACCOUNT` (403), `BLOCKED` (403), `COMMENTS_DISABLED` (403), `PIN_LIMIT` (400), `COLLECTION_NOT_FOUND` (404), `HIGHLIGHT_NOT_FOUND` (404), `NOT_GROUP` (400).
 
-## 7. Frontend (Avaz, az 2026-10-21)
+## 7. Frontend
 
-| Sahifa / komponent | Chi |
-|---|---|
-| Stories tray + viewer | gradient / didashuda / sabz (close friends), progress, tap chap-rost, hold, Esc, useri badi, like, javob, share, viewers baroi xud |
-| `/reels` | scroll-snap, autoplay/pause (IntersectionObserver), mute, like, comment, save, share |
-| Create (modal) | intixob / drag & drop, Post (1–10), Reel (1 video), Story (+ Close friends), caption, location, tag-i odamon |
-| Notifications panel | Today / This week / This month / Earlier, Follow back, darxosthoi follow (Confirm / Delete) |
-| Profil | tab-hoi POSTS / REELS / SAVED / TAGGED, highlights, qulf baroi private, menyui "..." (Block, Restrict, Mute, Report, Close friends) |
-| Post menu | Edit, Archive, Pin, Hide like count, Turn off commenting, Delete, Report, Add to collection |
-| Comment | dil-i comment, `@mention` va `#hashtag` link |
-| `/accounts/*` | Privacy (private), Blocked, Muted, Restricted, Close friends, Archive (postho, story) |
-| Saved | collections |
-| Direct | group chat, dil-i paym (double-tap), reply, paymi ovozi, javob ba story |
-| `/explore/locations/[name]` | posthoi location |
+> **Taqsim (2026-10-21):** sahifahoe, ki dar vazifahoi Abubakr hastand (Stories, Reels, Create, Notifications, Profil, Post, Feed), — **Abubakr** (FE-26). Avaz faqat sahifahoi xud va sahifahoi navro menavisad: Direct (FE-23), `/accounts/*` (FE-24), location va API-i front (FE-25). Kodi Abubakr-ro Avaz tagyir namedihad.
+
+| Sahifa / komponent | Chi | Kas |
+|---|---|---|
+| Stories tray + viewer | gradient / didashuda / sabz (close friends), progress, tap chap-rost, hold, Esc, useri badi, like, javob, share, viewers baroi xud | Abubakr |
+| `/reels` | scroll-snap, autoplay/pause (IntersectionObserver), mute, like, comment, save, share | Abubakr |
+| Create (modal) | intixob / drag & drop, Post (1–10), Reel (1 video), Story (+ Close friends), caption, location, tag-i odamon | Abubakr |
+| Notifications panel | Today / This week / This month / Earlier, Follow back, darxosthoi follow (Confirm / Delete) | Abubakr |
+| Profil | tab-hoi POSTS / REELS / SAVED / TAGGED, highlights, qulf baroi private, menyui "..." (Block, Restrict, Mute, Report, Close friends) | Abubakr |
+| Post menu | Edit, Archive, Pin, Hide like count, Turn off commenting, Delete, Report, Add to collection | Abubakr |
+| Comment | dil-i comment, `@mention` va `#hashtag` link | Abubakr |
+| `/accounts/*` | Privacy (private), Blocked, Muted, Restricted, Close friends, Archive (postho, story) | Avaz |
+| Saved | collections | Abubakr |
+| Direct | group chat, dil-i paym (double-tap), reply, paymi ovozi, javob ba story | Avaz |
+| `/explore/locations/[name]` | posthoi location | Avaz |
 
 ## 8. Kriteriyahoi qabul
 

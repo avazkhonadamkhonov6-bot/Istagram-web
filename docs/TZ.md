@@ -28,8 +28,13 @@ Prioritetho: **P0** — hatman dar 4 ruz · **P1** — boyad boshad, agar vaqt r
 | 12 | Explore / Search | Sahifai Explore, justujui user va hashtag | P0 |
 | 13 | Suggestions | "Suggested for you" | P1 |
 | 14 | Dark mode | Mavzui torik | P1 |
-| 15 | Hisobi xususi (private) + follow request | | P2 |
-| 16 | Highlights, Group chat, Mention, Comment like | | P2 |
+| 15 | Hisobi xususi (private) + follow request | [Spec 14](specs/14-funksiyahoi-purra.md) §1.1 | P0 (az 2026-10-21) |
+| 16 | Highlights, Group chat, Mention, Comment like | Spec 14 §2–4 | P0 (az 2026-10-21) |
+| 17 | Block, Mute, Restrict, Report, Close friends | Spec 14 §1.2–1.6 | P0 (az 2026-10-21) |
+| 18 | Tag dar aks, Location, tahriri post, Archive, Pin, Collections | Spec 14 §2 | P0 (az 2026-10-21) |
+| 19 | Direct: dil-i paym, reply, paymi ovozi, javob ba story | Spec 14 §3–4 | P0 (az 2026-10-21) |
+
+> 2026-10-21: qaror — "nusxai purrai Instagram". Funksiyahoi 15–19 az P2 ba P0 guzaronida shudand; backend — tayyor (Spec 14), frontend — Avaz (Direct, `/accounts/*`, location) va Abubakr (sahifahoi xud, FE-26).
 
 ## 3. Talaboti asosi ba Auth
 

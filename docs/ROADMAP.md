@@ -90,6 +90,8 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 
 **Tayyor, agar:** hamai funksiyahoi **P2** dar [TZ.md §2](TZ.md) kor mekunand + har kadom spec-i xudro dorad.
 
+> **2026-10-21:** qismi kalon az v1.0 ba **v0.2** guzasht ([Spec 14](specs/14-funksiyahoi-purra.md)): private + follow request, highlights, mention, comment like, group chat, dil-i paym, tagged, block / report / mute / restrict, close friends, archive, pin, collections, location. Backend va frontendi Avaz (FE-23…FE-25) tayyor; UI dar sahifahoi Abubakr — FE-26. Dar v1.0 memonand: CAPTCHA, sessiyaho, edit-i comment.
+
 ---
 
 ## v2.0 — Miqyos (vaqte ki sarborii voqe'i oyad)

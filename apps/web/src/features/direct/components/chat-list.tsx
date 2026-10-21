@@ -45,8 +45,17 @@ export function ChatList({ className }: { className?: string }) {
         {chats?.map((chat) => {
           const peer = peerOf(chat, me?.userId);
           const last = chat.lastMessage;
-          const body = last?.messageText ?? (last?.sharedPost ? "Sent a post" : "Sent an attachment");
-          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${body}` : "Start a conversation";
+          const body =
+            last?.messageText ??
+            (last?.sharedPost
+              ? "Sent a post"
+              : last?.story
+                ? "Replied to a story"
+                : last?.fileType === "audio"
+                  ? "Sent a voice message"
+                  : "Sent an attachment");
+          const author = last?.userId === me?.userId ? "You: " : chat.isGroup && last ? `${last.userName}: ` : "";
+          const preview = last ? `${author}${body}` : "Start a conversation";
           // Paymi naxonda — matni gafs va nuqtai kabud, misli Instagram (Spec 13 §4)
           const unread = chat.unreadCount > 0 && activeId !== chat.chatId;
           return (

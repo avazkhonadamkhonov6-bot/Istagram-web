@@ -114,6 +114,16 @@ Digar hama — **alohida**:
 
 ---
 
+## RUZI 4 (ilova) — Spec 14, "nusxai purrai Instagram"
+
+| Kas | Vazifa | Holat |
+|---|---|---|
+| Avaz | Backend-i Spec 14 (private, block, mute, restrict, report, close friends, comment like, mention, tag, location, edit, archive, pin, collections, highlights, group chat) + seed | tayyor |
+| Avaz | FE-23 Direct (group, dil, reply, ovoz, story), FE-24 `/accounts/*`, FE-25 location + `social/api.ts` | tayyor |
+| Abubakr | FE-26 UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) | navbat |
+
+Qoida hamon: Avaz ba faylhoi Abubakr dast namerasonad; API-i front (`features/social/api.ts`) tayyor ast — Abubakr faqat UI menavisad.
+
 ## Agar vaqt namerasad — chi buridan (tartib)
 
 1. Suggestions (P1) → ruyxati oddii populyarho
