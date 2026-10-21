@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, UserRelationType } from '@prisma/client';
-import { AddReportDto, ErrorCode, RelationStatus, UserShort } from '@repo/shared';
+import { ActivityStatus, AddReportDto, ErrorCode, FAVORITES_LIMIT, RelationStatus, UserShort } from '@repo/shared';
 import { badRequest, notFound } from '../../common/app-exception';
 import { toUserShort, userShortSelect } from '../../common/mappers';
 import { PrismaService } from '../../infra/prisma.service';
@@ -115,7 +115,43 @@ export class RelationsService {
       isMutedStories: types.has('MUTE_STORIES'),
       isRestricted: types.has('RESTRICT'),
       isCloseFriend: types.has('CLOSE_FRIEND'),
+      isFavorite: types.has('FAVORITE'),
     };
+  }
+
+  /** Favorites (Spec 15 §1): maks. 50 nafar; postho-i onho dar feed-i "Favorites" */
+  async addFavorite(me: string, target: string) {
+    if (await this.isBlockedEither(me, target)) throw badRequest(ErrorCode.BLOCKED);
+    if (!(await this.has(me, target, 'FAVORITE'))) {
+      const n = await this.prisma.userRelation.count({ where: { ownerId: me, type: 'FAVORITE' } });
+      if (n >= FAVORITES_LIMIT) throw badRequest(ErrorCode.FAVORITES_LIMIT);
+    }
+    return this.set(me, target, 'FAVORITE');
+  }
+
+  /**
+   * "Active now" (Spec 15 §4): faqat agar yake digariro follow kunad yo chat-i umumi doshta boshand;
+   * aks holat — pinhon (misli Instagram).
+   */
+  async activityStatus(me: string, target: string, isOnline: (id: string) => boolean): Promise<ActivityStatus> {
+    const hidden = { userId: target, isOnline: false, lastActiveAt: null };
+    if (me === target) return { userId: target, isOnline: isOnline(target), lastActiveAt: new Date().toISOString() };
+    if (await this.isBlockedEither(me, target)) return hidden;
+    const [follows, chat, user] = await Promise.all([
+      this.prisma.follow.count({ where: { OR: [{ followerId: me, followingId: target }, { followerId: target, followingId: me }] } }),
+      this.prisma.chat.count({
+        where: {
+          OR: [
+            { isGroup: false, OR: [{ sendUserId: me, receiveUserId: target }, { sendUserId: target, receiveUserId: me }] },
+            { isGroup: true, AND: [{ members: { some: { userId: me } } }, { members: { some: { userId: target } } }] },
+          ],
+        },
+      }),
+      this.prisma.user.findUnique({ where: { id: target }, select: { lastActiveAt: true } }),
+    ]);
+    if (!user) throw notFound(ErrorCode.USER_NOT_FOUND);
+    if (follows === 0 && chat === 0) return hidden;
+    return { userId: target, isOnline: isOnline(target), lastActiveAt: user.lastActiveAt?.toISOString() ?? null };
   }
 
   /** Takror az yak user ba yak hadaf — yak satr (sababi nav) */

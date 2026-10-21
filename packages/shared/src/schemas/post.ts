@@ -65,6 +65,8 @@ export const collectionItemQuerySchema = z.object({
 export const collectionPostsQuerySchema = paginationQuerySchema.extend({ collectionId: z.coerce.number().int().positive() });
 
 export const PIN_LIMIT = 3;
+/** Spec 15 §2 */
+export const COMMENT_PIN_LIMIT = 3;
 /** @username dar matn (Spec 14 §2) */
 export const MENTION_REGEX = /(?:^|[^\w.])@([a-z0-9._]{1,30})/giu;
 
@@ -105,6 +107,8 @@ export const commentDtoSchema = z.object({
   isLiked: z.boolean().default(false),
   likeCount: z.number().int().default(0),
   isRestricted: z.boolean().default(false),
+  /** Spec 15 §2: comment-i pin-shuda (muallifi post, maks. 3) */
+  isPinned: z.boolean().default(false),
 });
 export type CommentDto = z.infer<typeof commentDtoSchema>;
 

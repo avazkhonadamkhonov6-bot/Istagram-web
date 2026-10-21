@@ -4,6 +4,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -17,7 +18,7 @@ export const userRoom = (userId: string) => `user:${userId}`;
 
 /** Yak gateway-i umumi (Spec 08). Auth: `io(url, { path: '/ws', auth: { token: <ws-ticket> } })`. */
 @WebSocketGateway({ path: '/ws', cors: { origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000', credentials: true } })
-export class RealtimeGateway implements OnGatewayConnection {
+export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(RealtimeGateway.name);
 
   @WebSocketServer()
@@ -37,11 +38,27 @@ export class RealtimeGateway implements OnGatewayConnection {
       if (payload.typ !== 'ws') throw new Error('not a ws ticket');
       client.data.userId = payload.sub;
       await client.join(userRoom(payload.sub));
+      await this.touch(payload.sub);
     } catch {
       // Tokeni galat → qat' (Spec 08 AC4)
       this.logger.debug(`Socket rad shud: ${client.id}`);
       client.disconnect(true);
     }
+  }
+
+  /** "Active now" (Spec 15 §4): vaqti oxirini faoliyat — dar connect va disconnect */
+  async handleDisconnect(client: Socket) {
+    const userId = client.data.userId as string | undefined;
+    if (userId) await this.touch(userId);
+  }
+
+  private async touch(userId: string) {
+    await this.prisma.user.updateMany({ where: { id: userId }, data: { lastActiveAt: new Date() } }).catch(() => undefined);
+  }
+
+  /** User hozir socket-i kushoda dorad? */
+  isOnline(userId: string) {
+    return (this.server?.sockets?.adapter?.rooms?.get(userRoom(userId))?.size ?? 0) > 0;
   }
 
   /** Typing (Spec 13 §4): faqat ishtirokchi; ba tarafi digar meravad */

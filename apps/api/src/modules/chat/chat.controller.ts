@@ -7,6 +7,7 @@ import {
   createChatQuerySchema,
   createGroupSchema,
   deleteMessageQuerySchema,
+  editMessageSchema,
   messageIdQuerySchema,
   sendMessageBodySchema,
   updateGroupSchema,
@@ -78,6 +79,12 @@ export class ChatController {
   @Delete('delete-chat')
   async deleteChat(@CurrentUser() me: AuthUser, @Query(new ZodPipe(chatIdQuerySchema)) q: ChatIdQuery) {
     return ok(await this.chat.deleteChat(me.id, q.chatId));
+  }
+
+  /** Spec 15 §3 */
+  @Put('edit-message')
+  async editMessage(@CurrentUser() me: AuthUser, @Body(new ZodPipe(editMessageSchema)) dto: z.infer<typeof editMessageSchema>) {
+    return ok(await this.chat.editMessage(me.id, dto.messageId, dto.text));
   }
 
   /** Spec 14 §4 */

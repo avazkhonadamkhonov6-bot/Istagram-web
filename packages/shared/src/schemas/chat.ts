@@ -24,6 +24,10 @@ export const updateGroupSchema = z.object({ chatId: z.number().int().positive(),
 export const addGroupMembersSchema = z
   .object({ chatId: z.number().int().positive(), userIds: z.array(z.string().uuid()).min(1).max(30) })
   .strict();
+/** Spec 15 §3: tahriri paym (faqat matn, to 15 daqiqa) */
+export const MESSAGE_EDIT_WINDOW_MS = 15 * 60_000;
+export const editMessageSchema = z.object({ messageId: z.number().int().positive(), text: z.string().trim().min(1).max(1000) }).strict();
+export type EditMessageDto = z.infer<typeof editMessageSchema>;
 export const messageIdQuerySchema = z.object({ messageId: z.coerce.number().int().positive() });
 export const FILE_TYPES = ['image', 'video', 'audio'] as const;
 
@@ -45,6 +49,8 @@ export const messageDtoSchema = z.object({
     .object({ storyId: z.number().int(), fileName: z.string().nullable(), userName: z.string(), isExpired: z.boolean() })
     .nullable()
     .default(null),
+  /** Spec 15 §3: vaqti tahrir */
+  editedAt: z.string().nullable().default(null),
 });
 export type MessageDto = z.infer<typeof messageDtoSchema>;
 
@@ -65,6 +71,9 @@ export const chatDtoSchema = z.object({
   isGroup: z.boolean().default(false),
   title: z.string().nullable().default(null),
   members: z.array(userShortSchema).default([]),
+  /** Spec 15 §4: holati tarafi digar (faqat 1:1) */
+  peerIsOnline: z.boolean().default(false),
+  peerLastActiveAt: z.string().nullable().default(null),
 });
 
 export const chatReadSchema = z.object({ chatId: z.number().int(), readAt: z.string() });

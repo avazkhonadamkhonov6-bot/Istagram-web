@@ -47,6 +47,10 @@
 | FE-24 | Avaz | 4 | `/accounts/*`: Privacy + follow requests, Blocked, Muted, Restricted, Close friends, Archive | tayyor |
 | FE-25 | Avaz | 4 | `/explore/locations/[name]`, `features/social/api.ts` (hamai endpoint-hoi Spec 14), ShareDialog, ReportDialog | tayyor |
 | FE-26 | Abubakr | 4 | UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) |  |
+| BE-13 | Avaz | 4 | Backend-i [Spec 15](specs/15-funksiyahoi-ilovagi.md): remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, notes, "Active now"; seed (40 user, 35 reel, ~100 story) | tayyor |
+| FE-27 | Avaz | 4 | Direct-i Spec 15: Notes tray, tahriri paym ("Edited"), "Active now" | tayyor |
+| FE-28 | Avaz | 4 | `/accounts/favorites`, `/accounts/activity` (liked posts) | tayyor |
+| FE-29 | Abubakr | 4 | UI-i Spec 15 dar sahifahoi xud (remove follower, tab-i REELS, pin-i comment, feed-i Favorites, linkho dar More) + tokenhoi rangi Spec 10 §1.11.1 |  |
 
 ---
 
@@ -408,6 +412,49 @@
 - [x] `/explore/locations/[name]` — grid-i postho bo infinite scroll (sanjida shud)
 - [x] `features/social/api.ts` — funksiyahoi hamai endpoint-hoi Spec 14 baroi Abubakr
 - [x] `ShareDialog` (`features/direct/components/share-dialog.tsx`, props: `share`, `onClose`) va `ReportDialog` (`features/social/components/report-dialog.tsx`)
+
+### BE-13 · Backend-i Spec 15 + seed
+<!-- who:avaz day:4 type:backend -->
+**Spec:** [15](specs/15-funksiyahoi-ilovagi.md)
+
+**Tayyor, agar:**
+- [x] 15 endpoint-i nav (`/Note/*`, `remove-follower`, `add/remove/get-favorite(s)`, `get-favorites-feed`, `get-liked-posts`, `get-user-reels`, `pin-comment`, `edit-message`, `get-activity-status`), migratsiya `spec15_full_instagram`
+- [x] Spec 15 AC1–AC7 (e2e, 7 test); hamai e2e — 40/40
+- [x] Seed: 40 user, 235 post (35 reel), 101 story (aks va video), 9 note, favorites, comment-hoi pin-shuda
+
+### FE-27 · Direct-i Spec 15
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 15 §3–5
+
+**Tayyor, agar:**
+- [x] Notes tray bolo-i inbox (note-i man + mutual, Share / Delete, close friends)
+- [x] "Edit" baroi paymi matni to 15 daqiqa, "Save", "Edited"; optimistic + rollback
+- [x] "Active now" / "Active 1h ago" dar header, nuqtai sabz dar ruyxat
+- [x] Dar brauzer sanjida shud
+
+### FE-28 · /accounts/favorites va /accounts/activity
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 15 §1, §6
+
+**Tayyor, agar:**
+- [x] Favorites: ruyxat, justuju, Add, Remove (maks. 50)
+- [x] Your activity: posthoi like-karda, nav avval
+- [x] Dar brauzer sanjida shud
+
+### FE-29 · UI-i Spec 15 dar sahifahoi Abubakr
+<!-- who:abubakr day:4 type:frontend -->
+**Spec:** 15 §8 · API: `features/social/api.ts` (`removeFollower`, `getUserReels`, `pinComment`, `getFavoritesFeed`) — tayyor
+
+- Followers modal: tugmai "Remove" baroi followerhoi xud
+- Profil: tab-i REELS → `getUserReels` (ba joi filtr-i `get-posts`)
+- Comment: "Pin" baroi muallifi post, belgii pin; tartib — az API
+- Feed: intixobi "Following / Favorites"
+- More menu: linkho ba `/accounts/privacy`, `/accounts/favorites`, `/accounts/activity`
+- Rangho: tokenhoi Spec 10 §1.11.1 ba `globals.css` (light + dark)
+
+**Tayyor, agar:**
+- [ ] Spec 15 AC1–AC4 az UI kor mekunand
+- [ ] Har token-i Spec 10 §1 (bo §1.11.1) dar `globals.css` hast
 
 ### FE-26 · UI-i Spec 14 dar sahifahoi Abubakr
 <!-- who:abubakr day:4 type:frontend -->

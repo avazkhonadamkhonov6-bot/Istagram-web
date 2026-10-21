@@ -13,6 +13,7 @@ import { AccountModule } from './modules/account/account.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { LocationModule } from './modules/location/location.module';
+import { NotesModule } from './modules/notes/notes.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
@@ -52,6 +53,7 @@ const config = loadConfig();
     StoriesModule,
     ChatModule,
     LocationModule,
+    NotesModule,
     NotificationsModule,
     RelationsModule,
   ],

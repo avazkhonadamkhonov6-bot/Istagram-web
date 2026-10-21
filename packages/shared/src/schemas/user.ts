@@ -98,8 +98,21 @@ export const relationStatusSchema = z.object({
   isMutedStories: z.boolean(),
   isRestricted: z.boolean(),
   isCloseFriend: z.boolean(),
+  /** Spec 15 §1 */
+  isFavorite: z.boolean().default(false),
 });
 export type RelationStatus = z.infer<typeof relationStatusSchema>;
+
+/** Favorites (Spec 15 §1): maks. 50 nafar */
+export const FAVORITES_LIMIT = 50;
+
+/** "Active now" / "Active 5m ago" (Spec 15 §4) */
+export const activityStatusSchema = z.object({
+  userId: z.string(),
+  isOnline: z.boolean(),
+  lastActiveAt: z.string().nullable(),
+});
+export type ActivityStatus = z.infer<typeof activityStatusSchema>;
 
 export const REPORT_TARGETS = ['POST', 'COMMENT', 'USER', 'STORY', 'MESSAGE'] as const;
 export const addReportSchema = z

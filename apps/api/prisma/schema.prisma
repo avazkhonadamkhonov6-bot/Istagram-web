@@ -19,6 +19,7 @@ model User {
   about          String?  @db.VarChar(150)
   gender         Int?
   isPrivate      Boolean  @default(false) // Spec 14 §1.1
+  lastActiveAt   DateTime? // "Active now" (Spec 15 §4)
   postsCount     Int      @default(0)
   followersCount Int      @default(0)
   followingCount Int      @default(0)
@@ -57,6 +58,18 @@ model User {
   highlights       Highlight[]
   chatMembers      ChatMember[]
   messageLikes     MessageLike[]
+  note             Note?
+}
+
+/// Notes (Spec 15 §5): yak note-i faol baroi har user, 24 soat
+model Note {
+  id           Int      @id @default(autoincrement())
+  userId       String   @unique
+  text         String   @db.VarChar(60)
+  closeFriends Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// Spec 14 §1.1
@@ -77,6 +90,7 @@ enum UserRelationType {
   MUTE_STORIES
   RESTRICT
   CLOSE_FRIEND
+  FAVORITE // Spec 15 §1
 }
 
 /// Block, mute, restrict, close friends (Spec 14 §1.2–1.6): ownerId -> targetId
@@ -248,6 +262,7 @@ model PostComment {
   replyCount    Int            @default(0)
   likeCount     Int            @default(0)
   isRestricted  Boolean        @default(false) // Spec 14 §1.4
+  pinnedAt      DateTime? // Spec 15 §2
   createdAt     DateTime       @default(now())
   post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -391,6 +406,7 @@ model Message {
   sharedPostId Int? // share post ba Direct (Spec 13 §4)
   storyId      Int? // javob / share-i story (Spec 14 §3)
   replyToId    Int?
+  editedAt     DateTime? // Spec 15 §3
   createdAt    DateTime      @default(now())
   chat         Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)

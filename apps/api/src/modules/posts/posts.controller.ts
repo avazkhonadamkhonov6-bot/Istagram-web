@@ -103,6 +103,27 @@ export class PostsController {
     return paged(items, total, q);
   }
 
+  /** Spec 15 §1: feed-i Favorites */
+  @Get('get-favorites-feed')
+  async getFavoritesFeed(@CurrentUser() me: AuthUser, @Query(new ZodPipe(paginationQuerySchema)) q: PageQuery) {
+    const { items, total } = await this.posts.getFavoritesFeed(me.id, q);
+    return paged(items, total, q);
+  }
+
+  /** Spec 15 §6: "Your activity → Likes" */
+  @Get('get-liked-posts')
+  async getLiked(@CurrentUser() me: AuthUser, @Query(new ZodPipe(paginationQuerySchema)) q: PageQuery) {
+    const { items, total } = await this.posts.getLiked(me.id, q);
+    return paged(items, total, q);
+  }
+
+  /** Spec 15 §2: tab-i REELS dar profil */
+  @Get('get-user-reels')
+  async getUserReels(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userPostsQuerySchema)) q: z.infer<typeof userPostsQuerySchema>) {
+    const { items, total } = await this.posts.getUserReels(me.id, q.UserId, q);
+    return paged(items, total, q);
+  }
+
   @Get('get-archived-posts')
   async getArchived(@CurrentUser() me: AuthUser, @Query(new ZodPipe(paginationQuerySchema)) q: PageQuery) {
     const { items, total } = await this.posts.getArchived(me.id, q);
@@ -158,6 +179,12 @@ export class PostsController {
   @Post('like-comment')
   async likeComment(@CurrentUser() me: AuthUser, @Query(new ZodPipe(commentIdQuerySchema)) q: z.infer<typeof commentIdQuerySchema>) {
     return ok(await this.posts.toggleCommentLike(me.id, q.commentId));
+  }
+
+  /** Spec 15 §2 */
+  @Post('pin-comment')
+  async pinComment(@CurrentUser() me: AuthUser, @Query(new ZodPipe(commentIdQuerySchema)) q: z.infer<typeof commentIdQuerySchema>) {
+    return ok(await this.posts.toggleCommentPin(me.id, q.commentId));
   }
 
   @Delete('delete-comment')

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
+  COMMENT_PIN_LIMIT,
   CommentDto,
   ErrorCode,
   HASHTAG_REGEX,
@@ -78,6 +79,7 @@ export class PostsService {
       isLiked: liked,
       likeCount: c.likeCount,
       isRestricted: c.isRestricted,
+      isPinned: c.pinnedAt !== null,
     };
   }
 
@@ -204,6 +206,32 @@ export class PostsService {
 
   async getCollectionPosts(me: string, collectionId: number, q: PaginationQuery) {
     return this.list({ collectionItems: { some: { collectionId } }, ...(await this.visible(me)) }, q, me);
+  }
+
+  /** Feed-i "Favorites" (Spec 15 §1): faqat postho-i userhoi Favorites */
+  async getFavoritesFeed(me: string, q: PaginationQuery) {
+    const [favs, blocked] = await Promise.all([this.relations.targetIds(me, 'FAVORITE'), this.relations.blockedIds(me)]);
+    const authors = favs.filter((id) => !blocked.includes(id));
+    return this.list({ userId: { in: authors }, isArchived: false, user: await this.follows.visibleOwners(me) }, q, me);
+  }
+
+  /** "Your activity → Likes" (Spec 15 §6): tartib — vaqti like, nav avval */
+  async getLiked(me: string, q: PaginationQuery) {
+    const where: Prisma.PostLikeWhereInput = { userId: me, post: await this.visible(me) };
+    const [likes, total] = await this.prisma.$transaction([
+      this.prisma.postLike.findMany({ where, orderBy: { createdAt: 'desc' }, select: { postId: true }, ...skipTake(q) }),
+      this.prisma.postLike.count({ where }),
+    ]);
+    const rows = await this.prisma.post.findMany({ where: { id: { in: likes.map((l) => l.postId) } }, include: postInclude });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const ordered = likes.map((l) => byId.get(l.postId)).filter((r): r is PostRow => !!r);
+    return { items: await this.toDtos(ordered, me), total };
+  }
+
+  /** Tab-i REELS dar profil (Spec 15 §2) */
+  async getUserReels(me: string, userId: string, q: PaginationQuery) {
+    if (!(await this.follows.canView(me, userId))) return { items: [], total: 0 };
+    return this.list({ userId, isReel: true, isArchived: false }, q, me, profileOrder);
   }
 
   async getArchived(me: string, q: PaginationQuery) {
@@ -458,7 +486,8 @@ export class PostsService {
       this.prisma.postComment.findMany({
         where,
         include: { user: { select: userShortSelect } },
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        // Avval pin-shudaho (Spec 15 §2)
+        orderBy: [{ pinnedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }, { id: 'desc' }],
         ...skipTake(q),
       }),
       this.prisma.postComment.count({ where }),
@@ -475,6 +504,25 @@ export class PostsService {
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
     return this.toCommentDtos(rows, me);
+  }
+
+  /** Pin-i comment (Spec 15 §2): faqat muallifi post, faqat sathi yakum, maks. 3; toggle */
+  async toggleCommentPin(me: string, commentId: number) {
+    const c = await this.prisma.postComment.findUnique({
+      where: { id: commentId },
+      select: { postId: true, parentId: true, pinnedAt: true, post: { select: { userId: true } } },
+    });
+    if (!c) throw notFound(ErrorCode.COMMENT_NOT_FOUND);
+    if (c.post.userId !== me) throw forbidden(ErrorCode.NOT_OWNER);
+    if (c.parentId) throw badRequest(ErrorCode.VALIDATION_ERROR);
+    if (c.pinnedAt) {
+      await this.prisma.postComment.update({ where: { id: commentId }, data: { pinnedAt: null } });
+      return { value: false };
+    }
+    const pinned = await this.prisma.postComment.count({ where: { postId: c.postId, pinnedAt: { not: null } } });
+    if (pinned >= COMMENT_PIN_LIMIT) throw badRequest(ErrorCode.COMMENT_PIN_LIMIT);
+    await this.prisma.postComment.update({ where: { id: commentId }, data: { pinnedAt: new Date() } });
+    return { value: true };
   }
 
   /** Like-i comment, toggle (Spec 14 §2) */

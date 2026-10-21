@@ -52,6 +52,10 @@ export const createGroup = (title: string, userIds: string[]) =>
 export const updateGroup = (chatId: number, title: string) =>
   api<unknown>("/Chat/update-group", { method: "PUT", ...json({ chatId, title }) });
 
+/** Tahriri paym (Spec 15 §3): faqat matn, to 15 daqiqa */
+export const editMessage = (messageId: number, text: string) =>
+  api<MessageDto>("/Chat/edit-message", { method: "PUT", ...json({ messageId, text }), schema: messageDtoSchema });
+
 export const leaveGroup = (chatId: number) => api<boolean>(`/Chat/leave-group?chatId=${chatId}`, { method: "DELETE" });
 
 type Paged<T> = { data: T[] };

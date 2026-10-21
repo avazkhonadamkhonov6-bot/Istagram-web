@@ -5,6 +5,7 @@ import type { z } from 'zod';
 import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodPipe } from '../../common/pipes/zod.pipe';
 import { ok } from '../../common/response';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { RelationsService } from './relations.service';
 
 type UserIdQuery = z.infer<typeof userIdQuerySchema>;
@@ -13,7 +14,10 @@ type UserIdQuery = z.infer<typeof userIdQuerySchema>;
 @ApiTags('User')
 @Controller('User')
 export class RelationsController {
-  constructor(private readonly relations: RelationsService) {}
+  constructor(
+    private readonly relations: RelationsService,
+    private readonly realtime: RealtimeGateway,
+  ) {}
 
   @Post('block-user')
   async block(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
@@ -75,6 +79,28 @@ export class RelationsController {
   @Get('get-close-friends')
   async closeFriends(@CurrentUser() me: AuthUser) {
     return ok(await this.relations.list(me.id, 'CLOSE_FRIEND'));
+  }
+
+  /** Favorites (Spec 15 §1) */
+  @Post('add-favorite')
+  async addFavorite(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
+    return ok(await this.relations.addFavorite(me.id, q.userId));
+  }
+
+  @Delete('remove-favorite')
+  async removeFavorite(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
+    return ok(await this.relations.unset(me.id, q.userId, ['FAVORITE']));
+  }
+
+  @Get('get-favorites')
+  async favorites(@CurrentUser() me: AuthUser) {
+    return ok(await this.relations.list(me.id, 'FAVORITE'));
+  }
+
+  /** "Active now" (Spec 15 §4) */
+  @Get('get-activity-status')
+  async activity(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
+    return ok(await this.relations.activityStatus(me.id, q.userId, (id) => this.realtime.isOnline(id)));
   }
 
   /** Holati man nisbat ba user (menyui profil) */

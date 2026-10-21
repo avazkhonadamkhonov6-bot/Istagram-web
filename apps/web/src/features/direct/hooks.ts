@@ -4,6 +4,8 @@ import { SocketEvent, type ChatDto, type MessageDto, type TypingPayload } from "
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast";
+import { ApiError } from "@/lib/api-client";
+import { formatRelativeTime } from "@/lib/format";
 import { getSocket, onReconnect } from "@/lib/socket";
 import * as directApi from "./api";
 
@@ -110,6 +112,43 @@ let tempId = -1;
 
 type SendVars = { text: string; file?: File; replyTo?: MessageDto | null };
 
+/** Tahriri paym (Spec 15 §3) — optimistic + rollback */
+export function useEditMessage(chatId: number) {
+  const qc = useQueryClient();
+  const key = directKeys.messages(chatId);
+  return useMutation({
+    networkMode: "always",
+    mutationFn: ({ messageId, text }: { messageId: number; text: string }) => directApi.editMessage(messageId, text),
+    onMutate: async ({ messageId, text }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<UiMessage[]>(key);
+      qc.setQueryData<UiMessage[]>(key, (old = []) =>
+        old.map((m) => (m.messageId === messageId ? { ...m, messageText: text, editedAt: new Date().toISOString() } : m)),
+      );
+      return { prev };
+    },
+    onSuccess: (msg) => {
+      qc.setQueryData<UiMessage[]>(key, (old = []) => old.map((m) => (m.messageId === msg.messageId ? msg : m)));
+      void qc.invalidateQueries({ queryKey: directKeys.chats });
+    },
+    onError: (err, _v, ctx) => {
+      qc.setQueryData(key, ctx?.prev);
+      toast.error(err instanceof ApiError && err.code === "EDIT_WINDOW_EXPIRED" ? "Messages can only be edited for 15 minutes" : "Couldn't edit message");
+    },
+  });
+}
+
+/** "Active now" / "Active 5m ago" (Spec 15 §4) */
+export function activityLabel(isOnline: boolean, lastActiveAt: string | null) {
+  if (isOnline) return "Active now";
+  if (!lastActiveAt) return null;
+  const ago = Date.now() - new Date(lastActiveAt).getTime();
+  // Instagram holati kuhnatar az 1 ruzro nishon namedihad
+  if (ago > 24 * 3600_000) return null;
+  const rel = formatRelativeTime(lastActiveAt);
+  return rel === "now" ? "Active now" : `Active ${rel} ago`;
+}
+
 /** Dil-i paym (double-tap) — toggle, optimistic (Spec 14 §4) */
 export function useLikeMessage(chatId: number) {
   const qc = useQueryClient();
@@ -169,6 +208,7 @@ export function useSendMessage(chatId: number) {
         likes: [],
         replyTo: replyTo ? { messageId: replyTo.messageId, userName: replyTo.userName, text: replyTo.messageText } : null,
         story: null,
+        editedAt: null,
         pending: true,
       };
       qc.setQueryData<UiMessage[]>(key, (old = []) => [...old, optimistic]);

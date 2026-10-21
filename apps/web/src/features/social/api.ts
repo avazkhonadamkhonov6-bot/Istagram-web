@@ -1,5 +1,7 @@
 import {
+  activityStatusSchema,
   collectionDtoSchema,
+  noteDtoSchema,
   getStoryDtoSchema,
   highlightDtoSchema,
   likeResultSchema,
@@ -9,11 +11,13 @@ import {
   toggleResultSchema,
   userShortSchema,
   userStoriesSchema,
+  type ActivityStatus,
   type AddReportDto,
   type CollectionDto,
   type GetStoryDto,
   type HighlightDto,
   type MessageDto,
+  type NoteDto,
   type PostDto,
   type RelationStatus,
   type UpdatePostDto,
@@ -90,12 +94,13 @@ export const getCollectionPosts = (collectionId: number, page: number) =>
   posts(`/Collection/get-collection-posts?collectionId=${collectionId}&PageNumber=${page}&PageSize=${PAGE_SIZE}`);
 
 // ---- Relations (block, mute, restrict, close friends) ----
-export type RelationList = "blocked" | "muted" | "restricted" | "close-friends";
+export type RelationList = "blocked" | "muted" | "restricted" | "close-friends" | "favorites";
 const LIST_PATH: Record<RelationList, string> = {
   blocked: "/User/get-blocked-users",
   muted: "/User/get-muted-users",
   restricted: "/User/get-restricted-users",
   "close-friends": "/User/get-close-friends",
+  favorites: "/User/get-favorites",
 };
 export const getRelationList = (kind: RelationList) => api<UserShort[]>(LIST_PATH[kind], { schema: userShortSchema.array() });
 export const getRelationStatus = (userId: string) =>
@@ -109,7 +114,9 @@ export type RelationAction =
   | "mute"
   | "unmute"
   | "add-close-friend"
-  | "remove-close-friend";
+  | "remove-close-friend"
+  | "add-favorite"
+  | "remove-favorite";
 const ACTION: Record<RelationAction, [string, "POST" | "DELETE"]> = {
   block: ["/User/block-user", "POST"],
   unblock: ["/User/unblock-user", "DELETE"],
@@ -119,6 +126,8 @@ const ACTION: Record<RelationAction, [string, "POST" | "DELETE"]> = {
   unmute: ["/User/unmute-user", "DELETE"],
   "add-close-friend": ["/User/add-close-friend", "POST"],
   "remove-close-friend": ["/User/remove-close-friend", "DELETE"],
+  "add-favorite": ["/User/add-favorite", "POST"],
+  "remove-favorite": ["/User/remove-favorite", "DELETE"],
 };
 export function relationAction(action: RelationAction, userId: string) {
   const [path, method] = ACTION[action];
@@ -142,3 +151,26 @@ export function sharePost(chatId: number, postId: number, storyId?: number) {
   if (storyId) form.set("SharedStoryId", String(storyId));
   return api<MessageDto>("/Chat/send-message", { method: "PUT", body: form, schema: messageDtoSchema });
 }
+
+// ---- Spec 15 ----
+/** Feed-i "Favorites" (baroi Abubakr: toggle dar sahifai asosi) */
+export const getFavoritesFeed = (page: number) => posts(`/Post/get-favorites-feed?PageNumber=${page}&PageSize=${PAGE_SIZE}`);
+/** "Your activity → Likes" */
+export const getLikedPosts = (page: number) => posts(`/Post/get-liked-posts?PageNumber=${page}&PageSize=${PAGE_SIZE}`);
+/** Tab-i REELS dar profil (baroi Abubakr) */
+export const getUserReels = (userId: string, page: number) =>
+  posts(`/Post/get-user-reels?UserId=${userId}&PageNumber=${page}&PageSize=${PAGE_SIZE}`);
+/** Pin-i comment, toggle; maks. 3 (baroi Abubakr) */
+export const pinComment = (commentId: number) =>
+  api<{ value: boolean }>(`/Post/pin-comment?commentId=${commentId}`, { method: "POST", schema: toggleResultSchema });
+/** "Remove follower" dar ruyxati followers (baroi Abubakr) */
+export const removeFollower = (userId: string) => api<boolean>(`/FollowingRelationShip/remove-follower?userId=${userId}`, { method: "DELETE" });
+/** "Active now" */
+export const getActivityStatus = (userId: string) =>
+  api<ActivityStatus>(`/User/get-activity-status?userId=${userId}`, { schema: activityStatusSchema });
+
+// ---- Notes (Direct) ----
+export const getNotes = () => api<NoteDto[]>("/Note/get-notes", { schema: noteDtoSchema.array() });
+export const addNote = (text: string, closeFriends: boolean) =>
+  api<NoteDto>("/Note/add-note", { method: "POST", ...json({ text, closeFriends }), schema: noteDtoSchema });
+export const deleteNote = () => api<boolean>("/Note/delete-note", { method: "DELETE" });

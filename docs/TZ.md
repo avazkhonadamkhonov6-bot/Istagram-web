@@ -33,8 +33,10 @@ Prioritetho: **P0** — hatman dar 4 ruz · **P1** — boyad boshad, agar vaqt r
 | 17 | Block, Mute, Restrict, Report, Close friends | Spec 14 §1.2–1.6 | P0 (az 2026-10-21) |
 | 18 | Tag dar aks, Location, tahriri post, Archive, Pin, Collections | Spec 14 §2 | P0 (az 2026-10-21) |
 | 19 | Direct: dil-i paym, reply, paymi ovozi, javob ba story | Spec 14 §3–4 | P0 (az 2026-10-21) |
+| 20 | Notes, tahriri paym, "Active now" dar Direct | [Spec 15](specs/15-funksiyahoi-ilovagi.md) §3–5 | P0 (az 2026-10-21) |
+| 21 | Remove follower, Favorites + feed, pin-i comment, reels-i profil, "Your activity" | Spec 15 §1, §2, §6 | P0 (az 2026-10-21) |
 
-> 2026-10-21: qaror — "nusxai purrai Instagram". Funksiyahoi 15–19 az P2 ba P0 guzaronida shudand; backend — tayyor (Spec 14), frontend — Avaz (Direct, `/accounts/*`, location) va Abubakr (sahifahoi xud, FE-26).
+> 2026-10-21: qaror — "nusxai purrai Instagram". Funksiyahoi 15–21 az P2 ba P0 guzaronida shudand (20–21 — Spec 15); backend — tayyor (Spec 14), frontend — Avaz (Direct, `/accounts/*`, location) va Abubakr (sahifahoi xud, FE-26).
 
 ## 3. Talaboti asosi ba Auth
 

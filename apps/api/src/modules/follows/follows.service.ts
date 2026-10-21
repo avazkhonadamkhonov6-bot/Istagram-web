@@ -103,6 +103,20 @@ export class FollowsService {
     return { isFollowing: false, isRequested: false, subscribersCount: followersCount };
   }
 
+  /** "Remove follower" (Spec 15 §1): `userId` digar maro follow namekunad; ba u xabar nameravad */
+  async removeFollower(me: string, userId: string) {
+    await this.assertUser(userId);
+    await this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.follow.deleteMany({ where: { followerId: userId, followingId: me } });
+      if (count === 1) {
+        await tx.user.update({ where: { id: userId }, data: { followingCount: { decrement: 1 } } });
+        await tx.user.update({ where: { id: me }, data: { followersCount: { decrement: 1 } } });
+      }
+    });
+    await this.notifications.retract({ type: 'FOLLOW', actorId: userId, recipientId: me });
+    return true;
+  }
+
   async requests(me: string): Promise<UserShort[]> {
     const rows = await this.prisma.followRequest.findMany({
       where: { targetId: me },

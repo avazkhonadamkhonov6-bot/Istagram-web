@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ChatDto, ErrorCode, MessageDto, SocketEvent } from '@repo/shared';
+import { ChatDto, ErrorCode, MESSAGE_EDIT_WINDOW_MS, MessageDto, SocketEvent } from '@repo/shared';
 import { randomUUID } from 'node:crypto';
 import { badRequest, forbidden, notFound } from '../../common/app-exception';
 import { toUserShort, userShortSelect } from '../../common/mappers';
@@ -97,6 +97,7 @@ export class ChatService {
       story: m.story
         ? { storyId: m.story.id, fileName: m.story.fileName, userName: m.story.user.userName, isExpired: m.story.expiresAt < new Date() }
         : null,
+      editedAt: m.editedAt?.toISOString() ?? null,
     };
   }
 
@@ -139,6 +140,18 @@ export class ChatService {
       },
     });
     const unread = await this.unreadByChat(me, chats);
+    // "Active now" baroi tarafi digari chat-i 1:1 (Spec 15 §4); blok — pinhon
+    const peerIds = chats.filter((c) => !c.isGroup).map((c) => (c.sendUserId === me ? c.receiveUserId : c.sendUserId));
+    const [peers, blocked] = await Promise.all([
+      this.prisma.user.findMany({ where: { id: { in: peerIds } }, select: { id: true, lastActiveAt: true } }),
+      this.relations.blockedIds(me),
+    ]);
+    const lastActive = new Map(peers.map((p) => [p.id, p.lastActiveAt]));
+    const presence = (c: { isGroup: boolean; sendUserId: string; receiveUserId: string }) => {
+      const peer = c.sendUserId === me ? c.receiveUserId : c.sendUserId;
+      if (c.isGroup || blocked.includes(peer)) return { peerIsOnline: false, peerLastActiveAt: null };
+      return { peerIsOnline: this.realtime.isOnline(peer), peerLastActiveAt: lastActive.get(peer)?.toISOString() ?? null };
+    };
     return chats.map((c) => ({
       chatId: c.id,
       sendUserId: c.sendUserId,
@@ -153,6 +166,7 @@ export class ChatService {
       isGroup: c.isGroup,
       title: c.title,
       members: c.members.map((m) => toUserShort(m.user)),
+      ...presence(c),
     }));
   }
 
@@ -330,6 +344,20 @@ export class ChatService {
     const { count } = await this.prisma.messageLike.deleteMany({ where: { messageId, userId: me } });
     if (count === 0) await this.prisma.messageLike.createMany({ data: [{ messageId, userId: me }], skipDuplicates: true });
     const row = await this.prisma.message.findUniqueOrThrow({ where: { id: messageId }, include: messageInclude });
+    const dto = this.toMessageDto(row);
+    this.emit(chat.peers, SocketEvent.MESSAGE_UPDATED, dto);
+    return dto;
+  }
+
+  /** Tahriri paym (Spec 15 §3): faqat muallif, faqat paymi matni, to 15 daqiqa; socket `message:updated` */
+  async editMessage(me: string, messageId: number, text: string) {
+    const m = await this.prisma.message.findUnique({ where: { id: messageId }, select: { userId: true, chatId: true, messageText: true, createdAt: true } });
+    if (!m) throw notFound(ErrorCode.MESSAGE_NOT_FOUND);
+    if (m.userId !== me) throw forbidden(ErrorCode.NOT_OWNER);
+    if (!m.messageText) throw badRequest(ErrorCode.VALIDATION_ERROR);
+    if (Date.now() - m.createdAt.getTime() > MESSAGE_EDIT_WINDOW_MS) throw badRequest(ErrorCode.EDIT_WINDOW_EXPIRED);
+    const chat = await this.assertMember(me, m.chatId);
+    const row = await this.prisma.message.update({ where: { id: messageId }, data: { messageText: text, editedAt: new Date() }, include: messageInclude });
     const dto = this.toMessageDto(row);
     this.emit(chat.peers, SocketEvent.MESSAGE_UPDATED, dto);
     return dto;

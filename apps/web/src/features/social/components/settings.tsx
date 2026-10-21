@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { directKeys, useMe } from "@/features/direct/hooks";
+import { ApiError } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ import {
   declineRequest,
   getArchived,
   getFollowRequests,
+  getLikedPosts,
   getRelationList,
   getStoryArchive,
   relationAction,
@@ -33,10 +35,12 @@ import {
 const LINKS = [
   { href: "/accounts/privacy", label: "Account privacy" },
   { href: "/accounts/close-friends", label: "Close friends" },
+  { href: "/accounts/favorites", label: "Favorites" },
   { href: "/accounts/blocked", label: "Blocked" },
   { href: "/accounts/restricted", label: "Restricted accounts" },
   { href: "/accounts/muted", label: "Muted accounts" },
   { href: "/accounts/archive", label: "Archive" },
+  { href: "/accounts/activity", label: "Your activity" },
 ];
 
 export function PrivacyNav() {
@@ -204,9 +208,16 @@ const LIST_COPY: Record<RelationList, { title: string; empty: string; hint: stri
     remove: "Remove",
     undo: "remove-close-friend",
   },
+  favorites: {
+    title: "Favorites",
+    empty: "You haven't added anyone to Favorites.",
+    hint: "Posts from your favorites appear higher in feed and in the Favorites feed. They won't be notified. Up to 50 accounts.",
+    remove: "Remove",
+    undo: "remove-favorite",
+  },
 };
 
-/** Ruyxathoi block / mute / restrict / close friends (Spec 14 §1.2–1.6) */
+/** Ruyxathoi block / mute / restrict / close friends (Spec 14 §1.2–1.6), favorites (Spec 15 §1) */
 export function RelationListView({ kind }: { kind: RelationList }) {
   const qc = useQueryClient();
   const copy = LIST_COPY[kind];
@@ -226,7 +237,7 @@ export function RelationListView({ kind }: { kind: RelationList }) {
     <section>
       <h1 className="mb-2 text-xl font-bold">{copy.title}</h1>
       <p className="mb-4 text-sm text-ig-text-secondary">{copy.hint}</p>
-      {kind === "close-friends" && <AddCloseFriend />}
+      {(kind === "close-friends" || kind === "favorites") && <AddToList kind={kind} />}
       {isPending ? (
         <RowsSkeleton />
       ) : data?.length ? (
@@ -248,7 +259,7 @@ export function RelationListView({ kind }: { kind: RelationList }) {
 
 type SearchUser = { id: string; userName: string; fullName: string | null; avatar: string | null };
 
-function AddCloseFriend() {
+function AddToList({ kind }: { kind: "close-friends" | "favorites" }) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [term, setTerm] = useState("");
@@ -265,12 +276,12 @@ function AddCloseFriend() {
     },
   });
   const add = useMutation({
-    mutationFn: (userId: string) => relationAction("add-close-friend", userId),
+    mutationFn: (userId: string) => relationAction(kind === "favorites" ? "add-favorite" : "add-close-friend", userId),
     onSuccess: () => {
       setQ("");
-      void qc.invalidateQueries({ queryKey: ["relation-list", "close-friends"] });
+      void qc.invalidateQueries({ queryKey: ["relation-list", kind] });
     },
-    onError: () => toast.error("Couldn't add to close friends"),
+    onError: (e) => toast.error(e instanceof ApiError && e.code === "FAVORITES_LIMIT" ? "You can add up to 50 favorites" : "Couldn't add"),
   });
 
   return (
@@ -416,6 +427,17 @@ export function ArchiveView() {
       ) : (
         <p className="py-16 text-center text-sm text-ig-text-secondary">No archived stories.</p>
       )}
+    </section>
+  );
+}
+
+/** "Your activity → Likes" (Spec 15 §6) */
+export function ActivityView() {
+  return (
+    <section>
+      <h1 className="mb-2 text-xl font-bold">Your activity</h1>
+      <p className="mb-4 text-sm text-ig-text-secondary">Photos and videos you&apos;ve liked, newest first.</p>
+      <PostTiles queryKey={["liked-posts"]} fetchPage={getLikedPosts} empty="When you like photos and videos, they'll appear here." />
     </section>
   );
 }

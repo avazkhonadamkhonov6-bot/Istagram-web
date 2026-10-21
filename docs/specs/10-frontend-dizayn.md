@@ -145,6 +145,32 @@ Ranghoi decorative az CSS-i Instagram: `--decorative-ig-yellow #FFD600`, `--deco
 | `--fds-duration-short-in` / `-out` | `280ms` / `200ms` |
 | `--fds-duration-medium-in` / `-out` | `400ms` / `350ms` |
 
+### 1.11.1 Tokenhoi ilovagi (az CSS-i instagram.com, sanjida 2026-10-21)
+> Baroi "100% ranghoi Instagram": in tokenho dar `globals.css` hanuz nestand — **Abubakr** (FE-29) ilova mekunad (`:root` va `.dark`, bo hamin nom va qimat).
+
+| Token | Light | Dark |
+|---|---|---|
+| `--ig-toggle-background-disabled-off-prism` | `#838993` | `#838993` |
+| `--ig-toggle-outline-prism` | `#6A717A` | `#A2AAB4` |
+| `--ig-toggle-outline-disabled-prism` | `#DBDFE4` | `#2B3036` |
+| `--ig-stroke-prism` | `#FFFFFF` | `#0C1014` |
+| `--ig-stroke-disabled-on-prism` / `-off-prism` | `#DCE0E5` | `#363C44` |
+| `--ig-facebook-blue` | `#3579EA` | `#3579EA` |
+| `--ig-secondary-button` | `#262626` | `#F5F5F5` |
+| `--ig-secondary-button-background` | `#EFEFEF` | `rgba(85,85,85,.7)` |
+| `--ig-secondary-button-hover` | `#DBDBDB` | `#363636` |
+| `--ig-colors-button-primary-background` | `#4A5DF9` | `#4A5DF9` |
+| `--ig-colors-button-primary-background--hover` | `#4150F7` | `#4150F7` |
+| `--ig-colors-button-primary-link-text--disabled` | `#A3BCFF` | `#1F28AD` |
+| `--ig-colors-button-primary-link-text--hover` | `#2536D0` | `#A3BCFF` |
+| `--ig-colors-button-primary-link-text--pressed` | `#1F28AD` | `#B8CDFF` |
+| `--ig-colors-button-secondary-background--pressed` | `#E7EAEE` | `#363C44` |
+| `--ig-colors-button-secondary-link-text` | `#0C1014` | `#FFFFFF` |
+| `--ig-colors-button-secondary-link-text--disabled` | `#5E646D` | `#A2AAB4` |
+| `--ig-colors-button-borderless-background--disabled` | `#DCE0E5` | `#DCE0E5` |
+| `--ig-menu-text-color` | `#0C1014` | `#F8F9F9` |
+| `--ig-duration-extra-extra-short-out` | `100ms` | `100ms` |
+
 ### 1.12 Kadom element — kadom token
 | Element | Token |
 |---|---|
@@ -163,6 +189,8 @@ Ranghoi decorative az CSS-i Instagram: `--decorative-ig-yellow #FFD600`, `--deco
 | Paymi xud / digaron | `--ig-outgoing-message-bubble` / `--ig-incoming-message-bubble` |
 | Nishoni tasdiq (verified) | `--ig-primary-button` |
 | "Unfollow", "Delete", "Report" | `--ig-error-or-destructive` |
+| "Active now" (nuqta dar avatar-i Direct) | `--ig-success` |
+| Dil dar paym va comment | `--ig-badge` |
 
 ## 2. Typography (az CSS-i Instagram)
 - Shrifti Instagram — `"Instagram Sans"`: **shrifti xususii Meta, litsenziyai ozod nadorad** — istifoda namebarem. Mo hamon fallback-ro istifoda mebarem ki xudi Instagram dar CSS dorad:

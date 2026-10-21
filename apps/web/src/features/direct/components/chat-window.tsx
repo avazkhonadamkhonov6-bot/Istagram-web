@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Heart, ImageIcon, LogOut, Mic, Reply, Square, Trash2, X } from "lucide-react";
+import { ChevronLeft, Heart, ImageIcon, LogOut, Mic, Pencil, Reply, Square, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -15,10 +15,12 @@ import { isVideoFile, mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { deleteChat, leaveGroup } from "../api";
 import {
+  activityLabel,
   directKeys,
   peerOf,
   useChats,
   useDeleteMessage,
+  useEditMessage,
   useLikeMessage,
   useMarkRead,
   useMe,
@@ -31,6 +33,8 @@ import {
 
 const GAP_MS = 15 * 60_000;
 const AUDIO_TYPES = ["audio/webm", "audio/ogg", "audio/mp4"];
+/** Spec 15 §3 */
+const EDIT_WINDOW_MS = 15 * 60_000;
 
 /** Paymi ovozi bo MediaRecorder (Spec 14 §4, <= 10 MB) */
 function useVoiceRecorder(onDone: (file: File) => void) {
@@ -77,11 +81,13 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const send = useSendMessage(chatId);
   const remove = useDeleteMessage(chatId);
   const like = useLikeMessage(chatId);
+  const edit = useEditMessage(chatId);
   const peerTyping = usePeerTyping(chatId);
   const typing = useTypingEmitter(chatId);
   useMarkRead(chatId, messages, me?.userId);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<UiMessage | null>(null);
+  const [editing, setEditing] = useState<UiMessage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -104,6 +110,12 @@ export function ChatWindow({ chatId }: { chatId: number }) {
     e.preventDefault();
     const value = text.trim();
     if (!value) return;
+    if (editing) {
+      if (value !== editing.messageText) edit.mutate({ messageId: editing.messageId, text: value });
+      setEditing(null);
+      setText("");
+      return;
+    }
     send.mutate({ text: value, replyTo });
     setText("");
     setReplyTo(null);
@@ -129,9 +141,19 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   }
 
   function startReply(m: UiMessage) {
+    setEditing(null);
     setReplyTo(m);
     inputRef.current?.focus();
   }
+
+  function startEdit(m: UiMessage) {
+    setReplyTo(null);
+    setEditing(m);
+    setText(m.messageText ?? "");
+    inputRef.current?.focus();
+  }
+
+  const status = chat && !isGroup ? activityLabel(chat.peerIsOnline, chat.peerLastActiveAt) : null;
 
   const forbidden = error instanceof ApiError && error.status === 403;
 
@@ -149,6 +171,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
               {isGroup && chat && (
                 <span className="block truncate text-xs text-ig-text-secondary">{chat.members.length} members</span>
               )}
+              {status && <span className="block truncate text-xs text-ig-text-secondary">{status}</span>}
             </span>
             <button
               type="button"
@@ -178,6 +201,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             onUnsend={(id) => remove.mutate(id)}
             onLike={(id) => like.mutate(id)}
             onReply={startReply}
+            onEdit={startEdit}
           />
         )}
         {seen && <p className="mt-1 text-right text-xs text-ig-text-secondary">Seen</p>}
@@ -188,6 +212,23 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         )}
         <div ref={bottomRef} />
       </div>
+
+      {editing && (
+        <div className="mx-4 flex items-center gap-3 border-t border-ig-separator pt-2 text-xs">
+          <p className="flex-1 font-semibold">Edit message</p>
+          <button
+            type="button"
+            aria-label="Cancel edit"
+            onClick={() => {
+              setEditing(null);
+              setText("");
+            }}
+            className="text-ig-icon"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
 
       {replyTo && (
         <div className="mx-4 flex items-center gap-3 border-t border-ig-separator pt-2 text-xs">
@@ -224,7 +265,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         )}
         {text.trim() && !voice.recording ? (
           <button type="submit" className="text-sm font-semibold text-ig-link hover:text-ig-link-action">
-            Send
+            {editing ? "Save" : "Send"}
           </button>
         ) : (
           <>
@@ -256,6 +297,7 @@ function MessageList({
   onUnsend,
   onLike,
   onReply,
+  onEdit,
 }: {
   messages: UiMessage[];
   myId?: string;
@@ -263,7 +305,15 @@ function MessageList({
   onUnsend: (id: number) => void;
   onLike: (id: number) => void;
   onReply: (m: UiMessage) => void;
+  onEdit: (m: UiMessage) => void;
 }) {
+  // Vaqti joriy baroi "Edit" (har daqiqa navsozi)
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+
   // Sarlavhai vaqt, agar bayni paymho > 15 daqiqa
   const rows = useMemo(
     () =>
@@ -285,6 +335,7 @@ function MessageList({
         const isAudio = m.fileType === "audio";
         const liked = !!myId && m.likes.includes(myId);
         const media = (file && !isAudio) || m.sharedPost || m.story;
+        const editable = mine && !!m.messageText && !file && now - new Date(m.sendMassageDate).getTime() < EDIT_WINDOW_MS;
         return (
           <li key={m.messageId} className="flex flex-col">
             {showTime && (
@@ -349,6 +400,11 @@ function MessageList({
                   <button type="button" aria-label="Reply" onClick={() => onReply(m)} className="text-ig-icon">
                     <Reply className="size-4" />
                   </button>
+                  {editable && (
+                    <button type="button" aria-label="Edit" onClick={() => onEdit(m)} className="text-ig-icon">
+                      <Pencil className="size-4" />
+                    </button>
+                  )}
                   {mine && (
                     <button
                       type="button"
@@ -361,6 +417,11 @@ function MessageList({
                 </span>
               )}
             </div>
+            {m.editedAt && (
+              <span className={cn("mt-0.5 text-[11px] text-ig-text-secondary", mine ? "self-end pr-2" : "pl-2", !mine && isGroup && "ml-8")}>
+                Edited
+              </span>
+            )}
             {m.likes.length > 0 && <span className="h-3" />}
           </li>
         );

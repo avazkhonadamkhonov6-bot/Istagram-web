@@ -47,6 +47,12 @@ export class FollowsController {
     return ok(await this.follows.accept(me.id, q.userId));
   }
 
+  /** Spec 15 §1 */
+  @Delete('remove-follower')
+  async removeFollower(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
+    return ok(await this.follows.removeFollower(me.id, q.userId));
+  }
+
   @Delete('decline-follow-request')
   async decline(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: UserIdQuery) {
     return ok(await this.follows.decline(me.id, q.userId));
