@@ -381,7 +381,7 @@ function MessageList({
                   <button
                     type="button"
                     onClick={() => onLike(m.messageId)}
-                    aria-label={liked ? "Unlike" : "Like"}
+                    aria-label={`${m.likes.length} ${m.likes.length === 1 ? "like" : "likes"}`}
                     className={cn(
                       "absolute -bottom-3 flex items-center gap-0.5 rounded-full border-2 border-ig-bg-primary bg-ig-bg-secondary px-1 py-0.5 text-[11px] text-ig-badge",
                       mine ? "right-2" : "left-2",

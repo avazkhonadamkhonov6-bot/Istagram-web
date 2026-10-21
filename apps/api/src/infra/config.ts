@@ -14,7 +14,12 @@ export function loadEnvFile(path = '.env') {
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
-  WEB_ORIGIN: z.string().url().default('http://localhost:3000'),
+  // Yak yo chand origin bo vergul: `http://localhost:3000,https://web.onrender.com`
+  WEB_ORIGIN: z
+    .string()
+    .default('http://localhost:3000')
+    .transform((v) => v.split(',').map((o) => o.trim()).filter(Boolean))
+    .pipe(z.array(z.string().url()).min(1)),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET boyad kamash 32 aloma boshad'),
   JWT_EXPIRES_IN: z.string().default('7d'),

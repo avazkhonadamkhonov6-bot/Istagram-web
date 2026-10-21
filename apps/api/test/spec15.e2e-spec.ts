@@ -1,6 +1,6 @@
 /**
  * e2e baroi AC-hoi Spec 15: remove follower, favorites + feed, pin-i comment, liked posts, user reels,
- * tahriri paym, notes, "Active now".
+ * tahriri paym, notes, "Active now"; Spec 03 `process-image` (WebP 1080 / 640 / 320).
  */
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
@@ -9,7 +9,10 @@ import { io, Socket } from 'socket.io-client';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { loadConfig } from '../src/infra/config';
+import { existsSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 import { PrismaService } from '../src/infra/prisma.service';
+import { StorageService } from '../src/infra/storage.service';
 import { configureApp } from '../src/setup';
 
 const PNG = Buffer.from(
@@ -166,5 +169,25 @@ describe('API (Spec 15)', () => {
     const chats = (await http().get('/Chat/get-chats').set(auth('a'))).body.data;
     expect(chats[0]).toHaveProperty('peerIsOnline');
     expect(chats[0]).toHaveProperty('peerLastActiveAt');
+  });
+
+  it('Spec 03: aks → WebP 1080 + 640 / 320; fayli galat bo mime-i aks → 400', async () => {
+    const root = app.get(StorageService).root;
+    const id = await post('a', 'WebP');
+    const file = (await http().get('/Post/get-post-by-id').query({ id }).set(auth('a')).expect(200)).body.data.images[0] as string;
+    expect(file).toMatch(/.webp$/);
+    for (const f of [file, file.replace('.webp', '-640.webp'), file.replace('.webp', '-320.webp')]) expect(existsSync(join(root, f))).toBe(true);
+    // Disk pok shud (restart-i Render) → fayl az DB (MediaFile) bargardonida meshavad
+    unlinkSync(join(root, file));
+    await http().get(`/images/${file}`).expect(200);
+    expect(existsSync(join(root, file))).toBe(true);
+    await http().get('/images/..%2Fpackage.json').expect(404);
+    const bad = await http()
+      .post('/Post/add-post')
+      .field('Content', 'fake')
+      .attach('Images', Buffer.from('not an image at all'), { filename: 'x.png', contentType: 'image/png' })
+      .set(auth('a'))
+      .expect(400);
+    expect(bad.body.code).toBe('MEDIA_TYPE_NOT_ALLOWED');
   });
 });

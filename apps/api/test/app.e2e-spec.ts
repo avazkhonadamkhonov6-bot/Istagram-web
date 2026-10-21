@@ -135,7 +135,8 @@ describe('API (Spec 12)', () => {
       const r = await http().put('/UserProfile/update-user-profile').send({ about: 'Dushanbe', gender: 1 }).set(auth('a')).expect(200);
       expect(r.body.data).toMatchObject({ about: 'Dushanbe', gender: 1 });
       const img = await http().put('/UserProfile/update-user-image-profile').attach('imageFile', PNG, { filename: 'a.png', contentType: 'image/png' }).set(auth('a')).expect(200);
-      expect(img.body.data.image).toMatch(/\.png$/);
+      // Spec 03: aks → WebP
+      expect(img.body.data.image).toMatch(/\.webp$/);
       await http().get(`/images/${img.body.data.image}`).expect(200);
       await http().put('/UserProfile/update-user-image-profile').attach('imageFile', Buffer.from('%PDF'), { filename: 'a.pdf', contentType: 'application/pdf' }).set(auth('a')).expect(400);
     });

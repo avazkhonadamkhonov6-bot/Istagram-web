@@ -72,8 +72,11 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
       </DialogTrigger>
       <DialogContent className="flex h-[70vh] max-w-[548px] flex-col p-0">
         <DialogTitle className="border-b border-ig-separator py-3 text-center">New message</DialogTitle>
-        <label className="flex items-center gap-4 border-b border-ig-separator px-4 py-2 text-sm">
-          <span className="font-semibold">To:</span>
+        {/* Chip-ho berun az <label>, ki nomi accessible-i onho matni input-ro nagirad */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-ig-separator px-4 py-2 text-sm">
+          <label htmlFor="new-message-to" className="mr-2 font-semibold">
+            To:
+          </label>
           {selected.map((u) => (
             <button
               key={u.id}
@@ -81,17 +84,19 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
               onClick={() => setSelected((cur) => cur.filter((x) => x.id !== u.id))}
               className="rounded-full bg-ig-bg-highlight px-3 py-1 text-sm font-semibold text-ig-primary"
             >
-              {u.userName} ×
+              <span aria-hidden>{u.userName} ×</span>
+              <span className="sr-only">Remove {u.userName}</span>
             </button>
           ))}
           <input
+            id="new-message-to"
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search..."
-            className="flex-1 bg-transparent py-1 outline-none placeholder:text-ig-input-placeholder"
+            className="min-w-[120px] flex-1 bg-transparent py-1 outline-none placeholder:text-ig-input-placeholder"
           />
-        </label>
+        </div>
         <div className="flex-1 overflow-y-auto py-2">
           {loading && (
             <div className="flex justify-center py-4">

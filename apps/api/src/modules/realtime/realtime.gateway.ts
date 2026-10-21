@@ -17,7 +17,7 @@ import { PrismaService } from '../../infra/prisma.service';
 export const userRoom = (userId: string) => `user:${userId}`;
 
 /** Yak gateway-i umumi (Spec 08). Auth: `io(url, { path: '/ws', auth: { token: <ws-ticket> } })`. */
-@WebSocketGateway({ path: '/ws', cors: { origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000', credentials: true } })
+@WebSocketGateway({ path: '/ws', cors: { origin: (process.env.WEB_ORIGIN ?? 'http://localhost:3000').split(',').map((o) => o.trim()), credentials: true } })
 export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(RealtimeGateway.name);
 

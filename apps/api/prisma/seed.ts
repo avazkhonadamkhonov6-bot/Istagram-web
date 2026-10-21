@@ -12,7 +12,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 if (existsSync('.env')) process.loadEnvFile('.env');
@@ -194,6 +194,12 @@ async function main() {
   });
   const postFiles = await pool(planned.map((p) => () => Promise.all(p.images.map((f) => f()))));
   const storyFiles = await pool(Array.from({ length: 80 }, (_, i) => () => photo(`story${i}`, 1080, 1920)));
+  // Nusxai media dar DB (MediaFile): server-i Render faylhoro az DB bargardonad
+  const used = new Set([...avatars, ...videos, ...postFiles.flat(), ...storyFiles]);
+  const saved = new Set((await prisma.mediaFile.findMany({ where: { name: { in: [...used] } }, select: { name: true } })).map((f) => f.name));
+  for (const name of used) {
+    if (!saved.has(name)) await prisma.mediaFile.create({ data: { name, data: readFileSync(join(uploadDir, name)) } });
+  }
   console.log('Media tayyor. DB pur meshavad...');
 
   await prisma.$transaction([

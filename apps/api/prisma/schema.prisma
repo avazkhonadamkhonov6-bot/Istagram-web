@@ -495,3 +495,10 @@ model Notification {
 
   @@index([recipientId, createdAt])
 }
+
+/// Nusxai faylhoi UPLOAD_DIR dar DB: diski Render (free) har restart pok meshavad, DB — ne.
+model MediaFile {
+  name      String   @id // hamon nomi fayl dar /images/<name>
+  data      Bytes
+  createdAt DateTime @default(now())
+}

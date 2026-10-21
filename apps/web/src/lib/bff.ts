@@ -5,7 +5,8 @@ import { cookies } from "next/headers";
 
 export const API_URL = process.env.API_URL ?? "http://localhost:4000";
 export const ACCESS_COOKIE = "access_token";
-const TIMEOUT_MS = 10_000;
+// API dar Render (free) ba'd az 15 daq. bekori "xob" meravad, bedorshavi to ~50 s
+const TIMEOUT_MS = 60_000;
 const WEEK_SECONDS = 7 * 24 * 60 * 60;
 
 export type Envelope<T> = { data: T | null; errors: string[]; statusCode: number; code?: string };
