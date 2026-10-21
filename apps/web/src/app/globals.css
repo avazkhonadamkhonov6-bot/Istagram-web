@@ -1,26 +1,386 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+.__ig-light-mode {
+  /* 1.1 Fon (background) */
+  --ig-primary-background: 255, 255, 255; /* #FFFFFF */
+  --ig-secondary-background: 243, 245, 247; /* #F3F5F7 */
+  --ig-highlight-background: 243, 245, 247; /* #F3F5F7 */
+  --ig-elevated-background: 255, 255, 255; /* #FFFFFF */
+  --ig-elevated-highlight-background: 239, 239, 239; /* #EFEFEF */
+  --ig-banner-background: 255, 255, 255; /* #FFFFFF */
+  --ig-dropdown-background: 243, 245, 247; /* #F3F5F7 */
+  --ig-menu-background-color: 248, 249, 249; /* #F8F9F9 */
+  --ig-hover-overlay: rgba(12, 16, 20, .05);
+  --ig-temporary-highlight: 245, 251, 255; /* #F5FBFF */
+
+  /* 1.2 Matn va ikonka */
+  --ig-primary-text: 12, 16, 20; /* #0C1014 */
+  --ig-secondary-text: 106, 113, 122; /* #6A717A */
+  --ig-tertiary-text: 199, 199, 199; /* #C7C7C7 */
+  --ig-primary-icon: 12, 16, 20; /* #0C1014 */
+  --ig-secondary-icon: 142, 142, 142; /* #8E8E8E */
+  --ig-tertiary-icon: 199, 199, 199; /* #C7C7C7 */
+  --ig-link: 0, 55, 107; /* #00376B */
+  --ig-colors-link-text: 65, 80, 247; /* #4150F7 */
+  --ig-text-on-color: 255, 255, 255; /* #FFFFFF */
+  --ig-text-on-media: 255, 255, 255; /* #FFFFFF */
+
+  /* 1.3 Xatho va border */
+  --ig-separator: 219, 223, 228; /* #DBDFE4 */
+  --ig-elevated-separator: 219, 223, 228; /* #DBDFE4 */
+  --ig-stroke: 219, 219, 219; /* #DBDBDB */
+  --ig-focus-stroke: 168, 168, 168; /* #A8A8A8 */
+  --ig-tablist-border: 219, 223, 228; /* #DBDFE4 */
+  --ig-tab-underline-active: 12, 16, 20; /* #0C1014 */
+  --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
+
+  /* 1.4 Tugmaho */
+  --ig-primary-button: 74, 93, 249; /* #4A5DF9 */
+  --ig-primary-button-hover: 65, 80, 247; /* #4150F7 */
+  --ig-colors-button-primary-background--pressed: 65, 80, 247; /* #4150F7 */
+  --ig-colors-button-primary-background--disabled: 184, 205, 255; /* #B8CDFF */
+  --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
+  --ig-colors-button-secondary-background: 240, 242, 245; /* #F0F2F5 */
+  --ig-colors-button-secondary-background--hover: 231, 234, 238; /* #E7EAEE */
+  --ig-colors-button-secondary-background--disabled: 220, 224, 229; /* #DCE0E5 */
+  --ig-colors-button-secondary-text: 12, 16, 20; /* #0C1014 */
+  --ig-colors-button-secondary-text--disabled: 94, 100, 109; /* #5E646D */
+  --ig-colors-button-borderless-text: 65, 80, 247; /* #4150F7 */
+  --ig-colors-button-borderless-text--hover: 37, 54, 208; /* #2536D0 */
+  --ig-colors-button-borderless-text--pressed: 31, 40, 173; /* #1F28AD */
+  --ig-colors-button-borderless-text--disabled: 184, 205, 255; /* #B8CDFF */
+  --ig-colors-button-primary-link-text: 49, 67, 227; /* #3143E3 */
+  --ig-tertiary-button-background: 255, 255, 255; /* #FFFFFF */
+  --ig-tertiary-button-border: 219, 219, 219; /* #DBDBDB */
+  --ig-tertiary-button-hover: 245, 245, 245; /* #F5F5F5 */
+  --ig-tertiary-button-text: 38, 38, 38; /* #262626 */
+
+  /* 1.5 Input (formaho) */
+  --ig-input-border-primary: 33, 35, 40; /* #212328 */
+  --ig-input-border-secondary: 219, 223, 228; /* #DBDFE4 */
+  --ig-input-disabled-background-color: 243, 245, 247; /* #F3F5F7 */
+  --ig-input-text-and-icon-primary: 12, 16, 20; /* #0C1014 */
+  --ig-input-text-and-icon-secondary: 106, 113, 122; /* #6A717A */
+  --ig-input-border-radius: 12px;
+  --ig-input-border-width: 1px;
+  --ig-text-input-padding-vertical: 20px;
+
+  /* 1.6 Holat va nishonho */
+  --ig-badge: 255, 48, 64; /* #FF3040 */
+  --ig-error-or-destructive: 237, 73, 86; /* #ED4956 */
+  --ig-success: 88, 195, 34; /* #58C322 */
+  --ig-live-badge: 255, 1, 105; /* #FF0169 */
+  --ig-close-friends-refreshed: 28, 209, 79; /* #1CD14F */
+  --ig-subscribers-only: 118, 56, 250; /* #7638FA */
+
+  /* 1.7 Direct (paymho) */
+  --ig-outgoing-message-bubble: 74, 93, 249; /* #4A5DF9 */
+  --ig-incoming-message-bubble: 243, 245, 247; /* #F3F5F7 */
+
+  /* 1.8 Toggle (switch) */
+  --ig-toggle-background-on-prism: 12, 16, 20; /* #0C1014 */
+  --ig-toggle-background-off-prism: 106, 113, 122; /* #6A717A */
+  --ig-toggle-background-disabled-on-prism: 131, 137, 147; /* #838993 */
+
+  /* 1.9 Soya, blur, toast */
+  --ig-strong-shadow: 0 4px 32px 0 rgba(11, 16, 20, .16);
+  --ig-toast-prism-background-color: rgba(37, 41, 46, .95);
+  --ig-background-always-dark-blur: rgba(43, 48, 54, .5);
+  --ig-modal-overlay: rgba(0, 0, 0, .65);
+
+  /* 1.10 Gradienti brendi Instagram */
+  --decorative-ig-yellow: 255, 214, 0; /* #FFD600 */
+  --decorative-ig-orange: 255, 122, 0; /* #FF7A00 */
+  --decorative-ig-lavender: 211, 0, 197; /* #D300C5 */
+  --decorative-ig-purple: 118, 56, 250; /* #7638FA */
+  --ig-brand-gradient: linear-gradient(45deg, #FFD600 0%, #FF7A00 25%, #FF0069 50%, #D300C5 75%, #7638FA 100%);
+
+  /* 1.11 Animatsiya */
+  --ig-animation-move-in: cubic-bezier(0.17, 0.17, 0, 1);
+  --ig-animation-move-out: cubic-bezier(0.17, 0.17, 0, 1);
+  --fds-animation-fade-in: cubic-bezier(0, 0, 1, 1);
+  --fds-animation-enter-exit-in: cubic-bezier(0.14, 1, 0.34, 1);
+  --fds-animation-enter-exit-out: cubic-bezier(0.45, 0.1, 0.2, 1);
+  --ig-duration-extra-extra-short-in: 100ms;
+  --fds-duration-extra-short-in: 200ms;
+  --fds-duration-extra-short-out: 150ms;
+  --fds-duration-short-in: 280ms;
+  --fds-duration-short-out: 200ms;
+  --fds-duration-medium-in: 400ms;
+  --fds-duration-medium-out: 350ms;
+
+  /* Привязка shadcn/ui к токенам --ig-* (FE-02) */
+  --background: rgb(var(--ig-primary-background));
+  --foreground: rgb(var(--ig-primary-text));
+  --card: rgb(var(--ig-elevated-background));
+  --card-foreground: rgb(var(--ig-primary-text));
+  --popover: rgb(var(--ig-elevated-background));
+  --popover-foreground: rgb(var(--ig-primary-text));
+  --primary: rgb(var(--ig-primary-button));
+  --primary-foreground: rgb(var(--ig-colors-button-primary-text));
+  --secondary: rgb(var(--ig-colors-button-secondary-background));
+  --secondary-foreground: rgb(var(--ig-colors-button-secondary-text));
+  --muted: rgb(var(--ig-secondary-background));
+  --muted-foreground: rgb(var(--ig-secondary-text));
+  --accent: rgb(var(--ig-highlight-background));
+  --accent-foreground: rgb(var(--ig-primary-text));
+  --destructive: rgb(var(--ig-error-or-destructive));
+  --destructive-foreground: rgb(var(--ig-text-on-color));
+  --border: rgb(var(--ig-separator));
+  --input: rgb(var(--ig-input-border-secondary));
+  --ring: rgb(var(--ig-focus-stroke));
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --ig-primary-background: 12, 16, 20; /* #0C1014 */
+    --ig-secondary-background: 37, 41, 46; /* #25292E */
+    --ig-highlight-background: 37, 41, 46; /* #25292E */
+    --ig-elevated-background: 33, 35, 40; /* #212328 */
+    --ig-elevated-highlight-background: 54, 54, 54; /* #363636 */
+    --ig-banner-background: 38, 38, 38; /* #262626 */
+    --ig-dropdown-background: 37, 41, 46; /* #25292E */
+    --ig-menu-background-color: 38, 43, 49; /* #262B31 */
+    --ig-hover-overlay: rgba(255, 255, 255, .1);
+    --ig-temporary-highlight: 0, 149, 246; /* #0095F6 */
+
+    --ig-primary-text: 248, 249, 249; /* #F8F9F9 */
+    --ig-secondary-text: 162, 170, 180; /* #A2AAB4 */
+    --ig-tertiary-text: 115, 115, 115; /* #737373 */
+    --ig-primary-icon: 248, 249, 249; /* #F8F9F9 */
+    --ig-secondary-icon: 142, 142, 142; /* #8E8E8E */
+    --ig-tertiary-icon: 115, 115, 115; /* #737373 */
+    --ig-link: 224, 241, 255; /* #E0F1FF */
+    --ig-colors-link-text: 112, 141, 255; /* #708DFF */
+    --ig-text-on-color: 255, 255, 255; /* #FFFFFF */
+    --ig-text-on-media: 255, 255, 255; /* #FFFFFF */
+
+    --ig-separator: 43, 48, 54; /* #2B3036 */
+    --ig-elevated-separator: 43, 48, 54; /* #2B3036 */
+    --ig-stroke: 54, 54, 54; /* #363636 */
+    --ig-focus-stroke: 85, 85, 85; /* #555555 */
+    --ig-tablist-border: 43, 48, 54; /* #2B3036 */
+    --ig-tab-underline-active: 248, 249, 249; /* #F8F9F9 */
+    --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
+
+    --ig-primary-button: 74, 93, 249; /* #4A5DF9 */
+    --ig-primary-button-hover: 65, 80, 247; /* #4150F7 */
+    --ig-colors-button-primary-background--pressed: 65, 80, 247; /* #4150F7 */
+    --ig-colors-button-primary-background--disabled: 24, 32, 139; /* #18208B */
+    --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
+    --ig-colors-button-secondary-background: 37, 41, 46; /* #25292E */
+    --ig-colors-button-secondary-background--hover: 54, 60, 68; /* #363C44 */
+    --ig-colors-button-secondary-background--disabled: 43, 48, 54; /* #2B3036 */
+    --ig-colors-button-secondary-text: 255, 255, 255; /* #FFFFFF */
+    --ig-colors-button-secondary-text--disabled: 162, 170, 180; /* #A2AAB4 */
+    --ig-colors-button-borderless-text: 112, 141, 255; /* #708DFF */
+    --ig-colors-button-borderless-text--hover: 133, 161, 255; /* #85A1FF */
+    --ig-colors-button-borderless-text--pressed: 163, 188, 255; /* #A3BCFF */
+    --ig-colors-button-borderless-text--disabled: 24, 32, 139; /* #18208B */
+    --ig-colors-button-primary-link-text: 133, 161, 255; /* #85A1FF */
+
+    --ig-input-border-primary: 248, 249, 249; /* #F8F9F9 */
+    --ig-input-border-secondary: 94, 100, 109; /* #5E646D */
+    --ig-input-disabled-background-color: 37, 41, 46; /* #25292E */
+    --ig-input-text-and-icon-primary: 248, 249, 249; /* #F8F9F9 */
+    --ig-input-text-and-icon-secondary: 162, 170, 180; /* #A2AAB4 */
+
+    --ig-outgoing-message-bubble: 74, 93, 249; /* #4A5DF9 */
+    --ig-incoming-message-bubble: 37, 41, 46; /* #25292E */
+
+    --ig-toggle-background-on-prism: 248, 249, 249; /* #F8F9F9 */
+    --ig-toggle-background-off-prism: 162, 170, 180; /* #A2AAB4 */
+    --ig-toggle-background-disabled-on-prism: 131, 137, 147; /* #838993 */
+  }
+}
+
+.dark,
+.__ig-dark-mode {
+  /* 1.1 Fon (background) */
+  --ig-primary-background: 12, 16, 20; /* #0C1014 */
+  --ig-secondary-background: 37, 41, 46; /* #25292E */
+  --ig-highlight-background: 37, 41, 46; /* #25292E */
+  --ig-elevated-background: 33, 35, 40; /* #212328 */
+  --ig-elevated-highlight-background: 54, 54, 54; /* #363636 */
+  --ig-banner-background: 38, 38, 38; /* #262626 */
+  --ig-dropdown-background: 37, 41, 46; /* #25292E */
+  --ig-menu-background-color: 38, 43, 49; /* #262B31 */
+  --ig-hover-overlay: rgba(255, 255, 255, .1);
+  --ig-temporary-highlight: 0, 149, 246; /* #0095F6 */
+
+  /* 1.2 Matn va ikonka */
+  --ig-primary-text: 248, 249, 249; /* #F8F9F9 */
+  --ig-secondary-text: 162, 170, 180; /* #A2AAB4 */
+  --ig-tertiary-text: 115, 115, 115; /* #737373 */
+  --ig-primary-icon: 248, 249, 249; /* #F8F9F9 */
+  --ig-secondary-icon: 142, 142, 142; /* #8E8E8E */
+  --ig-tertiary-icon: 115, 115, 115; /* #737373 */
+  --ig-link: 224, 241, 255; /* #E0F1FF */
+  --ig-colors-link-text: 112, 141, 255; /* #708DFF */
+  --ig-text-on-color: 255, 255, 255; /* #FFFFFF */
+  --ig-text-on-media: 255, 255, 255; /* #FFFFFF */
+
+  /* 1.3 Xatho va border */
+  --ig-separator: 43, 48, 54; /* #2B3036 */
+  --ig-elevated-separator: 43, 48, 54; /* #2B3036 */
+  --ig-stroke: 54, 54, 54; /* #363636 */
+  --ig-focus-stroke: 85, 85, 85; /* #555555 */
+  --ig-tablist-border: 43, 48, 54; /* #2B3036 */
+  --ig-tab-underline-active: 248, 249, 249; /* #F8F9F9 */
+  --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
+
+  /* 1.4 Tugmaho */
+  --ig-primary-button: 74, 93, 249; /* #4A5DF9 */
+  --ig-primary-button-hover: 65, 80, 247; /* #4150F7 */
+  --ig-colors-button-primary-background--pressed: 65, 80, 247; /* #4150F7 */
+  --ig-colors-button-primary-background--disabled: 24, 32, 139; /* #18208B */
+  --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
+  --ig-colors-button-secondary-background: 37, 41, 46; /* #25292E */
+  --ig-colors-button-secondary-background--hover: 54, 60, 68; /* #363C44 */
+  --ig-colors-button-secondary-background--disabled: 43, 48, 54; /* #2B3036 */
+  --ig-colors-button-secondary-text: 255, 255, 255; /* #FFFFFF */
+  --ig-colors-button-secondary-text--disabled: 162, 170, 180; /* #A2AAB4 */
+  --ig-colors-button-borderless-text: 112, 141, 255; /* #708DFF */
+  --ig-colors-button-borderless-text--hover: 133, 161, 255; /* #85A1FF */
+  --ig-colors-button-borderless-text--pressed: 163, 188, 255; /* #A3BCFF */
+  --ig-colors-button-borderless-text--disabled: 24, 32, 139; /* #18208B */
+  --ig-colors-button-primary-link-text: 133, 161, 255; /* #85A1FF */
+
+  /* 1.5 Input (formaho) */
+  --ig-input-border-primary: 248, 249, 249; /* #F8F9F9 */
+  --ig-input-border-secondary: 94, 100, 109; /* #5E646D */
+  --ig-input-disabled-background-color: 37, 41, 46; /* #25292E */
+  --ig-input-text-and-icon-primary: 248, 249, 249; /* #F8F9F9 */
+  --ig-input-text-and-icon-secondary: 162, 170, 180; /* #A2AAB4 */
+
+  /* 1.7 Direct (paymho) */
+  --ig-outgoing-message-bubble: 74, 93, 249; /* #4A5DF9 */
+  --ig-incoming-message-bubble: 37, 41, 46; /* #25292E */
+
+  /* 1.8 Toggle (switch) */
+  --ig-toggle-background-on-prism: 248, 249, 249; /* #F8F9F9 */
+  --ig-toggle-background-off-prism: 162, 170, 180; /* #A2AAB4 */
+  --ig-toggle-background-disabled-on-prism: 131, 137, 147; /* #838993 */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Семантические утилиты Instagram для Tailwind 4 */
+  --color-ig-bg: rgb(var(--ig-primary-background));
+  --color-ig-bg-secondary: rgb(var(--ig-secondary-background));
+  --color-ig-bg-highlight: rgb(var(--ig-highlight-background));
+  --color-ig-bg-elevated: rgb(var(--ig-elevated-background));
+  --color-ig-bg-elevated-highlight: rgb(var(--ig-elevated-highlight-background));
+  --color-ig-bg-banner: rgb(var(--ig-banner-background));
+  --color-ig-bg-dropdown: rgb(var(--ig-dropdown-background));
+  --color-ig-bg-menu: rgb(var(--ig-menu-background-color));
+
+  --color-ig-text: rgb(var(--ig-primary-text));
+  --color-ig-text-secondary: rgb(var(--ig-secondary-text));
+  --color-ig-text-tertiary: rgb(var(--ig-tertiary-text));
+  --color-ig-text-on-color: rgb(var(--ig-text-on-color));
+  --color-ig-text-on-media: rgb(var(--ig-text-on-media));
+  --color-ig-link: rgb(var(--ig-link));
+  --color-ig-link-action: rgb(var(--ig-colors-link-text));
+
+  --color-ig-separator: rgb(var(--ig-separator));
+  --color-ig-elevated-separator: rgb(var(--ig-elevated-separator));
+  --color-ig-stroke: rgb(var(--ig-stroke));
+  --color-ig-focus-stroke: rgb(var(--ig-focus-stroke));
+
+  --color-ig-primary: rgb(var(--ig-primary-button));
+  --color-ig-primary-hover: rgb(var(--ig-primary-button-hover));
+  --color-ig-primary-disabled: rgb(var(--ig-colors-button-primary-background--disabled));
+  --color-ig-secondary: rgb(var(--ig-colors-button-secondary-background));
+  --color-ig-secondary-hover: rgb(var(--ig-colors-button-secondary-background--hover));
+
+  --color-ig-badge: rgb(var(--ig-badge));
+  --color-ig-error: rgb(var(--ig-error-or-destructive));
+  --color-ig-success: rgb(var(--ig-success));
+  --color-ig-live: rgb(var(--ig-live-badge));
+  --color-ig-close-friends: rgb(var(--ig-close-friends-refreshed));
+  --color-ig-subscribers: rgb(var(--ig-subscribers-only));
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-logo: var(--font-grand-hotel), cursive;
+
+    /* FE-03: дополнительные токены для UI-компонентов */
+  --color-ig-primary-pressed: rgb(var(--ig-colors-button-primary-background--pressed));
+  --color-ig-secondary-disabled: rgb(var(--ig-colors-button-secondary-background--disabled));
+  --color-ig-btn-secondary-text: rgb(var(--ig-colors-button-secondary-text));
+  --color-ig-btn-secondary-text-disabled: rgb(var(--ig-colors-button-secondary-text--disabled));
+  --color-ig-borderless: rgb(var(--ig-colors-button-borderless-text));
+  --color-ig-borderless-hover: rgb(var(--ig-colors-button-borderless-text--hover));
+  --color-ig-borderless-pressed: rgb(var(--ig-colors-button-borderless-text--pressed));
+  --color-ig-borderless-disabled: rgb(var(--ig-colors-button-borderless-text--disabled));
+  --color-ig-tertiary-bg: rgb(var(--ig-tertiary-button-background));
+  --color-ig-tertiary-border: rgb(var(--ig-tertiary-button-border));
+  --color-ig-tertiary-hover: rgb(var(--ig-tertiary-button-hover));
+  --color-ig-tertiary-text: rgb(var(--ig-tertiary-button-text));
+  --color-ig-input-border: rgb(var(--ig-input-border-secondary));
+  --color-ig-input-border-focus: rgb(var(--ig-input-border-primary));
+  --color-ig-input-disabled-bg: rgb(var(--ig-input-disabled-background-color));
+  --color-ig-input-text: rgb(var(--ig-input-text-and-icon-primary));
+  --color-ig-input-placeholder: rgb(var(--ig-input-text-and-icon-secondary));
+  --color-ig-icon: rgb(var(--ig-primary-icon));
+  --color-ig-icon-secondary: rgb(var(--ig-secondary-icon));
+  --color-ig-hover-overlay: var(--ig-hover-overlay);
+  --color-ig-overlay: var(--ig-modal-overlay);
+  --color-ig-toast: var(--ig-toast-prism-background-color);
+  --shadow-ig-strong: var(--ig-strong-shadow);
+
+  --animate-ig-shimmer: ig-shimmer 1.4s linear infinite;
+  --animate-ig-spinner: ig-spinner 1s steps(12, end) infinite;
+  --animate-ig-fade: ig-fade-in 200ms linear;
+  --animate-ig-slide-left: ig-slide-in-left 280ms cubic-bezier(0.17, 0.17, 0, 1);
+  --animate-ig-slide-right: ig-slide-in-right 280ms cubic-bezier(0.17, 0.17, 0, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(var(--ig-primary-background));
+  color: rgb(var(--ig-primary-text));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+@keyframes ig-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes ig-spinner {
+  to { transform: rotate(360deg); }
+}
+@keyframes ig-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ig-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes ig-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }

@@ -1,6 +1,7 @@
 # TASKS — Vazifaho baroi Avaz va Abubakr
 
 > Har vazifa dar GitHub **Issue**-i alohida ast (milestone = ruz, label = `backend` / `frontend` / `qa` va nomi odam).
+> **Kontrakti API (az 2026-10-21):** [specs/12-api-kontrakt.md](specs/12-api-kontrakt.md) — URL va DTO-ho az onjo, ne az spec-hoi 01–09.
 > Tartib va vaqt — dar [PLAN.md](PLAN.md). Pas az tamom: PR bo `Closes #<issue>` → Issue xud baste meshavad.
 > | ID | Kas | Ruz | Vazifa |
 |---|---|---|---|
