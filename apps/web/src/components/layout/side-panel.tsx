@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useUiStore } from "@/store/ui.store";
+import { SearchPanel } from "@/features/search/components/search-panel";
 
 const TITLES = { search: "Search", notifications: "Notifications" } as const;
 const PLACEHOLDERS = {
-  search: "Search will be built in FE-11.",
   notifications: "Notifications will be built in FE-12.",
 } as const;
 
@@ -35,9 +35,13 @@ export function SidePanel() {
         <h2 className="px-6 pb-9 pt-3 text-2xl font-semibold">
           {TITLES[panel]}
         </h2>
-        <p className="px-6 text-sm text-ig-text-secondary">
-          {PLACEHOLDERS[panel]}
-        </p>
+        {panel === "search" ? (
+          <SearchPanel />
+        ) : (
+          <p className="px-6 text-sm text-ig-text-secondary">
+            {PLACEHOLDERS.notifications}
+          </p>
+        )}
       </aside>
     </>
   );

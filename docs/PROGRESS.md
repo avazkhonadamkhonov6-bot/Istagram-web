@@ -28,12 +28,12 @@
 | [x] | BE-07 Post, like, comment, favorite | [x] | FE-07 Feed + PostCard |
 | [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [x] | FE-08 Post modal |
 | [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [x] | FE-09 Profil |
-| [x] | BE-10 Story API | [ ] | FE-10 Edit profile + parol |
+| [x] | BE-10 Story API | [x] | FE-10 Edit profile + parol |
 
 ## RUZI 3
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-11 Chat + Reels + Location API | [ ] | FE-11 Explore, Search |
+| [x] | BE-11 Chat + Reels + Location API | [x] | FE-11 Explore, Search |
 | [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [ ] | FE-12 Notifications panel |
 | [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [ ] | FE-14 Mock xomush, integratsiya |
 | [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [ ] | FE-16 Stories |

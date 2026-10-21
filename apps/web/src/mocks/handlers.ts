@@ -62,7 +62,170 @@ const mockNotifications = [
 
 const followed = new Set<string>();
 
+const mockHashtags = [
+  { name: "travel", postsCount: 128 },
+  { name: "pamir", postsCount: 42 },
+  { name: "tajikistan", postsCount: 87 },
+  { name: "food", postsCount: 310 },
+];
+
+// 30 постов для проверки сетки Explore. Клоны (postId >= 1000) в модалке не откроются.
+const explorePool = Array.from({ length: 30 }, (_, i) => {
+  const p = mockPosts[i % mockPosts.length];
+  return { ...p, postId: p.postId + 1000 * Math.floor(i / mockPosts.length) };
+});
+
+function pagedMock<T>(items: T[], params: URLSearchParams) {
+  const page = Number(params.get("PageNumber") ?? "1");
+  const size = Number(params.get("PageSize") ?? "24");
+  return HttpResponse.json({
+    pageNumber: page,
+    pageSize: size,
+    totalPage: Math.max(1, Math.ceil(items.length / size)),
+    totalRecord: items.length,
+    data: items.slice((page - 1) * size, page * size),
+    errors: [],
+    statusCode: 200,
+  });
+}
+
+let nextHistoryId = 1;
+const userHistory: {
+  id: number;
+  createdAt: string;
+  users: {
+    id: string;
+    userName: string;
+    fullName: string | null;
+    avatar: string | null;
+  };
+}[] = [];
+const textHistory: { id: number; text: string; createdAt: string }[] = [];
+
 export const handlers = [
+      http.get("/api/Post/get-explore-posts", ({ request }) =>
+    pagedMock(explorePool, new URL(request.url).searchParams),
+  ),
+
+  http.get("/api/Hashtag/search", ({ request }) => {
+    const q = (new URL(request.url).searchParams.get("Query") ?? "")
+      .replace(/^#/, "")
+      .toLowerCase();
+    return HttpResponse.json({
+      data: mockHashtags.filter((h) => h.name.includes(q)),
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.get("/api/Hashtag/get-posts", ({ request }) =>
+    pagedMock(
+      explorePool.filter((_, i) => i % 2 === 0),
+      new URL(request.url).searchParams,
+    ),
+  ),
+
+  http.post("/api/User/add-user-search-history", ({ request }) => {
+    const id = new URL(request.url).searchParams.get("UserSearchId") ?? "";
+    const u = mockUsers.find((x) => x.id === id);
+    if (!u) {
+      return HttpResponse.json(
+        { data: null, errors: ["User not found"], statusCode: 404 },
+        { status: 404 },
+      );
+    }
+    const old = userHistory.findIndex((h) => h.users.id === id);
+    if (old >= 0) userHistory.splice(old, 1);
+    const entry = {
+      id: nextHistoryId++,
+      createdAt: new Date().toISOString(),
+      users: {
+        id: u.id,
+        userName: u.userName,
+        fullName: u.fullName ?? null,
+        avatar: u.avatar ?? null,
+      },
+    };
+    userHistory.push(entry);
+    return HttpResponse.json({ data: entry, errors: [], statusCode: 200 });
+  }),
+
+  http.get("/api/User/get-user-search-histories", () =>
+    HttpResponse.json({ data: userHistory, errors: [], statusCode: 200 }),
+  ),
+
+  http.delete("/api/User/delete-user-search-history", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("id"));
+    const i = userHistory.findIndex((h) => h.id === id);
+    if (i >= 0) userHistory.splice(i, 1);
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
+
+  http.delete("/api/User/delete-user-search-histories", () => {
+    userHistory.length = 0;
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
+
+  http.post("/api/User/add-search-history", ({ request }) => {
+    const text = new URL(request.url).searchParams.get("Text") ?? "";
+    const old = textHistory.findIndex((h) => h.text === text);
+    if (old >= 0) textHistory.splice(old, 1);
+    const entry = {
+      id: nextHistoryId++,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    textHistory.push(entry);
+    return HttpResponse.json({ data: entry, errors: [], statusCode: 200 });
+  }),
+
+  http.get("/api/User/get-search-histories", () =>
+    HttpResponse.json({ data: textHistory, errors: [], statusCode: 200 }),
+  ),
+
+  http.delete("/api/User/delete-search-history", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("id"));
+    const i = textHistory.findIndex((h) => h.id === id);
+    if (i >= 0) textHistory.splice(i, 1);
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
+
+  http.delete("/api/User/delete-search-histories", () => {
+    textHistory.length = 0;
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
+  }),
+
+     http.put("/api/UserProfile/update-user-profile", async ({ request }) => {
+    const body = (await request.json()) as { about?: string; gender?: 0 | 1 };
+    Object.assign(mockMe, body);
+    return HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 });
+  }),
+
+  http.put("/api/UserProfile/update-user-image-profile", () => {
+    mockMe.image = "mock-avatar.jpg";
+    return HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 });
+  }),
+
+  http.delete("/api/UserProfile/delete-user-image-profile", () => {
+    mockMe.image = null;
+    return HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 });
+  }),
+
+  http.put("/api/Account/ChangePassword", ({ request }) => {
+    const old = new URL(request.url).searchParams.get("OldPassword");
+    if (old === "wrongpass") {
+      return HttpResponse.json(
+        { data: null, errors: ["Old password is incorrect"], statusCode: 400 },
+        { status: 400 },
+      );
+    }
+    return HttpResponse.json({
+      data: "Password changed",
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
     http.get("/api/images/:name", () =>
     new HttpResponse(
       '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="100%" height="100%" fill="#8e8e8e"/></svg>',
