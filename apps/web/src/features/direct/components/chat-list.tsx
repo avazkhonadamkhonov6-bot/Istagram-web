@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Radio } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -24,7 +24,13 @@ export function ChatList({ className }: { className?: string }) {
     <aside className={cn("flex h-full flex-col border-r border-ig-separator", className)}>
       <header className="flex min-h-[100px] shrink-0 items-center justify-between gap-4 px-6 pb-3 pt-6">
         <h1 className="flex min-w-0 items-center gap-2 text-xl font-bold"><span className="truncate">{me?.userName ?? "Instagram"}</span><ChevronDown aria-hidden className="size-4 shrink-0" /></h1>
-        <NewMessageDialog />
+        <span className="flex shrink-0 items-center gap-4">
+          {/* Efiri mustaqim (Spec 16 §3) */}
+          <Link href="/live" aria-label="Live videos" className="text-ig-icon">
+            <Radio className="size-6" />
+          </Link>
+          <NewMessageDialog />
+        </span>
       </header>
       <NotesTray />
       <h2 className="px-6 pb-4 pt-3 text-base font-bold">Messages</h2>
@@ -54,9 +60,15 @@ export function ChatList({ className }: { className?: string }) {
               ? "Sent a post"
               : last?.story
                 ? "Replied to a story"
-                : last?.fileType === "audio"
-                  ? "Sent a voice message"
-                  : "Sent an attachment");
+                : last?.call
+                  ? last.call.status === "MISSED" || last.call.status === "DECLINED"
+                    ? `Missed ${last.call.type === "VIDEO" ? "video" : "audio"} call`
+                    : `${last.call.type === "VIDEO" ? "Video" : "Audio"} call`
+                  : last?.fileType === "audio"
+                    ? "Sent a voice message"
+                    : last?.fileType === "video"
+                      ? "Sent a video"
+                      : "Sent an attachment");
           const author = last?.userId === me?.userId ? "You: " : chat.isGroup && last ? `${last.userName}: ` : "";
           const preview = last ? `${author}${body}` : "Start a conversation";
           // Paymi naxonda — matni gafs va nuqtai kabud, misli Instagram (Spec 13 §4)

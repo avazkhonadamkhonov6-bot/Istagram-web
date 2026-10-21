@@ -52,6 +52,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   private async dispatch(event: string, client: Socket, body: unknown): Promise<SocketAck> {
+    await (client.data.ready as Promise<void> | undefined);
     const userId = client.data.userId as string | undefined;
     const handler = this.handlers.get(event);
     if (!userId) return { ok: false, code: ErrorCode.UNAUTHORIZED };
@@ -97,6 +98,12 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   ) {}
 
   async handleConnection(client: Socket) {
+    // Event-hoe ki client favran pas az connect mefiristad, to anjomi auth intizor meshavand (dispatch)
+    client.data.ready = this.authenticate(client);
+    await client.data.ready;
+  }
+
+  private async authenticate(client: Socket) {
     const raw = (client.handshake.auth as { token?: unknown })?.token;
     const token = typeof raw === 'string' ? raw : '';
     try {

@@ -1,6 +1,6 @@
 # Render Blueprint: API-i umumi (NestJS) + PostgreSQL. Nomho bo xizmathoi mavjuda dar Render yakxela-and
-# (Istagram-web, instagram-db), DATABASE_URL-ro Render худаш az baza meguzorad.
-# Har `git push` ba main → Render худкор deploy mekunad (Auto-Deploy: On Commit); maʼlumoti baza nigoh doshta meshavad.
+# (Istagram-web, instagram-db), DATABASE_URL-ro Render xudash az baza meguzorad.
+# Har `git push` ba main → Render xudkor deploy mekunad (Auto-Deploy: On Commit); maʼlumoti baza nigoh doshta meshavad.
 # Frontend (Avaz va Abubakr) dar kompyuteri xud: apps/web/.env.local → API_URL va NEXT_PUBLIC_WS_URL = https://istagram-web.onrender.com
 services:
   - type: web

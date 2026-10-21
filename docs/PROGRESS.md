@@ -57,9 +57,9 @@
 ## RUZI 5
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | Deploy: Render (API + Postgres), faylho dar DB (MediaFile), seed-i худкор | | |
+| [x] | Deploy: Render (API + Postgres), faylho dar DB (MediaFile), seed-i xudkor | | |
 | [x] | BE-14 backend-i Spec 16: zang, paymi ovozi / video, efir | | |
-| [ ] | FE-30 Direct: zangi audio / video, paymi ovozi va video | [ ] | FE-31 Efiri mustaqim (Live) |
+| [x] | FE-30 Direct: zangi audio / video, paymi ovozi va video + sahifahoi efir (`/live`) | [ ] | FE-31 Darvozahoi efir (Create, story tray, notification) |
 
 ## Qaydho / masalaho
 - 2026-10-21: Kontrakti API ivaz shud — endpoint-ho aynan misli Swagger-i "Web Api" (`/Account/*`, `/Post/*`, `/Chat/*`...): [Spec 12](specs/12-api-kontrakt.md). URL/DTO-hoi spec-hoi 01–09 digar amal namekunand; qoidahoi amniyat boqi memonand.
@@ -79,67 +79,10 @@
 - 2026-10-21 (baroi Abubakr): dar `components/layout/bottom-nav.tsx` hydration mismatch: `href="/me"` dar server, `"/avaz"` dar client — linki profil boyad pas az mount ivaz shavad. Linkho ba `/accounts/privacy` (FE-24) ba `more-menu` / `settings-nav` ilova kuned.
 - 2026-10-21: [Spec 15](specs/15-funksiyahoi-ilovagi.md) — sanjishi backend bo Instagram: 15 endpoint-i nav (notes, remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, "Active now"). Seed: 40 user, 235 post (35 reel), 101 story, 9 note. API e2e 40/40; Direct va `/accounts/favorites|activity` dar brauzer sanjida shudand.
 - 2026-10-21 (baroi Abubakr): ranghoi ilovagii instagram.com dar Spec 10 §1.11.1 — ba `globals.css` ilova kuned (FE-29). Pas az `db:seed` user-ho nav meshavand — dar brauzer az nav login kuned.
-- 2026-10-22: Deploy ba Render. API: https://istagram-web.onrender.com, Swagger: https://istagram-web.onrender.com/swagger. Baroi kor bo bazai umumi dar `apps/web/.env.local`: `API_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_WS_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_API_MOCKING=off`. Har `git push` ba `main` → Render худкор deploy mekunad, maʼlumoti baza nigoh doshta meshavad. Plan-i free: pas az 15 daq. bekori server "xob" meravad (darxosti avval ~50 s); bazai free pas az 30 ruz muhlatash meguzarad.
+- 2026-10-22: Deploy ba Render. API: https://istagram-web.onrender.com, Swagger: https://istagram-web.onrender.com/swagger. Baroi kor bo bazai umumi dar `apps/web/.env.local`: `API_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_WS_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_API_MOCKING=off`. Har `git push` ba `main` → Render xudkor deploy mekunad, maʼlumoti baza nigoh doshta meshavad. Plan-i free: pas az 15 daq. bekori server "xob" meravad (darxosti avval ~50 s); bazai free pas az 30 ruz muhlatash meguzarad.
 - 2026-10-22: [Spec 16](specs/16-zang-va-efir.md) — zangi audio / video (WebRTC, server — signaling), paymi ovozi / video bo `Duration`, efiri mustaqim. 12 endpoint-i nav, socket `call:*` va `live:*`. API e2e 48/48. Front: FE-30 (Avaz), FE-31 (Abubakr).
+- 2026-10-22: FE-30 tayyor va dar du brauzer (avaz + abubakr) sanjida shud: zangi audio va video (tasvir va ovoz har du taraf, mute, kamera, rad → "Call declined", paymi zang + "Call back"), paymi ovozi va video (MP4, ovoz dar fayl sanjida shud), efir (video + ovoz, comment, dil, anjom). Xatohoi yoftshuda va islohshuda: `myId` pas az zang pok meshud; `scrollIntoView` dar Chrome-i nav Promise bar megardonad (effect-i efir vayron meshud); poygai join dar efir (token + watchdog 8 s); event-hoi socket pesh az auth (server akkun intizor meshavad); paymi ovozii MP4 qismi avvalro gum mekard (bidun timeslice).
+- 2026-10-22 (muhim): zang va efir bevosita bayni brauzerho meravand (WebRTC). Dar yak shabaka yo bo aksari internet-ho STUN kifoya ast; agar bayni du shabakai gunogun (masalan, Wi-Fi va internet-i mobil) ovoz / video naoyad — serveri TURN lozim: dar Render ba `Istagram-web` → Environment `TURN_URLS`, `TURN_USERNAME`, `TURN_CREDENTIAL` guzoshta meshavad (masalan, hisobi roygoni Metered yo Cloudflare). OpenRelay-i ozod sanjida shud — kor namekunad.
+- 2026-10-22 (baroi hardu): dar rejimi production (`next build` + `next start`) sahifahoi statiki (login va g.) nonce-i CSP nadorand va skriptho bastа meshavand (Next 16: nonce faqat dar rendering-i dinamiki). Hal — dar root layout `await connection()` (fayli umumi, `src/app/layout.tsx`) yo CSP bidun nonce. Dar `pnpm dev` kor mekunad. Hanuz isloh nashudaast.
+- 2026-10-22 (baroi Abubakr): hydration mismatch dar `sidebar.tsx` va `bottom-nav.tsx` (`/me` dar server, `/avaz` dar client) hanuz hast.
 
-## Frontend Abubakr — 2026-10-21
-
-- FE-01…FE-22 (faqat vazifahoi Abubakr) tatbiq shudand; `[~]` = frontend tayyor,
-  ammo talabi alohida endpoint-i ilovagii API yo reference-i vizual mehohad.
-  Tafsilot va kodhoi masalaho: [QA-02](qa/QA-02.md).
-- Next.js production build, TypeScript va ESLint sabz; 18 UI + 5 live UI sanjish
-  sabz; 24 testi mavjudi API biduni tagyiri kodi Avaz sabz.
-- Lighthouse desktop: feed 100 performance / 100 accessibility; profile 100 / 100.
-  135 sanjishi tokenho ba Spec 10 mos; hardcoded color dar components/features = 0.
-- Feed-i 200 post: hamai sahifaho bor meshavand, article-hoi mounted ≤15.
-- Root layout bo `connection()` + `instant = false` server-rendered ast, to nonce
-  CSP-i mavjuda dar production kor kunad. Proxy, BFF, Direct, socket va shared
-  tagyir nayoftand.
-- API-FE-06/09/10/16/18: username availability-i public, edit name/username/website,
-  remove follower, viewers list va location baroi post dar kontrakt nestand.
-  Inho bo xulosa «tayyor» pushonida nashudaand.
-
-## Визуальная переработка — 2026-10-21
-
-- Общая палитра приближена к классическому Instagram Web: чёрный/белый фон,
-  нейтральные разделители и синие кнопки. Это намеренное изменение прежних
-  серо-синих токенов Spec 10 по запросу пользователя.
-- Login / Signup: локальный SVG-логотип, поля 38px с плавающими подписями,
-  исправленный autofill, адаптивные карточки, footer. На Login — локальные
-  фотографии в макетах телефонов с плавным переключением.
-- Direct: компактная навигация 72px, исправлен отступ основного содержимого,
-  адаптивный список чатов, общий QueryClient вместо вложенного провайдера.
-- Добавлены анимации открытия/закрытия диалогов, лайка и наведения;
-  учитывается prefers-reduced-motion. Индикатор Next отключён в конфигурации
-  (для уже работающего dev-сервера может понадобиться перезапуск).
-- Проверено: TypeScript и 6 существующих Playwright-тестов (навигация/лента
-  на трёх ширинах, уведомления, сохранение темы, валидация регистрации);
-  Chromium — Login / Signup в обеих темах,
-  поля 38px, загрузка фотографий; Direct на 1440 / 1000 / 390px,
-  открытие/закрытие New message, отсутствие горизонтального overflow и
-  необработанных ошибок JavaScript. Авторизация и доставка сообщений через
-  реальный API в этой проверке не проверялись.
-- Это приближение к интерфейсу Instagram, а не подтверждённая pixel-perfect
-  копия всех его текущих экранов. Facebook OAuth и восстановление пароля
-  требуют отдельных API, поэтому не добавлены как неработающие кнопки.
-
-## Интеграция с общим Render — 2026-10-22
-
-- Изменения партнёра Spec 14–16 сверены с опубликованным Swagger (143 маршрута).
-- Наш web настроен на общий HTTP/Socket backend; устранён неверный
-  Content-Length сжатых ответов, из-за которого лента не загружалась.
-- Подключены Favorites feed, User Reels, Remove follower, Requested/private,
-  Location/Close Friends при публикации, Story reply, comment like/pin,
-  Confirm/Delete заявок и навигация новых настроек.
-- Build/TypeScript, 25 MSW UI-сценариев, read-only контракт Render и
-  production UI smoke с настоящим Login/BFF проходят.
-  Детали, воспроизводимые команды и оставшиеся задачи:
-  [RENDER-INTEGRATION](qa/RENDER-INTEGRATION.md).
-
-### Следующая сессия
-
-По договорённости сохраняем текущую интеграцию на GitHub и продолжаем позже.
-Следующий шаг: завершить оставшиеся элементы FE-26/29 (Highlights, TAGGED,
-коллекции, действия с постами/профилями), затем FE-31 (Live).
-FE-30 (интерфейс звонков) — задача Аваза. После реализации — финальная
-проверка с Render и на мобильном экране, актуализация статусов в TASKS.md.
