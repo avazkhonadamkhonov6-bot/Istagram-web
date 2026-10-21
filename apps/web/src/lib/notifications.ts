@@ -58,6 +58,9 @@ export function notificationText(n: NotificationDto): string {
       return n.commentText ? `mentioned you in a comment: ${n.commentText}` : "mentioned you in a post.";
     case "TAG":
       return "tagged you in a post.";
+    // Spec 16 §3
+    case "LIVE_STARTED":
+      return "started a live video.";
   }
 }
 

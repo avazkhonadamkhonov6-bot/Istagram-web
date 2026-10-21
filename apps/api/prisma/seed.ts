@@ -196,9 +196,9 @@ async function main() {
   const storyFiles = await pool(Array.from({ length: 80 }, (_, i) => () => photo(`story${i}`, 1080, 1920)));
   // Nusxai media dar DB (MediaFile): server-i Render faylhoro az DB bargardonad
   const used = new Set([...avatars, ...videos, ...postFiles.flat(), ...storyFiles]);
-  const saved = new Set((await prisma.mediaFile.findMany({ where: { name: { in: [...used] } }, select: { name: true } })).map((f) => f.name));
+  const stored = new Set((await prisma.mediaFile.findMany({ where: { name: { in: [...used] } }, select: { name: true } })).map((f) => f.name));
   for (const name of used) {
-    if (!saved.has(name)) await prisma.mediaFile.create({ data: { name, data: readFileSync(join(uploadDir, name)) } });
+    if (!stored.has(name)) await prisma.mediaFile.create({ data: { name, data: readFileSync(join(uploadDir, name)) } });
   }
   console.log('Media tayyor. DB pur meshavad...');
 

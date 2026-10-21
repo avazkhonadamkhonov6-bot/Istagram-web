@@ -8,3 +8,5 @@ export * from './schemas/chat';
 export * from './schemas/location';
 export * from './schemas/notification';
 export * from './schemas/note';
+export * from './schemas/call';
+export * from './schemas/live';

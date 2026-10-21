@@ -10,8 +10,10 @@ import { StatusOkInterceptor } from './common/status.interceptor';
 import { loadConfig } from './infra/config';
 import { InfraModule } from './infra/infra.module';
 import { AccountModule } from './modules/account/account.module';
+import { CallsModule } from './modules/calls/calls.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { FollowsModule } from './modules/follows/follows.module';
+import { LiveModule } from './modules/live/live.module';
 import { LocationModule } from './modules/location/location.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -52,6 +54,8 @@ const config = loadConfig();
     UsersModule,
     StoriesModule,
     ChatModule,
+    CallsModule,
+    LiveModule,
     LocationModule,
     NotesModule,
     NotificationsModule,

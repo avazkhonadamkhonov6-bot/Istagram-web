@@ -13,6 +13,8 @@ export const NOTIFICATION_TYPES = [
   'COMMENT_LIKE',
   'MENTION',
   'TAG',
+  // Spec 16 §3: "X started a live video"
+  'LIVE_STARTED',
 ] as const;
 
 export const notificationDtoSchema = z.object({

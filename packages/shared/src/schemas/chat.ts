@@ -14,6 +14,8 @@ export const sendMessageBodySchema = z.object({
   /** Spec 14 §3–4 */
   SharedStoryId: z.coerce.number().int().positive().optional(),
   ReplyToMessageId: z.coerce.number().int().positive().optional(),
+  /** Spec 16 §1: davomnokii paymi ovozi / video (soniya), baroi namoish dar UI */
+  Duration: z.coerce.number().int().min(0).max(3600).optional(),
 });
 
 /** Group chat (Spec 14 §4) */
@@ -51,6 +53,18 @@ export const messageDtoSchema = z.object({
     .default(null),
   /** Spec 15 §3: vaqti tahrir */
   editedAt: z.string().nullable().default(null),
+  /** Spec 16 §1: soniyaho (paymi ovozi / video) */
+  durationSec: z.number().int().nullable().default(null),
+  /** Spec 16 §2: paymi "zang" dar chat (Audio call · 3:12, Missed video call) */
+  call: z
+    .object({
+      callId: z.number().int(),
+      type: z.enum(['AUDIO', 'VIDEO']),
+      status: z.enum(['RINGING', 'ONGOING', 'ENDED', 'MISSED', 'DECLINED']),
+      durationSec: z.number().int(),
+    })
+    .nullable()
+    .default(null),
 });
 export type MessageDto = z.infer<typeof messageDtoSchema>;
 
@@ -90,4 +104,30 @@ export const SocketEvent = {
   NOTIFICATION_NEW: 'notification:new',
   /** Like-i paym (Spec 14 §4) */
   MESSAGE_UPDATED: 'message:updated',
+  /** Spec 16 §2: zang (server → client: CallDto; `call:signal` — { callId, fromUserId, signal }) */
+  CALL_INCOMING: 'call:incoming',
+  CALL_ACCEPTED: 'call:accepted',
+  CALL_DECLINED: 'call:declined',
+  CALL_LEFT: 'call:left',
+  CALL_ENDED: 'call:ended',
+  CALL_SIGNAL: 'call:signal',
+  /** Spec 16 §3: efir */
+  LIVE_STARTED: 'live:started',
+  LIVE_ENDED: 'live:ended',
+  LIVE_VIEWER_JOINED: 'live:viewer-joined',
+  LIVE_VIEWER_LEFT: 'live:viewer-left',
+  LIVE_VIEWERS: 'live:viewers',
+  LIVE_COMMENT: 'live:comment',
+  LIVE_HEART: 'live:heart',
+  LIVE_SIGNAL: 'live:signal',
+} as const;
+
+/** Event-hoi Socket.IO (client → server), Spec 16. Javob — ack `{ ok: true, data? }` yo `{ ok: false, code }` */
+export const ClientEvent = {
+  TYPING: 'typing',
+  CALL_SIGNAL: 'call:signal',
+  LIVE_JOIN: 'live:join',
+  LIVE_LEAVE: 'live:leave',
+  LIVE_SIGNAL: 'live:signal',
+  LIVE_HEART: 'live:heart',
 } as const;

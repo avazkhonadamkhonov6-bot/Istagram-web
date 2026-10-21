@@ -38,6 +38,14 @@ export const ErrorCode = {
   COMMENT_PIN_LIMIT: 'COMMENT_PIN_LIMIT',
   FAVORITES_LIMIT: 'FAVORITES_LIMIT',
   NOTE_NOT_FOUND: 'NOTE_NOT_FOUND',
+  /** Spec 16 */
+  CALL_NOT_FOUND: 'CALL_NOT_FOUND',
+  CALL_BUSY: 'CALL_BUSY',
+  CALL_NOT_ACTIVE: 'CALL_NOT_ACTIVE',
+  LIVE_NOT_FOUND: 'LIVE_NOT_FOUND',
+  LIVE_ALREADY_STARTED: 'LIVE_ALREADY_STARTED',
+  LIVE_NOT_ACTIVE: 'LIVE_NOT_ACTIVE',
+  LIVE_FULL: 'LIVE_FULL',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -81,4 +89,11 @@ export const ErrorMessage: Record<ErrorCode, string> = {
   COMMENT_PIN_LIMIT: 'Maks. 3 comment pin kardan mumkin ast',
   FAVORITES_LIMIT: 'Dar Favorites maks. 50 nafar',
   NOTE_NOT_FOUND: 'Note yoft nashud',
+  CALL_NOT_FOUND: 'Zang yoft nashud',
+  CALL_BUSY: 'Shumo hozir dar zangi digar hasted',
+  CALL_NOT_ACTIVE: 'Zang allakay tamom shudaast',
+  LIVE_NOT_FOUND: 'Efir yoft nashud',
+  LIVE_ALREADY_STARTED: 'Shumo allakay dar efir hasted',
+  LIVE_NOT_ACTIVE: 'Efir tamom shudaast',
+  LIVE_FULL: 'Dar efir joi xoli nest',
 };

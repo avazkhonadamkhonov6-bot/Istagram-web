@@ -35,8 +35,12 @@ Prioritetho: **P0** — hatman dar 4 ruz · **P1** — boyad boshad, agar vaqt r
 | 19 | Direct: dil-i paym, reply, paymi ovozi, javob ba story | Spec 14 §3–4 | P0 (az 2026-10-21) |
 | 20 | Notes, tahriri paym, "Active now" dar Direct | [Spec 15](specs/15-funksiyahoi-ilovagi.md) §3–5 | P0 (az 2026-10-21) |
 | 21 | Remove follower, Favorites + feed, pin-i comment, reels-i profil, "Your activity" | Spec 15 §1, §2, §6 | P0 (az 2026-10-21) |
+| 22 | Direct: zangi audio va video (1:1 va group), paymi ovozi va video bo davomnoki | [Spec 16](specs/16-zang-va-efir.md) §1–2 | P0 (az 2026-10-22) |
+| 23 | Efiri mustaqim (Live): ogoz, tamosho, comment, dil, xabar ba follower-ho | Spec 16 §3 | P0 (az 2026-10-22) |
+| 24 | Deploy: API va bazai umumi dar Render (har `git push` → deploy) | [PROGRESS](PROGRESS.md) | P0 (az 2026-10-22) |
 
 > 2026-10-21: qaror — "nusxai purrai Instagram". Funksiyahoi 15–21 az P2 ba P0 guzaronida shudand (20–21 — Spec 15); backend — tayyor (Spec 14), frontend — Avaz (Direct, `/accounts/*`, location) va Abubakr (sahifahoi xud, FE-26).
+> 2026-10-22: funksiyahoi 22–24 ilova shudand; backend — tayyor (Spec 16), frontend — Avaz (FE-30: zang va paymi ovozi / video dar Direct), Abubakr (FE-31: efir).
 
 ## 3. Talaboti asosi ba Auth
 

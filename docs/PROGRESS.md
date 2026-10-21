@@ -4,7 +4,7 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir (2026-10-21, shom):** Spec 14 va Spec 15-i Avaz tayyor (BE-13, FE-23…FE-25, FE-27, FE-28); API e2e 40/40. Navbat — Abubakr: FE-12, FE-16, FE-18, FE-20, FE-22, FE-26, FE-29.
+**Hozir (2026-10-22):** API dar Render: https://istagram-web.onrender.com (Swagger — `/swagger`), baza umumi — Avaz va Abubakr bo yak maʼlumot kor mekunand. Backend-i [Spec 16](specs/16-zang-va-efir.md) (zang, paymi ovozi / video, efir) tayyor, e2e 48/48. Navbat — FE-30 (Avaz), FE-31 (Abubakr), FE-26, FE-29.
 **Pesh az in:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
 
 ## Hujjatho
@@ -54,6 +54,13 @@
 | [x] | FE-28 `/accounts/favorites`, `/accounts/activity` | | |
 | [ ] | README, `v0.2`, demo | | |
 
+## RUZI 5
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [x] | Deploy: Render (API + Postgres), faylho dar DB (MediaFile), seed-i худкор | | |
+| [x] | BE-14 backend-i Spec 16: zang, paymi ovozi / video, efir | | |
+| [ ] | FE-30 Direct: zangi audio / video, paymi ovozi va video | [ ] | FE-31 Efiri mustaqim (Live) |
+
 ## Qaydho / masalaho
 - 2026-10-21: Kontrakti API ivaz shud — endpoint-ho aynan misli Swagger-i "Web Api" (`/Account/*`, `/Post/*`, `/Chat/*`...): [Spec 12](specs/12-api-kontrakt.md). URL/DTO-hoi spec-hoi 01–09 digar amal namekunand; qoidahoi amniyat boqi memonand.
 - 2026-10-21: To P1 buridashud: Redis/BullMQ, Notifications, presign S3, refresh token (Spec 12 §10).
@@ -72,3 +79,5 @@
 - 2026-10-21 (baroi Abubakr): dar `components/layout/bottom-nav.tsx` hydration mismatch: `href="/me"` dar server, `"/avaz"` dar client — linki profil boyad pas az mount ivaz shavad. Linkho ba `/accounts/privacy` (FE-24) ba `more-menu` / `settings-nav` ilova kuned.
 - 2026-10-21: [Spec 15](specs/15-funksiyahoi-ilovagi.md) — sanjishi backend bo Instagram: 15 endpoint-i nav (notes, remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, "Active now"). Seed: 40 user, 235 post (35 reel), 101 story, 9 note. API e2e 40/40; Direct va `/accounts/favorites|activity` dar brauzer sanjida shudand.
 - 2026-10-21 (baroi Abubakr): ranghoi ilovagii instagram.com dar Spec 10 §1.11.1 — ba `globals.css` ilova kuned (FE-29). Pas az `db:seed` user-ho nav meshavand — dar brauzer az nav login kuned.
+- 2026-10-22: Deploy ba Render. API: https://istagram-web.onrender.com, Swagger: https://istagram-web.onrender.com/swagger. Baroi kor bo bazai umumi dar `apps/web/.env.local`: `API_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_WS_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_API_MOCKING=off`. Har `git push` ba `main` → Render худкор deploy mekunad, maʼlumoti baza nigoh doshta meshavad. Plan-i free: pas az 15 daq. bekori server "xob" meravad (darxosti avval ~50 s); bazai free pas az 30 ruz muhlatash meguzarad.
+- 2026-10-22: [Spec 16](specs/16-zang-va-efir.md) — zangi audio / video (WebRTC, server — signaling), paymi ovozi / video bo `Duration`, efiri mustaqim. 12 endpoint-i nav, socket `call:*` va `live:*`. API e2e 48/48. Front: FE-30 (Avaz), FE-31 (Abubakr).

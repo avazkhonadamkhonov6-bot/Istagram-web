@@ -25,6 +25,11 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   UPLOAD_DIR: z.string().default('uploads'),
   PUBLIC_URL: z.string().url().default('http://localhost:4000'),
+  // Zang va efir (Spec 16): STUN-i ozod; TURN — baroi shabakahoi mahdud (masalan turn:host:3478, bo vergul)
+  STUN_URLS: z.string().default('stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302'),
+  TURN_URLS: z.string().optional(),
+  TURN_USERNAME: z.string().optional(),
+  TURN_CREDENTIAL: z.string().optional(),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

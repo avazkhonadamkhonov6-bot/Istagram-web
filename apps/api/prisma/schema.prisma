@@ -59,6 +59,10 @@ model User {
   chatMembers      ChatMember[]
   messageLikes     MessageLike[]
   note             Note?
+  callsMade        Call[]            @relation("caller")
+  callParts        CallParticipant[]
+  liveStreams      LiveStream[]
+  liveComments     LiveComment[]
 }
 
 /// Notes (Spec 15 §5): yak note-i faol baroi har user, 24 soat
@@ -391,6 +395,7 @@ model Chat {
   sendUser          User         @relation("sendUser", fields: [sendUserId], references: [id], onDelete: Cascade)
   receiveUser       User         @relation("receiveUser", fields: [receiveUserId], references: [id], onDelete: Cascade)
   messages          Message[]
+  calls             Call[]
 
   @@index([sendUserId])
   @@index([receiveUserId])
@@ -407,7 +412,10 @@ model Message {
   storyId      Int? // javob / share-i story (Spec 14 §3)
   replyToId    Int?
   editedAt     DateTime? // Spec 15 §3
+  durationSec  Int? // davomnokii paymi ovozi / video (Spec 16 §1)
+  callId       Int? // paymi "zang" dar chat (Spec 16 §2)
   createdAt    DateTime      @default(now())
+  call         Call?         @relation(fields: [callId], references: [id], onDelete: SetNull)
   chat         Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   sharedPost   Post?         @relation(fields: [sharedPostId], references: [id], onDelete: SetNull)
@@ -474,6 +482,7 @@ enum NotificationType {
   COMMENT_LIKE
   MENTION
   TAG
+  LIVE_STARTED
 }
 
 /// Spec 13 §1
@@ -501,4 +510,80 @@ model MediaFile {
   name      String   @id // hamon nomi fayl dar /images/<name>
   data      Bytes
   createdAt DateTime @default(now())
+}
+
+/// Zangi audio / video dar Direct (Spec 16 §2). Media bevosita bayni brauzerho (WebRTC), server — faqat signaling.
+enum CallType {
+  AUDIO
+  VIDEO
+}
+
+enum CallStatus {
+  RINGING
+  ONGOING
+  ENDED
+  MISSED
+  DECLINED
+}
+
+model Call {
+  id           Int               @id @default(autoincrement())
+  chatId       Int
+  callerId     String
+  type         CallType
+  status       CallStatus        @default(RINGING)
+  createdAt    DateTime          @default(now())
+  answeredAt   DateTime?
+  endedAt      DateTime?
+  chat         Chat              @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  caller       User              @relation("caller", fields: [callerId], references: [id], onDelete: Cascade)
+  participants CallParticipant[]
+  messages     Message[]
+
+  @@index([chatId, createdAt])
+}
+
+/// Ishtirokchii zang: joinedAt — qabul kard, leftAt — baromad
+model CallParticipant {
+  callId   Int
+  userId   String
+  joinedAt DateTime?
+  leftAt   DateTime?
+  call     Call      @relation(fields: [callId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([callId, userId])
+  @@index([userId])
+}
+
+/// Efiri mustaqim (Spec 16 §3)
+enum LiveStatus {
+  LIVE
+  ENDED
+}
+
+model LiveStream {
+  id          Int           @id @default(autoincrement())
+  userId      String
+  title       String?       @db.VarChar(100)
+  status      LiveStatus    @default(LIVE)
+  startedAt   DateTime      @default(now())
+  endedAt     DateTime?
+  peakViewers Int           @default(0)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments    LiveComment[]
+
+  @@index([userId, status])
+}
+
+model LiveComment {
+  id        Int        @id @default(autoincrement())
+  liveId    Int
+  userId    String
+  text      String     @db.VarChar(150)
+  createdAt DateTime   @default(now())
+  live      LiveStream @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([liveId, createdAt])
 }

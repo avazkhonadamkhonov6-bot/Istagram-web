@@ -21,6 +21,7 @@ const messageInclude = {
   likes: { select: { userId: true } },
   replyTo: { select: { id: true, messageText: true, file: true, user: { select: { userName: true } } } },
   story: { select: { id: true, fileName: true, expiresAt: true, user: { select: { userName: true } } } },
+  call: { select: { id: true, type: true, status: true, answeredAt: true, endedAt: true } },
 } satisfies Prisma.MessageInclude;
 type MessageRow = Prisma.MessageGetPayload<{ include: typeof messageInclude }>;
 
@@ -67,7 +68,13 @@ export type SendOptions = {
   sharedPostId?: number;
   sharedStoryId?: number;
   replyToId?: number;
+  /** Spec 16 §1: davomnokii paymi ovozi / video */
+  durationSec?: number;
 };
+
+/** Davomnokii zang: az qabul to anjom (soniya) */
+export const callDurationSec = (c: { answeredAt: Date | null; endedAt: Date | null }) =>
+  c.answeredAt && c.endedAt ? Math.max(0, Math.round((c.endedAt.getTime() - c.answeredAt.getTime()) / 1000)) : 0;
 
 @Injectable()
 export class ChatService {
@@ -98,6 +105,8 @@ export class ChatService {
         ? { storyId: m.story.id, fileName: m.story.fileName, userName: m.story.user.userName, isExpired: m.story.expiresAt < new Date() }
         : null,
       editedAt: m.editedAt?.toISOString() ?? null,
+      durationSec: m.durationSec,
+      call: m.call ? { callId: m.call.id, type: m.call.type, status: m.call.status, durationSec: callDurationSec(m.call) } : null,
     };
   }
 
@@ -284,7 +293,7 @@ export class ChatService {
   }
 
   async sendMessage(me: string, chatId: number, opts: SendOptions, storyReplyId?: number) {
-    const { text, file, sharedPostId, sharedStoryId, replyToId } = opts;
+    const { text, file, sharedPostId, sharedStoryId, replyToId, durationSec } = opts;
     if (!text && !file && !sharedPostId && !sharedStoryId) throw badRequest(ErrorCode.VALIDATION_ERROR);
     const chat = await this.assertMember(me, chatId);
     if (!chat.isGroup && (await this.relations.isBlockedEither(me, chat.peers[0]!))) throw forbidden(ErrorCode.BLOCKED);
@@ -314,6 +323,8 @@ export class ChatService {
           sharedPostId: sharedPostId ?? null,
           storyId: storyId ?? null,
           replyToId: replyToId ?? null,
+          // Davomnoki faqat baroi audio / video
+          durationSec: file && this.storage.fileType(file.mimetype) !== 'image' ? (durationSec ?? null) : null,
         },
         include: messageInclude,
       });
@@ -326,6 +337,22 @@ export class ChatService {
     // Manba'i haqiqat — DB; socket faqat xabar medihad
     this.emit(chat.peers, SocketEvent.MESSAGE_NEW, dto);
     return dto;
+  }
+
+  /**
+   * Paymi "zang" dar chat pas az anjomi zang (Spec 16 §2): az nomi zangzananda,
+   * ba hamai a'zo (ba zangzananda ham) `message:new` meravad.
+   */
+  async addCallMessage(chatId: number, callerId: string, callId: number) {
+    const chat = await this.prisma.chat.findUnique({ where: { id: chatId }, select: chatMetaSelect });
+    if (!chat) return;
+    const message = await this.prisma.$transaction(async (tx) => {
+      const m = await tx.message.create({ data: { chatId, userId: callerId, callId }, include: messageInclude });
+      await tx.chat.update({ where: { id: chatId }, data: { lastMessageAt: m.createdAt } });
+      return m;
+    });
+    const members = chat.isGroup ? chat.members.map((m) => m.userId) : [chat.sendUserId, chat.receiveUserId];
+    this.emit(members, SocketEvent.MESSAGE_NEW, this.toMessageDto(message));
   }
 
   /** Javob ba story → paym dar Direct-i muallif (Spec 14 §3) */

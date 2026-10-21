@@ -209,6 +209,8 @@ export function useSendMessage(chatId: number) {
         replyTo: replyTo ? { messageId: replyTo.messageId, userName: replyTo.userName, text: replyTo.messageText } : null,
         story: null,
         editedAt: null,
+        durationSec: null,
+        call: null,
         pending: true,
       };
       qc.setQueryData<UiMessage[]>(key, (old = []) => [...old, optimistic]);

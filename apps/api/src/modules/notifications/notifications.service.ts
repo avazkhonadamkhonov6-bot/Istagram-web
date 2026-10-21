@@ -37,6 +37,9 @@ export function notificationKey(e: Event): string {
       return `MENTION:${e.actorId}:${e.recipientId}:${e.postId}:${e.commentId ?? 0}`;
     case 'TAG':
       return `TAG:${e.postId}:${e.recipientId}`;
+    // Spec 16 §3: efiri nav → notification-i kuhna navsozi meshavad
+    case 'LIVE_STARTED':
+      return `LIVE_STARTED:${e.actorId}:${e.recipientId}`;
     default:
       return `${e.type}:${e.commentId}`;
   }

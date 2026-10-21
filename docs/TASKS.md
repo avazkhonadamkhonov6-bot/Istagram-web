@@ -469,3 +469,49 @@
 
 **Tayyor, agar:**
 - [ ] Spec 14 AC1–AC8 az UI kor mekunand
+
+---
+
+## Spec 16 — Zang, paymi ovozi / video, efir
+
+### BE-14 · Backend-i Spec 16
+<!-- who:avaz day:5 type:backend -->
+**Spec:** [16](specs/16-zang-va-efir.md) §1–3
+
+**Tayyor, agar:**
+- [x] `/Call/*` (start, accept, decline, end, active, history, ICE servers) + socket `call:*`, MISSED pas az 45 s, offline → baromadan
+- [x] `/Live/*` (start, end, get-lives, comments) + socket `live:*` (join, leave, signal, heart), maks. 50 tamoshobin, notification `LIVE_STARTED`
+- [x] `send-message` + `Duration` → `MessageDto.durationSec`; paymi "zang" (`MessageDto.call`)
+- [x] e2e: `spec16.e2e-spec.ts` (7 test), hamagi 48/48
+- [x] Render: API dar https://istagram-web.onrender.com, Swagger — `/swagger`, `git push` ba main → deploy-i худкор
+
+### FE-30 · Direct: zangi audio / video, paymi ovozi va video
+<!-- who:avaz day:5 type:frontend -->
+**Spec:** 16 §1–2, §5 · API: `/Call/*`, `PUT /Chat/send-message` + `Duration`, socket `call:*`
+
+- `features/rtc/`: `getIceServers`, `useCall` (RTCPeerConnection, offer / answer / ICE bo `call:signal`), `useLive` (baroi FE-31)
+- Header-i chat: ikonkahoi telefon va kamera → `start-call`
+- Ekrani zang: avatar, "Calling…" / vaqt, mute, kamera on/off, ivazi kamera, end; video-i xud dar kunj
+- Zangi voridshavanda: modal dar har sahifa (`call:incoming`) + ringtone, Accept / Decline; pas az refresh — `get-active-calls`
+- Paymi "zang" dar chat: "Audio call · 3:12", "Missed video call", "Call back"
+- Paymi ovozi: `MediaRecorder`, pahsh karda nigoh dor / kashidan — bekor, mavj va vaqt, `Duration`
+- Paymi video: navishtan to 60 s yo intixobi fayl, player bo davomnoki
+
+**Tayyor, agar:**
+- [ ] Spec 16 AC1–AC5 az UI kor mekunand
+- [ ] Zangi audio va video dar du brauzer bo API-i Render sanjida shud (ovoz va tasvir har du taraf)
+- [ ] Mobil 375px
+
+### FE-31 · Efiri mustaqim (Live)
+<!-- who:abubakr day:5 type:frontend -->
+**Spec:** 16 §3, §5 · API: `/Live/*`, socket `live:*`, hook-i `useLive` az FE-30
+
+- Create → "LIVE": preview-i kamera, unvon, `start-live`
+- Ekrani muallif: "LIVE" + shumorai tamoshobinho, comment-ho (ba bolo), dil-ho, "End"
+- Story tray: halqai surxi "LIVE" (`get-lives`, `live:started`)
+- Sahifai tamosho: video, comment, dil (`live:heart`), "Live video ended" (`live:ended`)
+- Notifications: `LIVE_STARTED` → "started a live video." → sahifai efir
+
+**Tayyor, agar:**
+- [ ] Spec 16 AC6–AC7 az UI kor mekunand
+- [ ] Efir dar du brauzer bo API-i Render sanjida shud (muallif + 2 tamoshobin)

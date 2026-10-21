@@ -56,6 +56,7 @@ export class ChatController {
         sharedPostId: body.SharedPostId,
         sharedStoryId: body.SharedStoryId,
         replyToId: body.ReplyToMessageId,
+        durationSec: body.Duration,
       }),
     );
   }
