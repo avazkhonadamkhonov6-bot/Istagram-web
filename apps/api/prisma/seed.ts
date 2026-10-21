@@ -6,7 +6,8 @@
  *
  * Media az internet bor meshavad va dar UPLOAD_DIR kesh meshavad (ijroi duyum — bidun internet):
  *  - aksho: picsum.photos (Unsplash, litsenziyai ozod), avatar-ho: i.pravatar.cc
- *  - video-ho: assets.mixkit.co (Mixkit Free License)
+ *  - video-hoi story: assets.mixkit.co (Mixkit Free License, bidun ovoz)
+ *  - video-hoi reels (bo ovoz): Blender open movies (CC-BY 3.0), MDN (CC0), W3C, samplelib — ruyxat: scripts/reel-videos.js
  * Agar internet naboshad — aksi rangini PNG (seed kor mekunad).
  * Ijro: pnpm --filter api db:seed
  */
@@ -25,7 +26,7 @@ const PNG = Buffer.from(
   'base64',
 );
 
-/** Video-hoi amudii 720x1280 (Mixkit) */
+/** Video-hoi amudii 720x1280 (Mixkit) — track-i audio nadorand, faqat baroi story */
 const VIDEO_IDS = [1173, 1232, 34487, 39767, 34404, 39875, 50000, 34405, 39880, 42298, 43483, 45351, 47583, 49076];
 
 // Tasodufii doimi — har ijro hamon natija
@@ -92,6 +93,8 @@ const photo = (seed: string, w = 1080, h = 1350) => {
 };
 const avatar = (img: number) => download(`https://i.pravatar.cc/320?img=${img}`, `seed-avatar-${img}.jpg`);
 const video = (id: number) => download(`https://assets.mixkit.co/videos/${id}/${id}-720.mp4`, `seed-video-${id}.mp4`);
+// Reels: video-hoi bo ovozi voqe'i (hamon ruyxat dar skripti Render-i reels-sound.js)
+const REEL_VIDEOS: { url: string; file: string }[] = require('../scripts/reel-videos.js');
 
 const PEOPLE = [
   { userName: 'avaz', fullName: 'Avaz Adamkhonov', about: 'Developer. Dushanbe.\nInstagram clone — 4 ruz', img: 12 },
@@ -170,6 +173,7 @@ async function main() {
   const avatars = await pool(PEOPLE.map((p) => () => avatar(p.img)));
   const videos = await pool(VIDEO_IDS.map((id) => () => video(id)), 3);
   const mp4 = videos.filter((f) => f.endsWith('.mp4'));
+  const reelVideos = (await pool(REEL_VIDEOS.map((v) => () => download(v.url, v.file)), 3)).filter((f) => f.endsWith('.mp4'));
 
   // Postho: har user 4–6, har chorumi — carousel
   type PlannedPost = { owner: number; images: (() => Promise<string>)[]; caption: string; location: string | null; hoursAgo: number };
@@ -195,7 +199,7 @@ async function main() {
   const postFiles = await pool(planned.map((p) => () => Promise.all(p.images.map((f) => f()))));
   const storyFiles = await pool(Array.from({ length: 80 }, (_, i) => () => photo(`story${i}`, 1080, 1920)));
   // Nusxai media dar DB (MediaFile): server-i Render faylhoro az DB bargardonad
-  const used = new Set([...avatars, ...videos, ...postFiles.flat(), ...storyFiles]);
+  const used = new Set([...avatars, ...videos, ...reelVideos, ...postFiles.flat(), ...storyFiles]);
   const stored = new Set((await prisma.mediaFile.findMany({ where: { name: { in: [...used] } }, select: { name: true } })).map((f) => f.name));
   for (const name of used) {
     if (!stored.has(name)) await prisma.mediaFile.create({ data: { name, data: readFileSync(join(uploadDir, name)) } });
@@ -272,7 +276,7 @@ async function main() {
     }
   }
 
-  // Reels — video-hoi amudi
+  // Reels — video-hoi bo ovoz
   const REEL_OWNERS = [
     'pamir.travel', 'nature.tj', 'sitora.music', 'rustam.fit', 'dushanbe.life', 'farrukh.photo', 'travel.with.ali', 'behruz.drone',
     'kamila.dance', 'davron.music', 'alisher.gym', 'iskandar.hike', 'dilnoza.cook', 'sabrina.pets', 'pamir.photo', 'avaz', 'abubakr',
@@ -282,7 +286,7 @@ async function main() {
     'Shahr zinda ast #reels #city', 'Az osmon #reels #drone', 'Subhi kuhi #reels #mountains', 'Trend-i nav #reels #trending',
   ];
   // Har video chand bor, az user-hoi gunogun (~35 reel)
-  const reelFiles = mp4.length ? Array.from({ length: Math.max(35, mp4.length) }, (_, i) => mp4[i % mp4.length]!) : [];
+  const reelFiles = reelVideos.length ? Array.from({ length: 35 }, (_, i) => reelVideos[i % reelVideos.length]!) : [];
   for (const [i, file] of reelFiles.entries()) {
     const owner = U[REEL_OWNERS[i % REEL_OWNERS.length]!]!;
     const post = await prisma.post.create({
