@@ -72,6 +72,12 @@ export class AccountService {
     return this.jwt.signAsync(payload);
   }
 
+  /** JWT-i 60 soniya baroi ulanishi Socket.IO (Spec 01) */
+  signWsTicket(id: string, userName: string) {
+    const payload: JwtPayload = { sub: id, name: userName, typ: 'ws' };
+    return this.jwt.signAsync(payload, { expiresIn: 60 });
+  }
+
   /** Kod sohta meshavad; to ilovai e-mail (P2) dar log-i dev nishon doda meshavad. */
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email }, select: { id: true } });

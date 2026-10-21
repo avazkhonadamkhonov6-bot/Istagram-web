@@ -160,7 +160,9 @@ ChatDto    { chatId, sendUserId, sendUserName, sendUserImage, receiveUserId, rec
 MessageDto { messageId, chatId, userId, userName, userImage, messageText, file, sendMassageDate }
 ```
 
-WebSocket (Socket.IO, path `/ws`, `auth: { token }`): server → `message:new` (`MessageDto`), `message:deleted` (`{ messageId, chatId }`) ba tarafi digar. Token-i galat → disconnect (Spec 08 AC4).
+WebSocket (Socket.IO, path `/ws`, `auth: { token: <ws-ticket> }`): server → `message:new` (`MessageDto`), `message:deleted` (`{ messageId, chatId }`) ba tarafi digar. Token-i galat yo JWT-i asosi (ne ticket) → disconnect (Spec 08 AC4).
+
+Ticket: `POST /Account/ws-ticket` → `data`: JWT-i **60 soniya** (`typ: "ws"`), faqat baroi ulanish; baroi HTTP qabul nameshavad. Front onro tavassuti BFF `GET /api/realtime/ticket` megirad — JWT-i asosi hech vaqt ba JavaScript namerasad (Spec 01 AC9).
 
 ## 9. Location
 

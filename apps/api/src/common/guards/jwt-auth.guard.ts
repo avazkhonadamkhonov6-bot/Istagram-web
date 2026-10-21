@@ -10,6 +10,8 @@ import { IS_PUBLIC } from '../decorators/public.decorator';
 export interface JwtPayload {
   sub: string;
   name: string;
+  /** 'ws' — ticket-i 60 soniya, faqat baroi Socket.IO */
+  typ?: 'ws';
 }
 
 /** Guard-i global: hamai endpoint-ho token talab mekunand, gayr az @Public(). */
@@ -30,6 +32,7 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwt.verifyAsync<JwtPayload>(token);
+      if (payload.typ === 'ws') throw new Error('ws ticket');
       req.user = { id: payload.sub, userName: payload.name };
       return true;
     } catch {

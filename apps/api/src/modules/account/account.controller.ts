@@ -54,6 +54,11 @@ export class AccountController {
     return ok(await this.account.resetPassword(q.Email, q.Token, q.Password));
   }
 
+  @Post('ws-ticket')
+  async wsTicket(@CurrentUser() me: AuthUser) {
+    return ok(await this.account.signWsTicket(me.id, me.userName));
+  }
+
   @Put('ChangePassword')
   async changePassword(
     @CurrentUser() me: AuthUser,

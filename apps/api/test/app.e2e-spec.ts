@@ -258,10 +258,18 @@ describe('API (Spec 12)', () => {
       const chatId = c1.body.data as number;
       await http().get('/Chat/get-chat-by-id').query({ chatId }).set(auth('c')).expect(403);
 
-      const bad: Socket = io(baseUrl, { path: '/ws', auth: { token: 'bad' }, transports: ['websocket'], reconnection: false });
-      await new Promise<void>((resolve) => bad.on('disconnect', () => resolve()));
+      // Tokeni galat va JWT-i asosi (ne ticket) → qat'
+      for (const token of ['bad', users.b!.token]) {
+        const bad: Socket = io(baseUrl, { path: '/ws', auth: { token }, transports: ['websocket'], reconnection: false });
+        await new Promise<void>((resolve) => bad.on('disconnect', () => resolve()));
+      }
 
-      const sock: Socket = io(baseUrl, { path: '/ws', auth: { token: users.b!.token }, transports: ['websocket'] });
+      const ticketRes = await http().post('/Account/ws-ticket').set(auth('b')).expect(200);
+      const ticket = ticketRes.body.data as string;
+      // Ticket baroi HTTP qabul nameshavad
+      await http().get('/UserProfile/get-my-profile').set('Authorization', `Bearer ${ticket}`).expect(401);
+
+      const sock: Socket = io(baseUrl, { path: '/ws', auth: { token: ticket }, transports: ['websocket'] });
       await new Promise<void>((resolve) => sock.on('connect', () => resolve()));
       const received = new Promise<{ messageText: string }>((resolve) => sock.on('message:new', resolve));
 

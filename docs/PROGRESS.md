@@ -4,7 +4,7 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** backend tayyor va sanjida shud (e2e 18/18, [Spec 12](specs/12-api-kontrakt.md)) → **API freeze**, navbat: FE-13 BFF (Avaz) · **FE-01** (Abubakr)
+**Hozir:** backend (e2e 18/18) + FE-13, FE-15, FE-17 tayyor dar branch-i `avaz` → navbat: FE-19, FE-21, QA-01 (Avaz) · FE-06… (Abubakr)
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -35,13 +35,13 @@
 |---|---|---|---|
 | [x] | BE-11 Chat + Reels + Location API | [ ] | FE-11 Explore, Search |
 | [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [ ] | FE-12 Notifications panel |
-| [ ] | FE-13 BFF + proxy + CSP | [ ] | FE-14 Mock xomush, integratsiya |
-| [ ] | FE-15 Socket + realtime | [ ] | FE-16 Stories |
+| [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [ ] | FE-14 Mock xomush, integratsiya |
+| [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [ ] | FE-16 Stories |
 
 ## RUZI 4
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [ ] | FE-17 Direct | [ ] | FE-18 Create modal |
+| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [ ] | FE-18 Create modal |
 | [ ] | FE-19 Bovarinokii front | [ ] | FE-20 Reels |
 | [ ] | FE-21 Playwright | [ ] | FE-22 Pardoz, responsive |
 | [ ] | QA-01 | [ ] | QA-02 |
@@ -54,3 +54,6 @@
 - 2026-10-20: Dar kompyuteri Avaz **pnpm** va **Docker** hanuz nasb nashudaand → BE-01 / BE-03.
 - 2026-10-20: Muhlati 4 ruz zich ast — tartibi buridan dar PLAN.md.
 - 2026-10-20: Counter-ho dar PostgreSQL (Redis faqat kesh); CAPTCHA, Meilisearch, Kafka, K8s — berun az 4 ruz (ROADMAP).
+- 2026-10-21: FE-13/15/17 dar brauzer sanjida shud (login, cookie-i httpOnly, `document.cookie` xoli, CSP bo nonce, paym dar realtime < 1 s, unsend, New message, mobil 375px, logout). Ticket-i Socket: `POST /Account/ws-ticket` (60 s), gateway JWT-i asosiro qabul namekunad.
+- 2026-10-21: Typing, Seen, share post va badge-i notifications — nest, chunki dar kontrakti Spec 12 endpoint/event nadorand (P1).
+- 2026-10-21 (baroi Abubakr): `src/components/layout/sidebar.tsx` — `usePathname()` berun az `<Suspense>` (Next 16 `cacheComponents` ogohi "Blocking Route" medihad). `CURRENT_USERNAME = "me"` boyad az `GET /api/UserProfile/get-my-profile` ivaz shavad. Aksho: `/api/images/<fileName>` (`lib/media.ts`), login: `POST /api/auth/login`.
