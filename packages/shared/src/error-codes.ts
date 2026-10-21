@@ -26,6 +26,18 @@ export const ErrorCode = {
   MEDIA_REQUIRED: 'MEDIA_REQUIRED',
   TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
+  PRIVATE_ACCOUNT: 'PRIVATE_ACCOUNT',
+  BLOCKED: 'BLOCKED',
+  COMMENTS_DISABLED: 'COMMENTS_DISABLED',
+  PIN_LIMIT: 'PIN_LIMIT',
+  COLLECTION_NOT_FOUND: 'COLLECTION_NOT_FOUND',
+  HIGHLIGHT_NOT_FOUND: 'HIGHLIGHT_NOT_FOUND',
+  NOT_GROUP: 'NOT_GROUP',
+  /** Spec 15 */
+  EDIT_WINDOW_EXPIRED: 'EDIT_WINDOW_EXPIRED',
+  COMMENT_PIN_LIMIT: 'COMMENT_PIN_LIMIT',
+  FAVORITES_LIMIT: 'FAVORITES_LIMIT',
+  NOTE_NOT_FOUND: 'NOTE_NOT_FOUND',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -58,4 +70,15 @@ export const ErrorMessage: Record<ErrorCode, string> = {
   MEDIA_REQUIRED: 'Fayl lozim ast',
   TOO_MANY_REQUESTS: 'Darxost ziyod ast, baadtar kusish kuned',
   INTERNAL_ERROR: 'Xatoi server',
+  PRIVATE_ACCOUNT: 'In hisob private ast',
+  BLOCKED: 'Dastras nest',
+  COMMENTS_DISABLED: 'Comment-ho xomush hastand',
+  PIN_LIMIT: 'Maks. 3 post pin kardan mumkin ast',
+  COLLECTION_NOT_FOUND: 'Collection yoft nashud',
+  HIGHLIGHT_NOT_FOUND: 'Highlight yoft nashud',
+  NOT_GROUP: 'In chat guruh nest',
+  EDIT_WINDOW_EXPIRED: 'Paymro faqat to 15 daqiqa tahrir kardan mumkin ast',
+  COMMENT_PIN_LIMIT: 'Maks. 3 comment pin kardan mumkin ast',
+  FAVORITES_LIMIT: 'Dar Favorites maks. 50 nafar',
+  NOTE_NOT_FOUND: 'Note yoft nashud',
 };

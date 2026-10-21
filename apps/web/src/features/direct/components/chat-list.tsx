@@ -10,6 +10,7 @@ import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { peerOf, useChats, useMe } from "../hooks";
 import { NewMessageDialog } from "./new-message-dialog";
+import { NotesTray } from "./notes-tray";
 
 /** Sutuni chap-i Direct: 397px dar desktop (Spec 08) */
 export function ChatList({ className }: { className?: string }) {
@@ -24,6 +25,7 @@ export function ChatList({ className }: { className?: string }) {
         <h1 className="text-xl font-bold">{me?.userName ?? " "}</h1>
         <NewMessageDialog />
       </header>
+      <NotesTray />
       <h2 className="px-6 pb-2 text-base font-bold">Messages</h2>
 
       <div className="flex-1 overflow-y-auto">
@@ -45,8 +47,17 @@ export function ChatList({ className }: { className?: string }) {
         {chats?.map((chat) => {
           const peer = peerOf(chat, me?.userId);
           const last = chat.lastMessage;
-          const body = last?.messageText ?? (last?.sharedPost ? "Sent a post" : "Sent an attachment");
-          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${body}` : "Start a conversation";
+          const body =
+            last?.messageText ??
+            (last?.sharedPost
+              ? "Sent a post"
+              : last?.story
+                ? "Replied to a story"
+                : last?.fileType === "audio"
+                  ? "Sent a voice message"
+                  : "Sent an attachment");
+          const author = last?.userId === me?.userId ? "You: " : chat.isGroup && last ? `${last.userName}: ` : "";
+          const preview = last ? `${author}${body}` : "Start a conversation";
           // Paymi naxonda — matni gafs va nuqtai kabud, misli Instagram (Spec 13 §4)
           const unread = chat.unreadCount > 0 && activeId !== chat.chatId;
           return (
@@ -58,7 +69,12 @@ export function ChatList({ className }: { className?: string }) {
                 activeId === chat.chatId && "bg-ig-bg-highlight",
               )}
             >
-              <Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={56} />
+              <span className="relative shrink-0">
+                <Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={56} />
+                {chat.peerIsOnline && (
+                  <span aria-label="Active now" className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full border-2 border-ig-bg-primary bg-ig-success" />
+                )}
+              </span>
               <div className="min-w-0 flex-1">
                 <p className={cn("truncate text-sm", unread && "font-semibold")}>{peer.userName}</p>
                 <p className={cn("truncate text-xs", unread ? "font-semibold text-ig-text" : "text-ig-text-secondary")}>

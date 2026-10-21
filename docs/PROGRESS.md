@@ -4,7 +4,8 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
+**Hozir (2026-10-21, shom):** Spec 14 va Spec 15-i Avaz tayyor (BE-13, FE-23…FE-25, FE-27, FE-28); API e2e 40/40. Navbat — Abubakr: FE-12, FE-16, FE-18, FE-20, FE-22, FE-26, FE-29.
+**Pesh az in:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -45,6 +46,12 @@
 | [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [ ] | FE-20 Reels |
 | [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [ ] | FE-22 Pardoz, responsive |
 | [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [ ] | QA-02 |
+| [x] | FE-23 Direct-i Spec 14 (group, dil, reply, ovoz, story) | [ ] | FE-26 UI-i Spec 14 |
+| [x] | FE-24 `/accounts/*` (privacy, blocked, muted, restricted, close friends, archive) | | |
+| [x] | FE-25 `/explore/locations/[name]`, `social/api.ts`, Share / Report dialog | | |
+| [x] | BE-13 backend-i Spec 15 + seed (40 user, 35 reel, 101 story) | [ ] | FE-29 UI-i Spec 15 |
+| [x] | FE-27 Direct (notes, edit, "Active now") | | |
+| [x] | FE-28 `/accounts/favorites`, `/accounts/activity` | | |
 | [ ] | README, `v0.2`, demo | | |
 
 ## Qaydho / masalaho
@@ -61,3 +68,7 @@
 - 2026-10-21 (baroi Abubakr): `OfflineBanner` (`src/components/offline-banner.tsx`) hozir faqat dar Direct ast — onro ba root layout guzored. `WidgetBoundary` baroi Stories/Suggestions/PostCard tayyor ast. Bo FE-07/FE-09/FE-18 senariyahoi Playwright-i post/like/follow ba UI guzaronida meshavand.
 - 2026-10-21: [Spec 13](specs/13-ilovaho-tz.md) — funksiyahoi P0/P1-i TZ, ki dar Swagger-i "Web Api" nabudand, ilova shudand (57 endpoint-i Spec 12 tagyir nayoftand): Notifications + realtime, Explore, Hashtag, javob ba comment, Direct (Seen, typing, unread, share post), Suggestions. API e2e 24/24, Playwright 8/8.
 - 2026-10-21: Rangho: hamai 62 tokeni rangi Spec 10 §1 dar `globals.css` mos (174 sanjish, light + dark); AC2 = 0.
+- 2026-10-21: FE-23…FE-25 tayyor va dar brauzer sanjida shud (group chat, dil-i paym, reply, private on/off, close friends, archive, location). `tsc`, `eslint` (0 xato), `next build` — sabz.
+- 2026-10-21 (baroi Abubakr): dar `components/layout/bottom-nav.tsx` hydration mismatch: `href="/me"` dar server, `"/avaz"` dar client — linki profil boyad pas az mount ivaz shavad. Linkho ba `/accounts/privacy` (FE-24) ba `more-menu` / `settings-nav` ilova kuned.
+- 2026-10-21: [Spec 15](specs/15-funksiyahoi-ilovagi.md) — sanjishi backend bo Instagram: 15 endpoint-i nav (notes, remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, "Active now"). Seed: 40 user, 235 post (35 reel), 101 story, 9 note. API e2e 40/40; Direct va `/accounts/favorites|activity` dar brauzer sanjida shudand.
+- 2026-10-21 (baroi Abubakr): ranghoi ilovagii instagram.com dar Spec 10 §1.11.1 — ba `globals.css` ilova kuned (FE-29). Pas az `db:seed` user-ho nav meshavand — dar brauzer az nav login kuned.

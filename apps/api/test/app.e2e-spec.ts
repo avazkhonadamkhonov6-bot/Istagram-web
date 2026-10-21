@@ -121,7 +121,7 @@ describe('API (Spec 12)', () => {
       const q = { followingUserId: users.b!.id };
       await http().post('/FollowingRelationShip/add-following-relation-ship').query(q).set(auth('a')).expect(200);
       const r = await http().post('/FollowingRelationShip/add-following-relation-ship').query(q).set(auth('a')).expect(200);
-      expect(r.body.data).toEqual({ isFollowing: true, subscribersCount: 1 });
+      expect(r.body.data).toEqual({ isFollowing: true, isRequested: false, subscribersCount: 1 });
       await http().post('/FollowingRelationShip/add-following-relation-ship').query({ followingUserId: users.a!.id }).set(auth('a')).expect(400);
       const subs = await http().get('/FollowingRelationShip/get-subscribers').query({ UserId: users.b!.id }).set(auth('a')).expect(200);
       expect(subs.body.data.map((u: { id: string }) => u.id)).toEqual([users.a!.id]);

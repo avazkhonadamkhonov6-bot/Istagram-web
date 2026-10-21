@@ -5,6 +5,7 @@ import { userShortSelect } from '../../common/mappers';
 import { skipTake } from '../../common/response';
 import { PrismaService } from '../../infra/prisma.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { RelationsService } from '../relations/relations.service';
 
 type Event = {
   type: NotificationType;
@@ -27,7 +28,15 @@ export function notificationKey(e: Event): string {
     case 'LIKE':
       return `LIKE:${e.actorId}:${e.postId}`;
     case 'FOLLOW':
-      return `FOLLOW:${e.actorId}:${e.recipientId}`;
+    case 'FOLLOW_REQUEST':
+    case 'FOLLOW_ACCEPTED':
+      return `${e.type}:${e.actorId}:${e.recipientId}`;
+    case 'COMMENT_LIKE':
+      return `COMMENT_LIKE:${e.actorId}:${e.commentId}`;
+    case 'MENTION':
+      return `MENTION:${e.actorId}:${e.recipientId}:${e.postId}:${e.commentId ?? 0}`;
+    case 'TAG':
+      return `TAG:${e.postId}:${e.recipientId}`;
     default:
       return `${e.type}:${e.commentId}`;
   }
@@ -40,6 +49,7 @@ export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtime: RealtimeGateway,
+    private readonly relations: RelationsService,
   ) {}
 
   private async toDtos(rows: Row[], me: string): Promise<NotificationDto[]> {
@@ -66,6 +76,9 @@ export class NotificationsService {
   async notify(e: Event): Promise<void> {
     if (e.actorId === e.recipientId) return;
     try {
+      // Block yo restrict → notification nest (Spec 14 §1.2, §1.4)
+      if (await this.relations.isBlockedEither(e.actorId, e.recipientId)) return;
+      if (await this.relations.has(e.recipientId, e.actorId, 'RESTRICT')) return;
       const key = notificationKey(e);
       const row = await this.prisma.notification.upsert({
         where: { key },
@@ -90,7 +103,7 @@ export class NotificationsService {
   }
 
   async list(me: string, q: PaginationQuery) {
-    const where = { recipientId: me };
+    const where = { recipientId: me, actorId: { notIn: await this.relations.blockedIds(me) } };
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.notification.findMany({ where, include, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], ...skipTake(q) }),
       this.prisma.notification.count({ where }),

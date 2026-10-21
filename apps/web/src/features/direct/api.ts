@@ -21,11 +21,12 @@ export const getMessages = (chatId: number) =>
 export const createChat = (receiverUserId: string) =>
   api<number>(`/Chat/create-chat?receiverUserId=${encodeURIComponent(receiverUserId)}`, { method: "POST" });
 
-export function sendMessage(chatId: number, text: string, file?: File) {
+export function sendMessage(chatId: number, text: string, file?: File, replyToId?: number) {
   const form = new FormData();
   form.set("ChatId", String(chatId));
   if (text) form.set("MessageText", text);
   if (file) form.set("File", file);
+  if (replyToId) form.set("ReplyToMessageId", String(replyToId));
   return api<MessageDto>("/Chat/send-message", { method: "PUT", body: form, schema: messageDtoSchema });
 }
 
@@ -38,6 +39,24 @@ export const readChat = (chatId: number) =>
 export const getUnreadCount = () => api<{ count: number }>("/Chat/get-unread-count");
 
 export const deleteChat = (chatId: number) => api<boolean>(`/Chat/delete-chat?chatId=${chatId}`, { method: "DELETE" });
+
+// ---- Spec 14 §4: like-i paym, group chat ----
+export const likeMessage = (messageId: number) =>
+  api<MessageDto>(`/Chat/like-message?messageId=${messageId}`, { method: "POST", schema: messageDtoSchema });
+
+const json = (body: unknown) => ({ headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+
+export const createGroup = (title: string, userIds: string[]) =>
+  api<number>("/Chat/create-group", { method: "POST", ...json({ title, userIds }) });
+
+export const updateGroup = (chatId: number, title: string) =>
+  api<unknown>("/Chat/update-group", { method: "PUT", ...json({ chatId, title }) });
+
+/** Tahriri paym (Spec 15 §3): faqat matn, to 15 daqiqa */
+export const editMessage = (messageId: number, text: string) =>
+  api<MessageDto>("/Chat/edit-message", { method: "PUT", ...json({ messageId, text }), schema: messageDtoSchema });
+
+export const leaveGroup = (chatId: number) => api<boolean>(`/Chat/leave-group?chatId=${chatId}`, { method: "DELETE" });
 
 type Paged<T> = { data: T[] };
 

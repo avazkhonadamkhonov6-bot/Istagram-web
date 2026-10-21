@@ -14,9 +14,14 @@ const EXT_BY_MIME: Record<string, string> = {
   'video/mp4': '.mp4',
   'video/webm': '.webm',
   'video/quicktime': '.mov',
+  'audio/webm': '.weba',
+  'audio/ogg': '.ogg',
+  'audio/mpeg': '.mp3',
+  'audio/mp4': '.m4a',
 };
 
-export type UploadKind = 'image' | 'media';
+/** `chat` — aks, video yo audio (paymi ovozi, Spec 14 §4) */
+export type UploadKind = 'image' | 'media' | 'chat';
 
 /**
  * Nigohdorii faylho dar disk (UPLOAD_DIR), dastras dar /images/<fileName>.
@@ -35,14 +40,24 @@ export class StorageService {
     return (MEDIA_RULES.videoTypes as readonly string[]).includes(mime);
   }
 
-  /** Tip va andozaro tekshirad; `image` — faqat aks, `media` — aks yo video. */
+  isAudio(mime: string): boolean {
+    return (MEDIA_RULES.audioTypes as readonly string[]).includes(mime);
+  }
+
+  fileType(mime: string): 'image' | 'video' | 'audio' {
+    return this.isAudio(mime) ? 'audio' : this.isVideo(mime) ? 'video' : 'image';
+  }
+
+  /** Tip va andozaro tekshirad; `image` — faqat aks, `media` — aks yo video, `chat` — + audio. */
   assertAllowed(file: Express.Multer.File, kind: UploadKind) {
     const isImage = (MEDIA_RULES.imageTypes as readonly string[]).includes(file.mimetype);
     const isVideo = this.isVideo(file.mimetype);
-    if (!isImage && !(kind === 'media' && isVideo)) {
+    const isAudio = this.isAudio(file.mimetype);
+    const allowed = isImage || (kind !== 'image' && isVideo) || (kind === 'chat' && isAudio);
+    if (!allowed) {
       throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TYPE_NOT_ALLOWED);
     }
-    const max = isVideo ? MEDIA_RULES.maxVideoBytes : MEDIA_RULES.maxImageBytes;
+    const max = isVideo ? MEDIA_RULES.maxVideoBytes : isAudio ? MEDIA_RULES.maxAudioBytes : MEDIA_RULES.maxImageBytes;
     if (file.size > max) {
       throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TOO_LARGE);
     }
