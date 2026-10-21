@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 /**
  * FE-21: 5 senariyai asosi (TZ §6.4) — register, post, like, follow, direct.
  * Talab: PostgreSQL bo migratsiya + seed (`pnpm --filter api db:deploy && pnpm --filter api db:seed`).
- * Ijro: `pnpm --filter web test:e2e` (api va web худ ба кор медароянд, agar hanuz kor nakunand).
+ * Ijro: `pnpm --filter web test:e2e` (api va web xud ba kor medaroyand, agar hanuz kor nakunand).
  * Brauzer: Chrome-i nasbshuda (PW_CHANNEL=msedge baroi Edge).
  */
 export default defineConfig({

@@ -33,14 +33,34 @@ Tafsiloti har papka — dar `README.md`-i xudi on.
 | [docs/TASKS.md](docs/TASKS.md) | Hamai vazifaho bo ID (BE-xx, FE-xx, QA-xx) |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | Chi tayyor, chi monda |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Versiyaho v0.1 → v2.0 |
-| [docs/specs/](docs/specs/) | Spec-i har modul (API, AC) |
+| [docs/specs/](docs/specs/) | Spec-i har modul (API, AC); **kontrakti amaldori API — [Spec 12](docs/specs/12-api-kontrakt.md)** |
+| [docs/qa/QA-01.md](docs/qa/QA-01.md) | Hisoboti QA (spec 01, 05, 08, 09, 11) |
 
-## Ogoz (pas az BE-01)
+## Ogoz
+
+Talab: Node >= 22, pnpm (`corepack enable`), PostgreSQL (lokali yo `docker compose up -d`).
 
 ```bash
-corepack enable
 pnpm install
-pnpm dev
+cp apps/api/.env.example apps/api/.env      # DATABASE_URL va JWT_SECRET-ro ivaz kuned
+cp apps/web/.env.example apps/web/.env.local
+pnpm --filter @repo/shared build
+pnpm --filter api db:deploy                 # migratsiyaho
+pnpm --filter api db:seed                   # user1…user10, parol password123
+pnpm dev                                    # api :4000, web :3000
+```
+
+| Chi | Kujo |
+|---|---|
+| Sayt | http://localhost:3000 (Direct: `/direct/inbox`) |
+| API + Swagger | http://localhost:4000/swagger |
+| Health | http://localhost:4000/health |
+
+## Testho
+
+```bash
+pnpm --filter api test        # API e2e (Jest + Supertest + Socket.IO), DB-i voqe'i lozim
+pnpm --filter web test:e2e    # Playwright (Chrome-i nasbshuda), api va web-ro xud ba kor medarorad
 ```
 
 ## Qoidaho
