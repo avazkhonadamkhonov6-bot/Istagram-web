@@ -15,11 +15,11 @@
 ## RUZI 1
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-01 Monorepo (pnpm 10, NestJS 11, tsconfig strict) | [ ] | FE-01 Tayyori, Next 16 docs |
-| [x] | BE-02 Kontrakt (Zod) — Spec 12, `packages/shared` | [ ] | FE-02 Rangho, dark, shadcn |
-| [x] | BE-03 Prisma + migratsiya, infra, CI, docker-compose (faqat Postgres) | [ ] | FE-03 Komponenthoi UI |
+| [x] | BE-01 Monorepo (pnpm 10, NestJS 11, tsconfig strict) | [x] | FE-01 Tayyori, Next 16 docs |
+| [x] | BE-02 Kontrakt (Zod) — Spec 12, `packages/shared` | [x] | FE-02 Rangho, dark, shadcn |
+| [x] | BE-03 Prisma + migratsiya, infra, CI, docker-compose (faqat Postgres) | [x] | FE-03 Komponenthoi UI |
 | [x] | BE-04 Account API | [ ] | FE-04 MSW mock |
-| [x] | BE-05 User, UserProfile, FollowingRelationShip | [ ] | FE-05 Layout |
+| [x] | BE-05 User, UserProfile, FollowingRelationShip | [x] | FE-05 Layout |
 
 ## RUZI 2
 | | Avaz | | Abubakr |
