@@ -26,7 +26,7 @@
 |---|---|---|---|
 | [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [x] | FE-06 Login / Signup |
 | [x] | BE-07 Post, like, comment, favorite | [x] | FE-07 Feed + PostCard |
-| [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [ ] | FE-08 Post modal |
+| [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [x] | FE-08 Post modal |
 | [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [ ] | FE-09 Profil |
 | [x] | BE-10 Story API | [ ] | FE-10 Edit profile + parol |
 

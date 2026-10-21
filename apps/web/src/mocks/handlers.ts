@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import type { CommentDto } from "@repo/shared";
 import {
   createMockComment,
   createMockNotification,
@@ -74,7 +75,7 @@ export const handlers = [
       statusCode: 200,
     }),
   ),
-  
+
   http.get("/api/v1/feed", () =>
     HttpResponse.json({
       pageNumber: 1,
@@ -195,15 +196,75 @@ export const handlers = [
     });
   }),
 
-  http.post("/api/Post/add-comment", async ({ request }) => {
-    const body = (await request.json()) as { postId: number; comment: string; parentId?: number | null };
+    http.post("/api/Post/add-comment", async ({ request }) => {
+    const body = (await request.json()) as {
+      postId: number;
+      comment: string;
+      parentId?: number | null;
+    };
     const created = createMockComment(body.postId, {
       userId: mockMe.userId,
       userName: mockMe.userName,
       comment: body.comment,
       parentId: body.parentId ?? null,
     });
+    commentStore.push(created);
+    if (created.parentId) {
+      const parent = commentStore.find((c) => c.postCommentId === created.parentId);
+      if (parent) parent.replyCount += 1;
+    }
+    const post = mockPosts.find((p) => p.postId === body.postId);
+    if (post) post.commentCount += 1;
     return HttpResponse.json({ data: created, errors: [], statusCode: 200 });
+  }),
+
+  http.get("/api/Post/get-comments", ({ request }) => {
+    const params = new URL(request.url).searchParams;
+    const postId = Number(params.get("postId") ?? "1");
+    const page = Number(params.get("PageNumber") ?? "1");
+    const roots = commentStore.filter(
+      (c) => c.postId === postId && c.parentId === null,
+    );
+    return HttpResponse.json({
+      pageNumber: page,
+      pageSize: 10,
+      totalPage: Math.max(1, Math.ceil(roots.length / 10)),
+      totalRecord: roots.length,
+      data: roots.slice((page - 1) * 10, page * 10),
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.get("/api/Post/get-comment-replies", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("commentId"));
+    return HttpResponse.json({
+      data: commentStore.filter((c) => c.parentId === id),
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.delete("/api/Post/delete-comment", ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get("commentId"));
+    const target = commentStore.find((c) => c.postCommentId === id);
+    if (target) {
+      const removed = commentStore.filter(
+        (c) => c.postCommentId === id || c.parentId === id,
+      );
+      for (const r of removed) {
+        commentStore.splice(commentStore.indexOf(r), 1);
+      }
+      if (target.parentId) {
+        const parent = commentStore.find(
+          (c) => c.postCommentId === target.parentId,
+        );
+        if (parent) parent.replyCount = Math.max(0, parent.replyCount - 1);
+      }
+      const post = mockPosts.find((p) => p.postId === target.postId);
+      if (post) post.commentCount = Math.max(0, post.commentCount - removed.length);
+    }
+    return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
   }),
 
   http.get("/api/Story/get-stories", () =>
@@ -234,3 +295,10 @@ export const handlers = [
     HttpResponse.json({ data: { count: 0 }, errors: [], statusCode: 200 }),
   ),
 ];
+
+const commentStore: CommentDto[] = mockPosts.flatMap((p) => p.comments);
+const firstRoot = commentStore[0];
+firstRoot.replyCount = 1;
+commentStore.push(
+  createMockComment(firstRoot.postId, { parentId: firstRoot.postCommentId }),
+);
