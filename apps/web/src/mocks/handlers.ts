@@ -60,6 +60,21 @@ const mockNotifications = [
 ];
 
 export const handlers = [
+      http.get("/api/images/:name", () =>
+    new HttpResponse(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="100%" height="100%" fill="#8e8e8e"/></svg>',
+      { headers: { "Content-Type": "image/svg+xml" } },
+    ),
+  ),
+
+    http.post("/api/FollowingRelationShip/add-following-relation-ship", () =>
+    HttpResponse.json({
+      data: { isFollowing: true, subscribersCount: 1 },
+      errors: [],
+      statusCode: 200,
+    }),
+  ),
+  
   http.get("/api/v1/feed", () =>
     HttpResponse.json({
       pageNumber: 1,
@@ -121,13 +136,7 @@ export const handlers = [
 
   http.get("/api/User/get-suggestions", () =>
     HttpResponse.json({
-      data: mockUsers.slice(1).map((u) => ({
-        id: u.id,
-        userName: u.userName,
-        fullName: u.fullName,
-        avatar: u.avatar,
-        subscribersCount: u.subscribersCount,
-      })),
+      data: mockUsers.slice(1),
       errors: [],
       statusCode: 200,
     }),
