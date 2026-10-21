@@ -491,7 +491,7 @@
 - [x] `/Live/*` (start, end, get-lives, comments) + socket `live:*` (join, leave, signal, heart), maks. 50 tamoshobin, notification `LIVE_STARTED`
 - [x] `send-message` + `Duration` → `MessageDto.durationSec`; paymi "zang" (`MessageDto.call`)
 - [x] e2e: `spec16.e2e-spec.ts` (7 test), hamagi 48/48
-- [x] Render: API dar https://istagram-web.onrender.com, Swagger — `/swagger`, `git push` ba main → deploy-i худкор
+- [x] Render: API dar https://istagram-web.onrender.com, Swagger — `/swagger`, `git push` ba main → deploy-i xudkor
 
 ### FE-30 · Direct: zangi audio / video, paymi ovozi va video
 <!-- who:avaz day:5 type:frontend -->
@@ -505,21 +505,24 @@
 - Paymi ovozi: `MediaRecorder`, pahsh karda nigoh dor / kashidan — bekor, mavj va vaqt, `Duration`
 - Paymi video: navishtan to 60 s yo intixobi fayl, player bo davomnoki
 
-**Tayyor, agar:**
-- [ ] Spec 16 AC1–AC5 az UI kor mekunand
-- [ ] Zangi audio va video dar du brauzer bo API-i Render sanjida shud (ovoz va tasvir har du taraf)
-- [ ] Mobil 375px
+- Ilova (Avaz): sahifahoi efir dar faylhoi nav — `/live` (ruyxat), `/live/new` (muallif), `/live/[id]` (tamosho); linki "Live" dar sarlavhai Direct; toast "started a live video" → Watch
 
-### FE-31 · Efiri mustaqim (Live)
+**Tayyor, agar:**
+- [x] Spec 16 AC1–AC5 az UI kor mekunand
+- [x] Zangi audio va video dar du brauzer sanjida shud: tasvir va ovoz har du taraf (analyser: 300 Hz ↔ 500 Hz), mute, kamera, rad, "Call back"
+- [x] Paymi ovozi va video: MP4 (Safari ham), ovoz dar fayl sanjida shud; BFF `Range` → 206
+- [x] Efir: muallif + tamoshobin, video va ovoz, comment, dil, "Live video ended"
+- [ ] Sanjish bayni du kompyuter dar shabakahoi gunogun (agar vasl nashavad — TURN, nig. PROGRESS)
+
+### FE-31 · Darvozahoi efir dar sahifahoi Abubakr
 <!-- who:abubakr day:5 type:frontend -->
-**Spec:** 16 §3, §5 · API: `/Live/*`, socket `live:*`, hook-i `useLive` az FE-30
+**Spec:** 16 §3, §5 · Sahifahoi efir tayyorand (Avaz, FE-30): `/live`, `/live/new`, `/live/[id]`; API: `getLives` dar `features/rtc/api.ts`
 
-- Create → "LIVE": preview-i kamera, unvon, `start-live`
-- Ekrani muallif: "LIVE" + shumorai tamoshobinho, comment-ho (ba bolo), dil-ho, "End"
-- Story tray: halqai surxi "LIVE" (`get-lives`, `live:started`)
-- Sahifai tamosho: video, comment, dil (`live:heart`), "Live video ended" (`live:ended`)
-- Notifications: `LIVE_STARTED` → "started a live video." → sahifai efir
+- Create (menyu) → band-i "Live" → `/live/new`
+- Story tray: halqai surxi "LIVE" baroi `getLives()` (va `live:started`) → `/live/[id]`
+- Notifications: `LIVE_STARTED` ("started a live video." — matn tayyor dar `lib/notifications.ts`) → klik → `/live/[id]` (liveId az `getLives()` bo `actor.id`)
+- Profil: agar user dar efir ast — nishoni "LIVE" dar avatar
 
 **Tayyor, agar:**
-- [ ] Spec 16 AC6–AC7 az UI kor mekunand
-- [ ] Efir dar du brauzer bo API-i Render sanjida shud (muallif + 2 tamoshobin)
+- [ ] Har se darvoza ba sahifai efir meravand
+- [ ] Mobil 375px

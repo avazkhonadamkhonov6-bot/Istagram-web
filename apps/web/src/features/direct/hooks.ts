@@ -110,7 +110,7 @@ export function peerOf(chat: ChatDto, myId: string | undefined) {
 
 let tempId = -1;
 
-type SendVars = { text: string; file?: File; replyTo?: MessageDto | null };
+type SendVars = { text: string; file?: File; replyTo?: MessageDto | null; durationSec?: number };
 
 /** Tahriri paym (Spec 15 §3) — optimistic + rollback */
 export function useEditMessage(chatId: number) {
@@ -189,7 +189,8 @@ export function useSendMessage(chatId: number) {
   return useMutation({
     // Offline → xato (rollback + toast, Spec 10 AC7), na pauza
     networkMode: "always",
-    mutationFn: ({ text, file, replyTo }: SendVars) => directApi.sendMessage(chatId, text, file, replyTo?.messageId),
+    mutationFn: ({ text, file, replyTo, durationSec }: SendVars) =>
+      directApi.sendMessage(chatId, text, file, replyTo?.messageId, durationSec),
     onMutate: async ({ text, file, replyTo }) => {
       if (file || !me) return { id: null };
       await qc.cancelQueries({ queryKey: key });
@@ -271,7 +272,7 @@ export function useDirectRealtime(activeChatId: number | null) {
       void qc.invalidateQueries({ queryKey: directKeys.chats });
       void qc.invalidateQueries({ queryKey: directKeys.unread });
       if (active.current !== msg.chatId) {
-        toast(msg.userName, { description: msg.messageText ?? "Sent an attachment" });
+        toast(msg.userName, { description: msg.messageText ?? (msg.call ? "Call" : "Sent an attachment") });
       }
     };
     const onDeleted = ({ messageId, chatId }: { messageId: number; chatId: number }) => {

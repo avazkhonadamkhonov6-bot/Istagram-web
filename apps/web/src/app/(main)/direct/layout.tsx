@@ -5,7 +5,7 @@ import "./direct.css";
 
 export default function DirectLayout({ children }: LayoutProps<"/direct">) {
   return (
-    <QueryProvider>
+    <>
       {/* useParams dar DirectShell — faqat dar runtime (cacheComponents) */}
       <Suspense
         fallback={
