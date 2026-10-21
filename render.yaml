@@ -9,7 +9,7 @@ services:
     branch: main
     buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @repo/shared build && pnpm --filter api build
     # Migratsiyaho dar har start (dar plan-i free preDeploy nest)
-    startCommand: pnpm --filter api db:deploy && pnpm --filter api start
+    startCommand: pnpm start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION

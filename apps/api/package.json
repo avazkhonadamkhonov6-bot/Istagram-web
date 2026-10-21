@@ -6,6 +6,7 @@
     "dev": "nest start --watch --preserveWatchOutput",
     "build": "nest build",
     "start": "node dist/main.js",
+    "start:render": "node scripts/seed-if-empty.js & node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "jest --config test/jest-e2e.json --runInBand",
