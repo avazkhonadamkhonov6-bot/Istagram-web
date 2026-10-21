@@ -43,6 +43,14 @@
 | FE-22 | Abubakr | 4 | Pardoz va responsive | tayyor |
 | QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
 | QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 | qisman (API / QA-02) |
+| FE-23 | Avaz | 4 | Direct-i Spec 14: group chat, dil-i paym, reply, paymi ovozi, javob ba story | tayyor |
+| FE-24 | Avaz | 4 | `/accounts/*`: Privacy + follow requests, Blocked, Muted, Restricted, Close friends, Archive | tayyor |
+| FE-25 | Avaz | 4 | `/explore/locations/[name]`, `features/social/api.ts` (hamai endpoint-hoi Spec 14), ShareDialog, ReportDialog | tayyor |
+| FE-26 | Abubakr | 4 | UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) |  |
+| BE-13 | Avaz | 4 | Backend-i [Spec 15](specs/15-funksiyahoi-ilovagi.md): remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, notes, "Active now"; seed (40 user, 35 reel, ~100 story) | tayyor |
+| FE-27 | Avaz | 4 | Direct-i Spec 15: Notes tray, tahriri paym ("Edited"), "Active now" | tayyor |
+| FE-28 | Avaz | 4 | `/accounts/favorites`, `/accounts/activity` (liked posts) | tayyor |
+| FE-29 | Abubakr | 4 | UI-i Spec 15 dar sahifahoi xud (remove follower, tab-i REELS, pin-i comment, feed-i Favorites, linkho dar More) + tokenhoi rangi Spec 10 §1.11.1 |  |
 
 ---
 
@@ -384,3 +392,136 @@
 - [x] Lighthouse: TZ §9 band 11
 
 **Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+
+### FE-23 · Direct-i Spec 14
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §4, §7
+
+**Tayyor, agar:**
+- [x] "New message": 2+ user → group chat (`/Chat/create-group`), nomi guruh; header "N members", "Leave group"
+- [x] Dil-i paym: double-tap / tugma, optimistic + rollback, realtime `message:updated`; rangi dil `--ig-badge` (#FF3040)
+- [x] Reply ba paym (`ReplyToMessageId`), namoishi "You replied to ..."
+- [x] Paymi ovozi (MediaRecorder → `audio/webm|ogg|mp4`), `<audio>` dar chat; javob ba story (`MessageDto.story`)
+- [x] Dar brauzer sanjida shud: group chat, dil, reply
+
+### FE-24 · /accounts/* (Privacy va amniyat)
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §1, §2, §3
+
+**Tayyor, agar:**
+- [x] `/accounts/privacy`: toggle-i "Private account" (`update-privacy`), darxosthoi follow (Confirm / Delete)
+- [x] `/accounts/blocked|muted|restricted|close-friends`: ruyxat + Unblock / Unmute / Unrestrict / Remove; close friends — justuju va Add
+- [x] `/accounts/archive`: tab-hoi POSTS / STORIES
+- [x] Dar brauzer sanjida shud (private on/off, close friends, archive)
+
+### FE-25 · Location, social API, Share / Report
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 14 §2, §7
+
+**Tayyor, agar:**
+- [x] `/explore/locations/[name]` — grid-i postho bo infinite scroll (sanjida shud)
+- [x] `features/social/api.ts` — funksiyahoi hamai endpoint-hoi Spec 14 baroi Abubakr
+- [x] `ShareDialog` (`features/direct/components/share-dialog.tsx`, props: `share`, `onClose`) va `ReportDialog` (`features/social/components/report-dialog.tsx`)
+
+### BE-13 · Backend-i Spec 15 + seed
+<!-- who:avaz day:4 type:backend -->
+**Spec:** [15](specs/15-funksiyahoi-ilovagi.md)
+
+**Tayyor, agar:**
+- [x] 15 endpoint-i nav (`/Note/*`, `remove-follower`, `add/remove/get-favorite(s)`, `get-favorites-feed`, `get-liked-posts`, `get-user-reels`, `pin-comment`, `edit-message`, `get-activity-status`), migratsiya `spec15_full_instagram`
+- [x] Spec 15 AC1–AC7 (e2e, 7 test); hamai e2e — 40/40
+- [x] Seed: 40 user, 235 post (35 reel), 101 story (aks va video), 9 note, favorites, comment-hoi pin-shuda
+
+### FE-27 · Direct-i Spec 15
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 15 §3–5
+
+**Tayyor, agar:**
+- [x] Notes tray bolo-i inbox (note-i man + mutual, Share / Delete, close friends)
+- [x] "Edit" baroi paymi matni to 15 daqiqa, "Save", "Edited"; optimistic + rollback
+- [x] "Active now" / "Active 1h ago" dar header, nuqtai sabz dar ruyxat
+- [x] Dar brauzer sanjida shud
+
+### FE-28 · /accounts/favorites va /accounts/activity
+<!-- who:avaz day:4 type:frontend -->
+**Spec:** 15 §1, §6
+
+**Tayyor, agar:**
+- [x] Favorites: ruyxat, justuju, Add, Remove (maks. 50)
+- [x] Your activity: posthoi like-karda, nav avval
+- [x] Dar brauzer sanjida shud
+
+### FE-29 · UI-i Spec 15 dar sahifahoi Abubakr
+<!-- who:abubakr day:4 type:frontend -->
+**Spec:** 15 §8 · API: `features/social/api.ts` (`removeFollower`, `getUserReels`, `pinComment`, `getFavoritesFeed`) — tayyor
+
+- Followers modal: tugmai "Remove" baroi followerhoi xud
+- Profil: tab-i REELS → `getUserReels` (ba joi filtr-i `get-posts`)
+- Comment: "Pin" baroi muallifi post, belgii pin; tartib — az API
+- Feed: intixobi "Following / Favorites"
+- More menu: linkho ba `/accounts/privacy`, `/accounts/favorites`, `/accounts/activity`
+- Rangho: tokenhoi Spec 10 §1.11.1 ba `globals.css` (light + dark)
+
+**Tayyor, agar:**
+- [ ] Spec 15 AC1–AC4 az UI kor mekunand
+- [ ] Har token-i Spec 10 §1 (bo §1.11.1) dar `globals.css` hast
+
+### FE-26 · UI-i Spec 14 dar sahifahoi Abubakr
+<!-- who:abubakr day:4 type:frontend -->
+**Spec:** 14 §7 · API: `features/social/api.ts` (tayyor)
+
+- Stories tray + viewer (gradient / didashuda / sabz-i close friends), like, javob (`replyStory`), share (`ShareDialog`)
+- Reels, Create (Post 1–10, Reel, Story + Close friends, location, tag), Notifications (Confirm / Delete-i follow request)
+- Profil: tab-i TAGGED, highlights, qulf baroi private, menyui "..." (Block, Restrict, Mute, Report, Close friends)
+- Post menu: Edit, Archive, Pin, Hide like count, Turn off commenting, Delete, Report, Add to collection; Saved → collections
+- Comment: dil-i comment (`likeComment`), linki `@mention` va `#hashtag`; linki location → `/explore/locations/[name]`
+- Dar `more-menu` / `settings-nav` linkho ba `/accounts/privacy` va digar sahifahoi FE-24
+
+**Tayyor, agar:**
+- [ ] Spec 14 AC1–AC8 az UI kor mekunand
+
+---
+
+## Spec 16 — Zang, paymi ovozi / video, efir
+
+### BE-14 · Backend-i Spec 16
+<!-- who:avaz day:5 type:backend -->
+**Spec:** [16](specs/16-zang-va-efir.md) §1–3
+
+**Tayyor, agar:**
+- [x] `/Call/*` (start, accept, decline, end, active, history, ICE servers) + socket `call:*`, MISSED pas az 45 s, offline → baromadan
+- [x] `/Live/*` (start, end, get-lives, comments) + socket `live:*` (join, leave, signal, heart), maks. 50 tamoshobin, notification `LIVE_STARTED`
+- [x] `send-message` + `Duration` → `MessageDto.durationSec`; paymi "zang" (`MessageDto.call`)
+- [x] e2e: `spec16.e2e-spec.ts` (7 test), hamagi 48/48
+- [x] Render: API dar https://istagram-web.onrender.com, Swagger — `/swagger`, `git push` ba main → deploy-i худкор
+
+### FE-30 · Direct: zangi audio / video, paymi ovozi va video
+<!-- who:avaz day:5 type:frontend -->
+**Spec:** 16 §1–2, §5 · API: `/Call/*`, `PUT /Chat/send-message` + `Duration`, socket `call:*`
+
+- `features/rtc/`: `getIceServers`, `useCall` (RTCPeerConnection, offer / answer / ICE bo `call:signal`), `useLive` (baroi FE-31)
+- Header-i chat: ikonkahoi telefon va kamera → `start-call`
+- Ekrani zang: avatar, "Calling…" / vaqt, mute, kamera on/off, ivazi kamera, end; video-i xud dar kunj
+- Zangi voridshavanda: modal dar har sahifa (`call:incoming`) + ringtone, Accept / Decline; pas az refresh — `get-active-calls`
+- Paymi "zang" dar chat: "Audio call · 3:12", "Missed video call", "Call back"
+- Paymi ovozi: `MediaRecorder`, pahsh karda nigoh dor / kashidan — bekor, mavj va vaqt, `Duration`
+- Paymi video: navishtan to 60 s yo intixobi fayl, player bo davomnoki
+
+**Tayyor, agar:**
+- [ ] Spec 16 AC1–AC5 az UI kor mekunand
+- [ ] Zangi audio va video dar du brauzer bo API-i Render sanjida shud (ovoz va tasvir har du taraf)
+- [ ] Mobil 375px
+
+### FE-31 · Efiri mustaqim (Live)
+<!-- who:abubakr day:5 type:frontend -->
+**Spec:** 16 §3, §5 · API: `/Live/*`, socket `live:*`, hook-i `useLive` az FE-30
+
+- Create → "LIVE": preview-i kamera, unvon, `start-live`
+- Ekrani muallif: "LIVE" + shumorai tamoshobinho, comment-ho (ba bolo), dil-ho, "End"
+- Story tray: halqai surxi "LIVE" (`get-lives`, `live:started`)
+- Sahifai tamosho: video, comment, dil (`live:heart`), "Live video ended" (`live:ended`)
+- Notifications: `LIVE_STARTED` → "started a live video." → sahifai efir
+
+**Tayyor, agar:**
+- [ ] Spec 16 AC6–AC7 az UI kor mekunand
+- [ ] Efir dar du brauzer bo API-i Render sanjida shud (muallif + 2 tamoshobin)

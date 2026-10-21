@@ -20,8 +20,8 @@ export class UserController {
   constructor(private readonly users: UsersService) {}
 
   @Get('get-users')
-  async getUsers(@Query(new ZodPipe(getUsersQuerySchema)) q: z.infer<typeof getUsersQuerySchema>) {
-    const { items, total } = await this.users.getUsers(q);
+  async getUsers(@CurrentUser() me: AuthUser, @Query(new ZodPipe(getUsersQuerySchema)) q: z.infer<typeof getUsersQuerySchema>) {
+    const { items, total } = await this.users.getUsers(me.id, q);
     return paged(items, total, q);
   }
 

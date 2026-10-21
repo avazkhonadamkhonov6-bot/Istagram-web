@@ -4,7 +4,8 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: frontend va QA nav shud — [QA-02](qa/QA-02.md); chand talab ba kontrakti API vobasta ast
+**Hozir (2026-10-22):** API dar Render: https://istagram-web.onrender.com (Swagger — `/swagger`), baza umumi — Avaz va Abubakr bo yak maʼlumot kor mekunand. Backend-i [Spec 16](specs/16-zang-va-efir.md) (zang, paymi ovozi / video, efir) tayyor, e2e 48/48. Navbat — FE-30 (Avaz), FE-31 (Abubakr), FE-26, FE-29.
+**Frontend Abubakr:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: frontend va QA nav shud — [QA-02](qa/QA-02.md); chand talab ba kontrakti API vobasta ast
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -45,7 +46,20 @@
 | [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [x] | FE-20 Reels |
 | [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [x] | FE-22 Pardoz, responsive |
 | [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [~] | QA-02 |
+| [x] | FE-23 Direct-i Spec 14 (group, dil, reply, ovoz, story) | [ ] | FE-26 UI-i Spec 14 |
+| [x] | FE-24 `/accounts/*` (privacy, blocked, muted, restricted, close friends, archive) | | |
+| [x] | FE-25 `/explore/locations/[name]`, `social/api.ts`, Share / Report dialog | | |
+| [x] | BE-13 backend-i Spec 15 + seed (40 user, 35 reel, 101 story) | [ ] | FE-29 UI-i Spec 15 |
+| [x] | FE-27 Direct (notes, edit, "Active now") | | |
+| [x] | FE-28 `/accounts/favorites`, `/accounts/activity` | | |
 | [ ] | README, `v0.2`, demo | | |
+
+## RUZI 5
+| | Avaz | | Abubakr |
+|---|---|---|---|
+| [x] | Deploy: Render (API + Postgres), faylho dar DB (MediaFile), seed-i худкор | | |
+| [x] | BE-14 backend-i Spec 16: zang, paymi ovozi / video, efir | | |
+| [ ] | FE-30 Direct: zangi audio / video, paymi ovozi va video | [ ] | FE-31 Efiri mustaqim (Live) |
 
 ## Qaydho / masalaho
 - 2026-10-21: Kontrakti API ivaz shud — endpoint-ho aynan misli Swagger-i "Web Api" (`/Account/*`, `/Post/*`, `/Chat/*`...): [Spec 12](specs/12-api-kontrakt.md). URL/DTO-hoi spec-hoi 01–09 digar amal namekunand; qoidahoi amniyat boqi memonand.
@@ -61,6 +75,12 @@
 - 2026-10-21 (baroi Abubakr): `OfflineBanner` (`src/components/offline-banner.tsx`) hozir faqat dar Direct ast — onro ba root layout guzored. `WidgetBoundary` baroi Stories/Suggestions/PostCard tayyor ast. Bo FE-07/FE-09/FE-18 senariyahoi Playwright-i post/like/follow ba UI guzaronida meshavand.
 - 2026-10-21: [Spec 13](specs/13-ilovaho-tz.md) — funksiyahoi P0/P1-i TZ, ki dar Swagger-i "Web Api" nabudand, ilova shudand (57 endpoint-i Spec 12 tagyir nayoftand): Notifications + realtime, Explore, Hashtag, javob ba comment, Direct (Seen, typing, unread, share post), Suggestions. API e2e 24/24, Playwright 8/8.
 - 2026-10-21: Rangho: hamai 62 tokeni rangi Spec 10 §1 dar `globals.css` mos (174 sanjish, light + dark); AC2 = 0.
+- 2026-10-21: FE-23…FE-25 tayyor va dar brauzer sanjida shud (group chat, dil-i paym, reply, private on/off, close friends, archive, location). `tsc`, `eslint` (0 xato), `next build` — sabz.
+- 2026-10-21 (baroi Abubakr): dar `components/layout/bottom-nav.tsx` hydration mismatch: `href="/me"` dar server, `"/avaz"` dar client — linki profil boyad pas az mount ivaz shavad. Linkho ba `/accounts/privacy` (FE-24) ba `more-menu` / `settings-nav` ilova kuned.
+- 2026-10-21: [Spec 15](specs/15-funksiyahoi-ilovagi.md) — sanjishi backend bo Instagram: 15 endpoint-i nav (notes, remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, "Active now"). Seed: 40 user, 235 post (35 reel), 101 story, 9 note. API e2e 40/40; Direct va `/accounts/favorites|activity` dar brauzer sanjida shudand.
+- 2026-10-21 (baroi Abubakr): ranghoi ilovagii instagram.com dar Spec 10 §1.11.1 — ba `globals.css` ilova kuned (FE-29). Pas az `db:seed` user-ho nav meshavand — dar brauzer az nav login kuned.
+- 2026-10-22: Deploy ba Render. API: https://istagram-web.onrender.com, Swagger: https://istagram-web.onrender.com/swagger. Baroi kor bo bazai umumi dar `apps/web/.env.local`: `API_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_WS_URL=https://istagram-web.onrender.com`, `NEXT_PUBLIC_API_MOCKING=off`. Har `git push` ba `main` → Render худкор deploy mekunad, maʼlumoti baza nigoh doshta meshavad. Plan-i free: pas az 15 daq. bekori server "xob" meravad (darxosti avval ~50 s); bazai free pas az 30 ruz muhlatash meguzarad.
+- 2026-10-22: [Spec 16](specs/16-zang-va-efir.md) — zangi audio / video (WebRTC, server — signaling), paymi ovozi / video bo `Duration`, efiri mustaqim. 12 endpoint-i nav, socket `call:*` va `live:*`. API e2e 48/48. Front: FE-30 (Avaz), FE-31 (Abubakr).
 
 ## Frontend Abubakr — 2026-10-21
 

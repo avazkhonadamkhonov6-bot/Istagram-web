@@ -1,0 +1,35 @@
+# Render Blueprint: API-i umumi (NestJS) + PostgreSQL. Nomho bo xizmathoi mavjuda dar Render yakxela-and
+# (Istagram-web, instagram-db), DATABASE_URL-ro Render худаш az baza meguzorad.
+# Har `git push` ba main → Render худкор deploy mekunad (Auto-Deploy: On Commit); maʼlumoti baza nigoh doshta meshavad.
+# Frontend (Avaz va Abubakr) dar kompyuteri xud: apps/web/.env.local → API_URL va NEXT_PUBLIC_WS_URL = https://istagram-web.onrender.com
+services:
+  - type: web
+    name: Istagram-web
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    # NODE_ENV=production namemonem: pnpm install devDependencies-ro (nest, prisma, ts-node) lozim dorad
+    buildCommand: pnpm install --frozen-lockfile; pnpm run build
+    # Migratsiyaho + seed-i yakbora (agar baza xoli boshad) + API
+    startCommand: pnpm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: instagram-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Frontend-i lokali; agar web ham deploy shavad — URL-ash bo vergul ilova meshavad
+      - key: WEB_ORIGIN
+        value: http://localhost:3000
+      - key: UPLOAD_DIR
+        value: uploads
+
+databases:
+  - name: instagram-db
+    plan: free
+    region: oregon

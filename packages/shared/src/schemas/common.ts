@@ -54,7 +54,10 @@ export type UserShort = z.infer<typeof userShortSchema>;
 export const MEDIA_RULES = {
   imageTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   videoTypes: ['video/mp4', 'video/webm', 'video/quicktime'],
+  /** Paymi ovozi dar Direct (Spec 14 §4) */
+  audioTypes: ['audio/webm', 'audio/ogg', 'audio/mpeg', 'audio/mp4'],
   maxImageBytes: 10 * 1024 * 1024,
+  maxAudioBytes: 10 * 1024 * 1024,
   maxVideoBytes: 100 * 1024 * 1024,
   maxPostFiles: 10,
 } as const;

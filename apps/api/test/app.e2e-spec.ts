@@ -121,7 +121,7 @@ describe('API (Spec 12)', () => {
       const q = { followingUserId: users.b!.id };
       await http().post('/FollowingRelationShip/add-following-relation-ship').query(q).set(auth('a')).expect(200);
       const r = await http().post('/FollowingRelationShip/add-following-relation-ship').query(q).set(auth('a')).expect(200);
-      expect(r.body.data).toEqual({ isFollowing: true, subscribersCount: 1 });
+      expect(r.body.data).toEqual({ isFollowing: true, isRequested: false, subscribersCount: 1 });
       await http().post('/FollowingRelationShip/add-following-relation-ship').query({ followingUserId: users.a!.id }).set(auth('a')).expect(400);
       const subs = await http().get('/FollowingRelationShip/get-subscribers').query({ UserId: users.b!.id }).set(auth('a')).expect(200);
       expect(subs.body.data.map((u: { id: string }) => u.id)).toEqual([users.a!.id]);
@@ -135,7 +135,8 @@ describe('API (Spec 12)', () => {
       const r = await http().put('/UserProfile/update-user-profile').send({ about: 'Dushanbe', gender: 1 }).set(auth('a')).expect(200);
       expect(r.body.data).toMatchObject({ about: 'Dushanbe', gender: 1 });
       const img = await http().put('/UserProfile/update-user-image-profile').attach('imageFile', PNG, { filename: 'a.png', contentType: 'image/png' }).set(auth('a')).expect(200);
-      expect(img.body.data.image).toMatch(/\.png$/);
+      // Spec 03: aks → WebP
+      expect(img.body.data.image).toMatch(/\.webp$/);
       await http().get(`/images/${img.body.data.image}`).expect(200);
       await http().put('/UserProfile/update-user-image-profile').attach('imageFile', Buffer.from('%PDF'), { filename: 'a.pdf', contentType: 'application/pdf' }).set(auth('a')).expect(400);
     });

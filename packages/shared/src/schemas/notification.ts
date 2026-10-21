@@ -2,7 +2,20 @@ import { z } from 'zod';
 import { userShortSchema } from './common';
 
 /** Spec 13 §1 */
-export const NOTIFICATION_TYPES = ['LIKE', 'COMMENT', 'COMMENT_REPLY', 'FOLLOW'] as const;
+export const NOTIFICATION_TYPES = [
+  'LIKE',
+  'COMMENT',
+  'COMMENT_REPLY',
+  'FOLLOW',
+  // Spec 14 §5
+  'FOLLOW_REQUEST',
+  'FOLLOW_ACCEPTED',
+  'COMMENT_LIKE',
+  'MENTION',
+  'TAG',
+  // Spec 16 §3: "X started a live video"
+  'LIVE_STARTED',
+] as const;
 
 export const notificationDtoSchema = z.object({
   id: z.number().int(),

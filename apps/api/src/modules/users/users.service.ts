@@ -5,6 +5,8 @@ import { toUserShort, userShortSelect } from '../../common/mappers';
 import { skipTake } from '../../common/response';
 import { PrismaService } from '../../infra/prisma.service';
 import { StorageService } from '../../infra/storage.service';
+import { FollowsService } from '../follows/follows.service';
+import { RelationsService } from '../relations/relations.service';
 
 const profileSelect = {
   id: true,
@@ -18,6 +20,7 @@ const profileSelect = {
   followersCount: true,
   followingCount: true,
   updatedAt: true,
+  isPrivate: true,
 } as const;
 
 @Injectable()
@@ -25,6 +28,8 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly relations: RelationsService,
+    private readonly follows: FollowsService,
   ) {}
 
   async assertExists(userId: string) {
@@ -32,8 +37,9 @@ export class UsersService {
     if (!user) throw notFound(ErrorCode.USER_NOT_FOUND);
   }
 
-  async getUsers(q: { UserName?: string; Email?: string; PageNumber: number; PageSize: number }) {
+  async getUsers(me: string, q: { UserName?: string; Email?: string; PageNumber: number; PageSize: number }) {
     const where = {
+      id: { notIn: await this.relations.blockedIds(me) },
       ...(q.UserName ? { userName: { contains: q.UserName.toLowerCase() } } : {}),
       ...(q.Email ? { email: { contains: q.Email.toLowerCase() } } : {}),
     };
@@ -78,7 +84,7 @@ export class UsersService {
   /** Spec 13 §5: avval follow-i follow-hoi man, ba'd populyartarin */
   async getSuggestions(me: string, limit: number): Promise<Suggestion[]> {
     const following = await this.prisma.follow.findMany({ where: { followerId: me }, select: { followingId: true } });
-    const exclude = [me, ...following.map((f) => f.followingId)];
+    const exclude = [me, ...following.map((f) => f.followingId), ...(await this.relations.blockedIds(me))];
     const select = { ...userShortSelect, followersCount: true } as const;
     const friendsOfFriends = following.length
       ? await this.prisma.user.findMany({
@@ -145,6 +151,19 @@ export class UsersService {
 
   // ---- Profile ----
 
+  /** Profil-i begona: blok → 404 (Spec 14 §1.2) */
+  async getProfileFor(me: string, userId: string): Promise<UserProfile> {
+    if (await this.relations.isBlockedEither(me, userId)) throw notFound(ErrorCode.USER_NOT_FOUND);
+    return this.getProfile(userId);
+  }
+
+  /** Private → public: hamai darxostho qabul (Spec 14 §1.1) */
+  async updatePrivacy(me: string, isPrivate: boolean) {
+    await this.prisma.user.update({ where: { id: me }, data: { isPrivate } });
+    if (!isPrivate) await this.follows.acceptAll(me);
+    return this.getProfile(me);
+  }
+
   async getProfile(userId: string): Promise<UserProfile> {
     const u = await this.prisma.user.findUnique({ where: { id: userId }, select: profileSelect });
     if (!u) throw notFound(ErrorCode.USER_NOT_FOUND);
@@ -160,6 +179,7 @@ export class UsersService {
       subscribersCount: u.followersCount,
       subscriptionsCount: u.followingCount,
       dateUpdated: u.updatedAt.toISOString(),
+      isPrivate: u.isPrivate,
     };
   }
 

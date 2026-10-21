@@ -12,10 +12,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { createChat, searchUsers } from "../api";
+import { createChat, createGroup, searchUsers } from "../api";
 import { directKeys, useMe } from "../hooks";
 
-/** Modali "New message": justujui user → create-chat → /direct/t/[id] */
+/** Modali "New message": justujui user → create-chat → /direct/t/[id]; 2+ user → group chat (Spec 14 §4) */
 export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
   const router = useRouter();
   const qc = useQueryClient();
@@ -23,7 +23,8 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [term, setTerm] = useState("");
-  const [selected, setSelected] = useState<UserListItem | null>(null);
+  const [selected, setSelected] = useState<UserListItem[]>([]);
+  const [groupName, setGroupName] = useState("");
   const [creating, setCreating] = useState(false);
 
   // Debounce 300 ms
@@ -37,14 +38,21 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
   const loading = term.length > 0 && search.isFetching;
 
   async function start() {
-    if (!selected) return;
+    if (selected.length === 0) return;
     setCreating(true);
     try {
-      const chatId = await createChat(selected.id);
+      const chatId =
+        selected.length === 1
+          ? await createChat(selected[0]!.id)
+          : await createGroup(
+              groupName.trim() || selected.map((u) => u.userName).join(", ").slice(0, 50),
+              selected.map((u) => u.id),
+            );
       await qc.invalidateQueries({ queryKey: directKeys.chats });
       setOpen(false);
       setQ("");
-      setSelected(null);
+      setSelected([]);
+      setGroupName("");
       router.push(`/direct/t/${chatId}`);
     } catch {
       toast.error("Couldn't start chat");
@@ -64,16 +72,31 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
       </DialogTrigger>
       <DialogContent className="flex h-[70vh] max-w-[548px] flex-col p-0">
         <DialogTitle className="border-b border-ig-separator py-3 text-center">New message</DialogTitle>
-        <label className="flex items-center gap-4 border-b border-ig-separator px-4 py-2 text-sm">
-          <span className="font-semibold">To:</span>
+        {/* Chip-ho berun az <label>, ki nomi accessible-i onho matni input-ro nagirad */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-ig-separator px-4 py-2 text-sm">
+          <label htmlFor="new-message-to" className="mr-2 font-semibold">
+            To:
+          </label>
+          {selected.map((u) => (
+            <button
+              key={u.id}
+              type="button"
+              onClick={() => setSelected((cur) => cur.filter((x) => x.id !== u.id))}
+              className="rounded-full bg-ig-bg-highlight px-3 py-1 text-sm font-semibold text-ig-primary"
+            >
+              <span aria-hidden>{u.userName} ×</span>
+              <span className="sr-only">Remove {u.userName}</span>
+            </button>
+          ))}
           <input
+            id="new-message-to"
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search..."
-            className="flex-1 bg-transparent py-1 outline-none placeholder:text-ig-input-placeholder"
+            className="min-w-[120px] flex-1 bg-transparent py-1 outline-none placeholder:text-ig-input-placeholder"
           />
-        </label>
+        </div>
         <div className="flex-1 overflow-y-auto py-2">
           {loading && (
             <div className="flex justify-center py-4">
@@ -85,10 +108,12 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
             <button
               key={u.id}
               type="button"
-              onClick={() => setSelected(u)}
+              onClick={() =>
+                setSelected((cur) => (cur.some((x) => x.id === u.id) ? cur.filter((x) => x.id !== u.id) : [...cur, u]))
+              }
               className={cn(
                 "flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-ig-hover-overlay",
-                selected?.id === u.id && "bg-ig-bg-highlight",
+                selected.some((x) => x.id === u.id) && "bg-ig-bg-highlight",
               )}
             >
               <Avatar src={mediaUrl(u.avatar)} alt={u.userName} size={44} />
@@ -100,14 +125,23 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
                 aria-hidden
                 className={cn(
                   "size-6 rounded-full border-2 border-ig-stroke",
-                  selected?.id === u.id && "border-ig-primary bg-ig-primary",
+                  selected.some((x) => x.id === u.id) && "border-ig-primary bg-ig-primary",
                 )}
               />
             </button>
           ))}
         </div>
-        <div className="p-4">
-          <Button className="w-full" disabled={!selected || creating} onClick={start}>
+        <div className="space-y-3 p-4">
+          {selected.length > 1 && (
+            <input
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="Group name (optional)"
+              maxLength={50}
+              className="w-full rounded-lg border border-ig-stroke bg-transparent px-3 py-2 text-sm outline-none placeholder:text-ig-input-placeholder"
+            />
+          )}
+          <Button className="w-full" disabled={selected.length === 0 || creating} onClick={start}>
             Chat
           </Button>
         </div>

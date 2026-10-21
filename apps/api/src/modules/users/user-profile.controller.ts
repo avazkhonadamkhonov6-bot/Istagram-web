@@ -5,6 +5,8 @@ import {
   ErrorCode,
   UpdateUserProfileDto,
   isFollowQuerySchema,
+  updatePrivacySchema,
+  userIdQuerySchema,
   paginationQuerySchema,
   updateUserProfileSchema,
   userProfileQuerySchema,
@@ -29,8 +31,19 @@ export class UserProfileController {
   ) {}
 
   @Get('get-user-profile-by-id')
-  async getById(@Query(new ZodPipe(userProfileQuerySchema)) q: z.infer<typeof userProfileQuerySchema>) {
-    return ok(await this.users.getProfile(q.id));
+  async getById(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userProfileQuerySchema)) q: z.infer<typeof userProfileQuerySchema>) {
+    return ok(await this.users.getProfileFor(me.id, q.id));
+  }
+
+  /** Spec 14 §1.1 */
+  @Put('update-privacy')
+  async updatePrivacy(@CurrentUser() me: AuthUser, @Body(new ZodPipe(updatePrivacySchema)) dto: z.infer<typeof updatePrivacySchema>) {
+    return ok(await this.users.updatePrivacy(me.id, dto.isPrivate));
+  }
+
+  @Get('get-follow-status')
+  async followStatus(@CurrentUser() me: AuthUser, @Query(new ZodPipe(userIdQuerySchema)) q: z.infer<typeof userIdQuerySchema>) {
+    return ok(await this.follows.status(me.id, q.userId));
   }
 
   @Get('get-is-follow-user-profile-by-id')

@@ -47,6 +47,20 @@ export function notificationText(n: NotificationDto): string {
       return `replied to your comment: ${n.commentText ?? ""}`;
     case "FOLLOW":
       return "started following you.";
+    // Spec 14 §5
+    case "FOLLOW_REQUEST":
+      return "requested to follow you.";
+    case "FOLLOW_ACCEPTED":
+      return "accepted your follow request.";
+    case "COMMENT_LIKE":
+      return `liked your comment: ${n.commentText ?? ""}`;
+    case "MENTION":
+      return n.commentText ? `mentioned you in a comment: ${n.commentText}` : "mentioned you in a post.";
+    case "TAG":
+      return "tagged you in a post.";
+    // Spec 16 §3
+    case "LIVE_STARTED":
+      return "started a live video.";
   }
 }
 

@@ -6,6 +6,7 @@
     "dev": "nest start --watch --preserveWatchOutput",
     "build": "nest build",
     "start": "node dist/main.js",
+    "start:render": "node scripts/seed-if-empty.js & node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "jest --config test/jest-e2e.json --runInBand",
@@ -37,6 +38,7 @@
     "pino-http": "^10.5.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "sharp": "0.35.5",
     "socket.io": "^4.8.1",
     "zod": "^3.25.76"
   },

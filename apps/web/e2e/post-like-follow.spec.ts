@@ -22,7 +22,8 @@ test("post: upload-i multipart → post bo aks, aks az /api/images kushoda mesha
 
   const img = await context.request.get(`/api/images/${post.images[0]}`);
   expect(img.status()).toBe(200);
-  expect(img.headers()["content-type"]).toBe("image/png");
+  // Spec 03: aks ba WebP tabdil doda meshavad
+  expect(img.headers()["content-type"]).toBe("image/webp");
 
   const mine = await (await context.request.get("/api/Post/get-my-posts")).json();
   expect(mine.data.map((p: { postId: number }) => p.postId)).toContain(post.postId);
@@ -65,7 +66,7 @@ test("follow: idempotent, feed posthoi follow-shudaro nishon medihad", async ({ 
   const follow = () => a.context.request.post(`/api/FollowingRelationShip/add-following-relation-ship?followingUserId=${b.me.userId}`);
   await follow();
   const again = await (await follow()).json();
-  expect(again.data).toEqual({ isFollowing: true, subscribersCount: 1 });
+  expect(again.data).toEqual({ isFollowing: true, isRequested: false, subscribersCount: 1 });
 
   const isFollow = await (await a.context.request.get(`/api/UserProfile/get-is-follow-user-profile-by-id?followingUserId=${b.me.userId}`)).json();
   expect(isFollow.data).toBe(true);
