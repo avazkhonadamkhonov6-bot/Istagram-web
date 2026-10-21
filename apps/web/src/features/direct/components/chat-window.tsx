@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { ErrorFallback } from "@/components/error-fallback";
 import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
@@ -22,7 +23,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const qc = useQueryClient();
   const { data: me } = useMe();
   const { data: chats } = useChats();
-  const { data: messages, isPending, isError, error } = useMessages(chatId);
+  const { data: messages, isPending, isError, error, refetch } = useMessages(chatId);
   const send = useSendMessage(chatId);
   const remove = useDeleteMessage(chatId);
   const [text, setText] = useState("");
@@ -51,13 +52,13 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   }
 
   async function removeChat() {
-    if (!window.confirm("Hamai suhbat hazf shavad?")) return;
+    if (!window.confirm("Delete this chat?")) return;
     try {
       await deleteChat(chatId);
       await qc.invalidateQueries({ queryKey: directKeys.chats });
       router.push("/direct/inbox");
     } catch {
-      toast.error("Chat hazf nashud");
+      toast.error("Couldn't delete chat");
     }
   }
 
@@ -86,8 +87,8 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             <Spinner />
           </div>
         )}
-        {forbidden && <p className="py-8 text-center text-sm text-ig-text-secondary">In chat dastras nest.</p>}
-        {isError && !forbidden && <p className="py-8 text-center text-sm text-ig-text-secondary">Paymho bor nashudand.</p>}
+        {forbidden && <p className="py-8 text-center text-sm text-ig-text-secondary">You don&apos;t have access to this chat.</p>}
+        {isError && !forbidden && <ErrorFallback compact title="Couldn't load messages" onRetry={() => refetch()} />}
         {messages && <MessageList messages={messages} myId={me?.userId} onUnsend={(id) => remove.mutate(id)} />}
         <div ref={bottomRef} />
       </div>
@@ -127,7 +128,7 @@ function MessageList({ messages, myId, onUnsend }: { messages: UiMessage[]; myId
     [messages],
   );
 
-  if (messages.length === 0) return <p className="py-8 text-center text-sm text-ig-text-secondary">Avvalin paymro firisted.</p>;
+  if (messages.length === 0) return <p className="py-8 text-center text-sm text-ig-text-secondary">Say hi to start the conversation.</p>;
 
   return (
     <ul className="flex flex-col gap-1">
@@ -145,8 +146,8 @@ function MessageList({ messages, myId, onUnsend }: { messages: UiMessage[]; myId
                   "max-w-[70%] overflow-hidden rounded-[22px] text-[15px]",
                   file ? "" : "px-3 py-2",
                   mine
-                    ? "bg-[rgb(var(--ig-outgoing-message-bubble))] text-ig-text-on-color"
-                    : "bg-[rgb(var(--ig-incoming-message-bubble))] text-ig-text",
+                    ? "ig-bubble-out"
+                    : "ig-bubble-in",
                   m.pending && "opacity-60",
                 )}
               >

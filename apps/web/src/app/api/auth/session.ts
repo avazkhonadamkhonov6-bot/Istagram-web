@@ -3,11 +3,11 @@ import type { UserProfile } from "@repo/shared";
 import { apiFetch, type Envelope, json, setToken, upstreamError } from "@/lib/bff";
 
 /** Login dar NestJS → token ba cookie → ba brauzer faqat profil (bidun token) */
-export async function loginAndRespond(userName: string, password: string, requestId?: string) {
+export async function loginAndRespond(userName: string, password: string, requestId?: string, ip?: string) {
   try {
     const res = await apiFetch("/Account/login", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...(ip ? { "x-forwarded-for": ip } : {}) },
       body: JSON.stringify({ userName, password }),
       requestId,
     });

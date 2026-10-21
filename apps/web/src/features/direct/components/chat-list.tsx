@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ErrorFallback } from "@/components/error-fallback";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/format";
@@ -37,21 +38,14 @@ export function ChatList({ className }: { className?: string }) {
             </div>
           ))}
 
-        {isError && (
-          <div className="px-6 py-4 text-sm text-ig-text-secondary">
-            Ruyxat bor nashud.{" "}
-            <button type="button" className="font-semibold text-ig-link" onClick={() => refetch()}>
-              Takror
-            </button>
-          </div>
-        )}
+        {isError && <ErrorFallback compact title="Couldn't load chats" onRetry={() => refetch()} />}
 
-        {chats?.length === 0 && <p className="px-6 py-4 text-sm text-ig-text-secondary">Hanuz paym nest.</p>}
+        {chats?.length === 0 && <p className="px-6 py-4 text-sm text-ig-text-secondary">No messages yet.</p>}
 
         {chats?.map((chat) => {
           const peer = peerOf(chat, me?.userId);
           const last = chat.lastMessage;
-          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${last.messageText ?? "Fayl"}` : "Suhbat sohta shud";
+          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${last.messageText ?? "Sent an attachment"}` : "Start a conversation";
           return (
             <Link
               key={chat.chatId}

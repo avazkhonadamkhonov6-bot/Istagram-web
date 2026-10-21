@@ -57,6 +57,14 @@ export function upstreamError(err: unknown) {
   });
 }
 
+/**
+ * IP-i mijoz baroi rate limit-i API (login 5/daq. baroi har IP, Spec 01).
+ * Avvalin qimati x-forwarded-for — onro platforma (Vercel/CDN) meguzorad; Next dar dev IP-i xudro ilova mekunad.
+ */
+export function clientIp(req: Request): string | undefined {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined;
+}
+
 /** CSRF: baroi metodhoi tagyirdihanda header-i Origin boyad az hamin sayt boshad (TZ §5.3) */
 export function isSameOrigin(req: Request) {
   const origin = req.headers.get("origin");

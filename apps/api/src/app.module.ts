@@ -31,6 +31,10 @@ const config = loadConfig();
           res.setHeader('x-request-id', id);
           return id;
         },
+        // Kontrakt parolro dar query mefiristad (ResetPassword, ChangePassword) — url bidun query dar log
+        serializers: {
+          req: (req: { url?: string }) => ({ ...req, url: req.url?.split('?')[0] }),
+        },
         // Parol, token va cookie dar log pinhon (Spec 11 AC6)
         redact: ['req.headers.authorization', 'req.headers.cookie', 'req.body.password', 'req.body.confirmPassword', 'req.query.Password', 'req.query.OldPassword', 'req.query.ConfirmPassword', 'req.query.Token'],
       },

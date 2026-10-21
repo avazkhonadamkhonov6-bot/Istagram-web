@@ -1,46 +1,48 @@
 # TASKS — Vazifaho baroi Avaz va Abubakr
 
 > Har vazifa dar GitHub **Issue**-i alohida ast (milestone = ruz, label = `backend` / `frontend` / `qa` va nomi odam).
+> **Holat (2026-10-21):** hamai vazifahoi Avaz tayyor — `[x]` tayyor va sanjida shud, `[-]` buridashud (sabab navishta shud). Tafsilot: [PROGRESS.md](PROGRESS.md), [qa/QA-01.md](qa/QA-01.md).
 > **Kontrakti API (az 2026-10-21):** [specs/12-api-kontrakt.md](specs/12-api-kontrakt.md) — URL va DTO-ho az onjo, ne az spec-hoi 01–09.
 > Tartib va vaqt — dar [PLAN.md](PLAN.md). Pas az tamom: PR bo `Closes #<issue>` → Issue xud baste meshavad.
-> | ID | Kas | Ruz | Vazifa |
-|---|---|---|---|
-| BE-01 | Avaz | 1 | Monorepo setup |
-| BE-02 | Avaz | 1 | Kontrakt: Zod schema-ho dar `packages/shared` |
-| BE-03 | Avaz | 1 | Docker, Prisma, infra, CI |
-| BE-04 | Avaz | 1 | Auth API |
-| BE-05 | Avaz | 1 | Users + Follow API |
-| BE-06 | Avaz | 2 | Media API (S3) |
-| BE-07 | Avaz | 2 | Posts, Like, Comment, Saved API |
-| BE-08 | Avaz | 2 | Feed, Explore, Search API |
-| BE-09 | Avaz | 2 | Realtime + Notifications API |
-| BE-10 | Avaz | 2 | Stories API |
-| BE-11 | Avaz | 3 | Direct + Reels API |
-| BE-12 | Avaz | 3 | Seed, e2e, API freeze |
-| FE-01 | Abubakr | 1 | Tayyori va omuzishi Next.js 16 |
-| FE-02 | Abubakr | 1 | Rangho, dark mode, shadcn/ui |
-| FE-03 | Abubakr | 1 | Komponenthoi UI |
-| FE-04 | Abubakr | 1 | MSW mock |
-| FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) |
-| FE-06 | Abubakr | 2 | Login / Signup |
-| FE-07 | Abubakr | 2 | Feed + PostCard |
-| FE-08 | Abubakr | 2 | Post modal + comment-ho |
-| FE-09 | Abubakr | 2 | Profil |
-| FE-10 | Abubakr | 2 | Edit profile + parol |
-| FE-11 | Abubakr | 3 | Explore, Hashtag, Search |
-| FE-12 | Abubakr | 3 | Notifications panel (UI) |
-| FE-13 | Avaz | 3 | BFF + proxy.ts + CSP |
-| FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya |
-| FE-15 | Avaz | 3 | Socket client + notifications realtime |
-| FE-16 | Abubakr | 3 | Stories tray + viewer |
-| FE-17 | Avaz | 4 | Direct (front) |
-| FE-18 | Abubakr | 4 | Create modal |
-| FE-19 | Avaz | 4 | Bovarinokii front |
-| FE-20 | Abubakr | 4 | Reels (front) |
-| FE-21 | Avaz | 4 | Playwright e2e |
-| FE-22 | Abubakr | 4 | Pardoz va responsive |
-| QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 |
-| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |
+
+| ID | Kas | Ruz | Vazifa | Holat |
+|---|---|---|---|---|
+| BE-01 | Avaz | 1 | Monorepo setup | tayyor |
+| BE-02 | Avaz | 1 | Kontrakt: Zod schema-ho dar `packages/shared` | tayyor |
+| BE-03 | Avaz | 1 | Docker, Prisma, infra, CI | tayyor |
+| BE-04 | Avaz | 1 | Auth API | tayyor |
+| BE-05 | Avaz | 1 | Users + Follow API | tayyor |
+| BE-06 | Avaz | 2 | Media API (S3) | tayyor |
+| BE-07 | Avaz | 2 | Posts, Like, Comment, Saved API | tayyor |
+| BE-08 | Avaz | 2 | Feed, Explore, Search API | tayyor |
+| BE-09 | Avaz | 2 | Realtime + Notifications API | tayyor |
+| BE-10 | Avaz | 2 | Stories API | tayyor |
+| BE-11 | Avaz | 3 | Direct + Reels API | tayyor |
+| BE-12 | Avaz | 3 | Seed, e2e, API freeze | tayyor |
+| FE-01 | Abubakr | 1 | Tayyori va omuzishi Next.js 16 |  |
+| FE-02 | Abubakr | 1 | Rangho, dark mode, shadcn/ui |  |
+| FE-03 | Abubakr | 1 | Komponenthoi UI |  |
+| FE-04 | Abubakr | 1 | MSW mock |  |
+| FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) |  |
+| FE-06 | Abubakr | 2 | Login / Signup |  |
+| FE-07 | Abubakr | 2 | Feed + PostCard |  |
+| FE-08 | Abubakr | 2 | Post modal + comment-ho |  |
+| FE-09 | Abubakr | 2 | Profil |  |
+| FE-10 | Abubakr | 2 | Edit profile + parol |  |
+| FE-11 | Abubakr | 3 | Explore, Hashtag, Search |  |
+| FE-12 | Abubakr | 3 | Notifications panel (UI) |  |
+| FE-13 | Avaz | 3 | BFF + proxy.ts + CSP | tayyor |
+| FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya |  |
+| FE-15 | Avaz | 3 | Socket client + notifications realtime | tayyor |
+| FE-16 | Abubakr | 3 | Stories tray + viewer |  |
+| FE-17 | Avaz | 4 | Direct (front) | tayyor |
+| FE-18 | Abubakr | 4 | Create modal |  |
+| FE-19 | Avaz | 4 | Bovarinokii front | tayyor |
+| FE-20 | Abubakr | 4 | Reels (front) |  |
+| FE-21 | Avaz | 4 | Playwright e2e | tayyor |
+| FE-22 | Abubakr | 4 | Pardoz va responsive |  |
+| QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
+| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |  |
 
 ---
 
@@ -55,9 +57,10 @@
 - Dar `CODEOWNERS` username-i GitHub-i Abubakr
 
 **Tayyor, agar:**
-- [ ] `pnpm install && pnpm dev` → web :3000 va api :4000 kor mekunand
-- [ ] `pnpm typecheck` va `pnpm lint` sabz
-- [ ] Push ba `main` → Abubakr metavonad sar kunad
+- [x] `pnpm install && pnpm dev` → web :3000 va api :4000 kor mekunand (sanjida shud)
+- [x] `pnpm typecheck` va `pnpm lint` sabz
+- [x] Push ba `main` (PR #1)
+- [ ] Dar `CODEOWNERS` username-i GitHub-i Abubakr — username ma'lum nest (faqat e-mail dar commit)
 
 ### BE-02 · Kontrakt: Zod schema-ho dar packages/shared
 <!-- who:avaz day:1 type:backend -->
@@ -67,8 +70,8 @@
 - `error-codes.ts`, tipho bo `z.infer`
 
 **Tayyor, agar:**
-- [ ] Har DTO az spec dar `shared` hast
-- [ ] Push to **12:30** — Abubakr mock-ro az inho mesozad
+- [x] Har DTO az spec dar `shared` hast — kontrakt ivaz shud ba [Spec 12](specs/12-api-kontrakt.md) (Swagger-i "Web Api")
+- [x] Push — Abubakr metavonad mock-ro az inho sozad
 
 ### BE-03 · Docker, Prisma, infra, CI
 <!-- who:avaz day:1 type:backend -->
@@ -81,9 +84,10 @@
 - `.github/workflows/ci.yml`
 
 **Tayyor, agar:**
-- [ ] Spec 11 AC1, AC2
-- [ ] `/api/v1/health` → `ok`
-- [ ] CI dar PR sabz
+- [ ] Spec 11 AC1 — Docker dar kompyuter nest; `docker-compose.yml` (Postgres) navishta shud, PostgreSQL-i lokali istifoda meshavad
+- [x] Spec 11 AC2 (bidun `JWT_SECRET` → xatoi fahmo dar start)
+- [x] `/health` → `ok` (prefiks-i `/api/v1` dar Spec 12 nest)
+- [x] CI dar PR sabz (PR #2)
 
 ### BE-04 · Auth API
 <!-- who:avaz day:1 type:backend -->
@@ -93,38 +97,38 @@
 - argon2id, `JwtAuthGuard` global + `@Public()`, throttler bo Redis
 
 **Tayyor, agar:**
-- [ ] Spec 01 AC1–AC8, AC10 (e2e)
-- [ ] `ali` va `ALI` → 409
+- [x] Spec 01 AC1–AC4, AC7, AC8, AC10 (e2e); AC5–AC6 (refresh token) — buridashud, dar kontrakt yak JWT
+- [x] `ali` va `ALI` → 409
 
 ### BE-05 · Users + Follow API
 <!-- who:avaz day:1 type:backend -->
 **Vaqt:** Ruzi 1, 18:00–19:30 · **Spec:** 02
 
 **Tayyor, agar:**
-- [ ] Spec 02 AC1–AC4, AC6
+- [x] Spec 02 AC1–AC4, AC6 (`/UserProfile`, `/FollowingRelationShip`, `get-post-favorites`)
 
 ### BE-06 · Media API (S3)
 <!-- who:avaz day:2 type:backend -->
 **Vaqt:** Ruzi 2, 09:15–11:00 · **Spec:** 03
 
 **Tayyor, agar:**
-- [ ] Spec 03 AC1–AC4
-- [ ] Job `process-image` versiyahoi WebP mesozad
+- [x] Spec 03 AC2–AC4 ekvivalent: upload-i multipart (Spec 12), tip/andoza → 400; presign S3 — buridashud
+- [-] Job `process-image` (WebP) — buridashud (PLAN, buridan #2)
 
 ### BE-07 · Posts, Like, Comment, Saved API
 <!-- who:avaz day:2 type:backend -->
 **Vaqt:** Ruzi 2, 11:00–13:00 · **Spec:** 04
 
 **Tayyor, agar:**
-- [ ] Spec 04 AC1–AC6
-- [ ] Like-i parallel → `likeCount` = 1
+- [x] Spec 04 AC1–AC6 (like/favorite — toggle, Spec 12)
+- [x] Like-i parallel → `likeCount` durust
 
 ### BE-08 · Feed, Explore, Search API
 <!-- who:avaz day:2 type:backend -->
 **Vaqt:** Ruzi 2, 14:00–16:00 · **Spec:** 05
 
 **Tayyor, agar:**
-- [ ] Spec 05 AC1–AC5
+- [x] Spec 05 AC1, AC2, AC4, AC5 (`get-following-post`, `get-posts`, `get-users`); AC3 Explore — dar Spec 12 nest
 
 ### BE-09 · Realtime + Notifications API
 <!-- who:avaz day:2 type:backend -->
@@ -134,32 +138,32 @@
 - event → queue `notifications` → worker → DB + `notification:new`
 
 **Tayyor, agar:**
-- [ ] Spec 09 AC1–AC4, Spec 02 AC5, Spec 04 AC7
-- [ ] Spec 11 AC4, AC5
+- [x] `RealtimeGateway` `/ws` + `emitToUser` (ticket-i 60 s)
+- [-] Notifications, Redis adapter, queue/worker — buridashud: dar kontrakti Spec 12 nest (P1)
 
 ### BE-10 · Stories API
 <!-- who:avaz day:2 type:backend -->
 **Vaqt:** Ruzi 2, 18:00–19:30 · **Spec:** 06
 
 **Tayyor, agar:**
-- [ ] Spec 06 AC1–AC4
+- [x] Spec 06 AC1–AC4 (`/Story/*`)
 
 ### BE-11 · Direct + Reels API
 <!-- who:avaz day:3 type:backend -->
 **Vaqt:** Ruzi 3, 09:15–11:30 · **Spec:** 07, 08
 
 **Tayyor, agar:**
-- [ ] Spec 08 AC1–AC5 (2 socket-client dar test)
-- [ ] Spec 07 AC1–AC4
+- [x] Spec 08 AC1–AC4 (2 socket-client dar test); AC5 (unread/Seen) — dar kontrakt nest
+- [x] Spec 07: `get-reels` faqat reel; reel = aniq 1 video (2 video yo aks → posti oddi, ne reel)
 
 ### BE-12 · Seed, e2e, API freeze
 <!-- who:avaz day:3 type:backend -->
 **Vaqt:** Ruzi 3, 11:30–13:00 · **Spec:** 00 §6, 11
 
 **Tayyor, agar:**
-- [ ] `pnpm --filter api db:seed` — 10 user, 50 post, story, chat
-- [ ] Spec 11 AC3, AC6
-- [ ] Hamai e2e sabz → **API freeze**, xabar ba Abubakr
+- [x] `pnpm --filter api db:seed` — 10 user, 50 post, story, chat
+- [x] Spec 11 AC6 (dar log parol/token nest); AC3 (Redis) — buridashud
+- [x] Hamai e2e sabz (18/18) → **API freeze**
 
 ### FE-01 · Tayyori va omuzishi Next.js 16
 <!-- who:abubakr day:1 type:frontend -->
@@ -280,9 +284,9 @@
 **Vaqt:** Ruzi 3, 14:00–16:00 · **Spec:** TZ §5.3, 01, 10 §6–7
 
 **Tayyor, agar:**
-- [ ] `app/api/auth/*` cookie-hoi httpOnly meguzorand
-- [ ] `app/api/[...path]` + refresh-i avtomati + timeout
-- [ ] Spec 01 AC9 (token dar JS nest)
+- [x] `app/api/auth/*` cookie-hoi httpOnly meguzorand
+- [x] `app/api/[...path]` + timeout 10 s (refresh — dar kontrakt nest)
+- [x] Spec 01 AC9 (token dar JS nest) — Playwright
 
 ### FE-14 · Xomush kardani mock, integratsiya
 <!-- who:abubakr day:3 type:frontend -->
@@ -297,8 +301,8 @@
 **Vaqt:** Ruzi 3, 17:00–19:30 · **Spec:** 08, 09
 
 **Tayyor, agar:**
-- [ ] `lib/socket.ts`: ticket, reconnect, refetch pas az reconnect
-- [ ] Badge va toast hangomi `notification:new`
+- [x] `lib/socket.ts`: ticket, reconnect, refetch pas az reconnect
+- [-] Badge/toast hangomi `notification:new` — notifications dar kontrakt nest; toast hangomi `message:new` hast
 
 ### FE-16 · Stories tray + viewer
 <!-- who:abubakr day:3 type:frontend -->
@@ -313,9 +317,9 @@
 **Vaqt:** Ruzi 4, 09:15–12:30 · **Spec:** 08
 
 **Tayyor, agar:**
-- [ ] Inbox, chat, optimistic + `clientId`, typing, Seen
-- [ ] "New message", share post ba Direct
-- [ ] Spec 08 AC1 dar du brauzer
+- [x] Inbox, chat, optimistic, unsend, fayl; typing/Seen — dar kontrakt nest (PLAN, buridan #6)
+- [x] "New message"; share post — dar kontrakt nest
+- [x] Spec 08 AC1 dar du brauzer — Playwright
 
 ### FE-18 · Create modal
 <!-- who:abubakr day:4 type:frontend -->
@@ -330,7 +334,7 @@
 **Vaqt:** Ruzi 4, 13:30–15:30 · **Spec:** 10 §7.1
 
 **Tayyor, agar:**
-- [ ] Spec 10 AC6, AC7, AC8
+- [x] Spec 10 AC6, AC7 — Playwright; AC8 (virtualizatsiyai feed) — feed (FE-07) hanuz nest
 
 ### FE-20 · Reels (front)
 <!-- who:abubakr day:4 type:frontend -->
@@ -345,7 +349,7 @@
 **Vaqt:** Ruzi 4, 15:30–17:00 · **Spec:** TZ §6.4
 
 **Tayyor, agar:**
-- [ ] 5 senariya sabz: register, post, like, follow, direct
+- [x] 5 senariya sabz: register, post, like, follow, direct (7 test)
 
 ### FE-22 · Pardoz va responsive
 <!-- who:abubakr day:4 type:frontend -->
@@ -360,8 +364,8 @@
 **Vaqt:** Ruzi 4, 17:00–19:00
 
 **Tayyor, agar:**
-- [ ] Hamai AC-hoi in spec-ho tekshirida shudand
-- [ ] TZ §9 band 8–10 (cookie, Redis xomush, worker xomush)
+- [x] Hamai AC-hoi in spec-ho tekshirida shudand — [qa/QA-01.md](qa/QA-01.md)
+- [x] TZ §9 band 8 (cookie); band 9–10 (Redis, worker) — buridashud
 
 ### QA-02 · QA: spec 02, 03, 04, 06, 07, 10
 <!-- who:abubakr day:4 type:qa -->
