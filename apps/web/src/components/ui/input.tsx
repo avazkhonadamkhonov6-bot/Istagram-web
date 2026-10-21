@@ -1,4 +1,6 @@
-import type { ComponentProps } from "react";
+"use client";
+
+import { useId, type ComponentProps } from "react";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +18,8 @@ export function Input({
   id,
   ...props
 }: InputProps) {
-  const inputId = id ?? props.name;
+  const generatedId = useId();
+  const inputId = id ?? props.name ?? generatedId;
   const hasError = Boolean(error) || status === "error";
 
   return (

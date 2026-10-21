@@ -4,7 +4,7 @@
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
 **Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: FE-04 mock, FE-06…FE-12
+**Hozir:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: frontend va QA nav shud — [QA-02](qa/QA-02.md); chand talab ba kontrakti API vobasta ast
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -24,27 +24,27 @@
 ## RUZI 2
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [x] | FE-06 Login / Signup |
+| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [~] | FE-06 Login / Signup |
 | [x] | BE-07 Post, like, comment, favorite | [x] | FE-07 Feed + PostCard |
 | [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [x] | FE-08 Post modal |
 | [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [x] | FE-09 Profil |
-| [x] | BE-10 Story API | [x] | FE-10 Edit profile + parol |
+| [x] | BE-10 Story API | [~] | FE-10 Edit profile + parol |
 
 ## RUZI 3
 | | Avaz | | Abubakr |
 |---|---|---|---|
 | [x] | BE-11 Chat + Reels + Location API | [x] | FE-11 Explore, Search |
-| [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [ ] | FE-12 Notifications panel |
-| [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [ ] | FE-14 Mock xomush, integratsiya |
-| [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [ ] | FE-16 Stories |
+| [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [x] | FE-12 Notifications panel |
+| [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [x] | FE-14 Mock xomush, integratsiya |
+| [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [~] | FE-16 Stories |
 
 ## RUZI 4
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [ ] | FE-18 Create modal |
-| [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [ ] | FE-20 Reels |
-| [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [ ] | FE-22 Pardoz, responsive |
-| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [ ] | QA-02 |
+| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [~] | FE-18 Create modal |
+| [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [x] | FE-20 Reels |
+| [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [x] | FE-22 Pardoz, responsive |
+| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [~] | QA-02 |
 | [ ] | README, `v0.2`, demo | | |
 
 ## Qaydho / masalaho
@@ -61,3 +61,44 @@
 - 2026-10-21 (baroi Abubakr): `OfflineBanner` (`src/components/offline-banner.tsx`) hozir faqat dar Direct ast — onro ba root layout guzored. `WidgetBoundary` baroi Stories/Suggestions/PostCard tayyor ast. Bo FE-07/FE-09/FE-18 senariyahoi Playwright-i post/like/follow ba UI guzaronida meshavand.
 - 2026-10-21: [Spec 13](specs/13-ilovaho-tz.md) — funksiyahoi P0/P1-i TZ, ki dar Swagger-i "Web Api" nabudand, ilova shudand (57 endpoint-i Spec 12 tagyir nayoftand): Notifications + realtime, Explore, Hashtag, javob ba comment, Direct (Seen, typing, unread, share post), Suggestions. API e2e 24/24, Playwright 8/8.
 - 2026-10-21: Rangho: hamai 62 tokeni rangi Spec 10 §1 dar `globals.css` mos (174 sanjish, light + dark); AC2 = 0.
+
+## Frontend Abubakr — 2026-10-21
+
+- FE-01…FE-22 (faqat vazifahoi Abubakr) tatbiq shudand; `[~]` = frontend tayyor,
+  ammo talabi alohida endpoint-i ilovagii API yo reference-i vizual mehohad.
+  Tafsilot va kodhoi masalaho: [QA-02](qa/QA-02.md).
+- Next.js production build, TypeScript va ESLint sabz; 18 UI + 5 live UI sanjish
+  sabz; 24 testi mavjudi API biduni tagyiri kodi Avaz sabz.
+- Lighthouse desktop: feed 100 performance / 100 accessibility; profile 100 / 100.
+  135 sanjishi tokenho ba Spec 10 mos; hardcoded color dar components/features = 0.
+- Feed-i 200 post: hamai sahifaho bor meshavand, article-hoi mounted ≤15.
+- Root layout bo `connection()` + `instant = false` server-rendered ast, to nonce
+  CSP-i mavjuda dar production kor kunad. Proxy, BFF, Direct, socket va shared
+  tagyir nayoftand.
+- API-FE-06/09/10/16/18: username availability-i public, edit name/username/website,
+  remove follower, viewers list va location baroi post dar kontrakt nestand.
+  Inho bo xulosa «tayyor» pushonida nashudaand.
+
+## Визуальная переработка — 2026-10-21
+
+- Общая палитра приближена к классическому Instagram Web: чёрный/белый фон,
+  нейтральные разделители и синие кнопки. Это намеренное изменение прежних
+  серо-синих токенов Spec 10 по запросу пользователя.
+- Login / Signup: локальный SVG-логотип, поля 38px с плавающими подписями,
+  исправленный autofill, адаптивные карточки, footer. На Login — локальные
+  фотографии в макетах телефонов с плавным переключением.
+- Direct: компактная навигация 72px, исправлен отступ основного содержимого,
+  адаптивный список чатов, общий QueryClient вместо вложенного провайдера.
+- Добавлены анимации открытия/закрытия диалогов, лайка и наведения;
+  учитывается prefers-reduced-motion. Индикатор Next отключён в конфигурации
+  (для уже работающего dev-сервера может понадобиться перезапуск).
+- Проверено: TypeScript и 6 существующих Playwright-тестов (навигация/лента
+  на трёх ширинах, уведомления, сохранение темы, валидация регистрации);
+  Chromium — Login / Signup в обеих темах,
+  поля 38px, загрузка фотографий; Direct на 1440 / 1000 / 390px,
+  открытие/закрытие New message, отсутствие горизонтального overflow и
+  необработанных ошибок JavaScript. Авторизация и доставка сообщений через
+  реальный API в этой проверке не проверялись.
+- Это приближение к интерфейсу Instagram, а не подтверждённая pixel-perfect
+  копия всех его текущих экранов. Facebook OAuth и восстановление пароля
+  требуют отдельных API, поэтому не добавлены как неработающие кнопки.

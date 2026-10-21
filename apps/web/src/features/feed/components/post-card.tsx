@@ -1,15 +1,17 @@
 "use client";
+import Image from "next/image";
 
+import { PostOptions } from "@/features/posts/components/post-options";
+import { SharePostDialog } from "@/features/posts/components/share-post-dialog";
 import type { PostDto } from "@repo/shared";
 import Link from "next/link";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bookmark,
   ChevronLeft,
   ChevronRight,
   Heart,
   MessageCircle,
-  MoreHorizontal,
   Send,
 } from "@/components/ui/icons";
 import { formatCount, formatRelativeTime } from "@/lib/format";
@@ -28,7 +30,7 @@ function renderCaption(text: string): ReactNode[] {
         <Link
           key={i}
           href={`/explore/tags/${encodeURIComponent(part.slice(1))}`}
-          className="text-ig-link"
+          className="text-ig-link underline decoration-ig-link/30 underline-offset-2"
         >
           {part}
         </Link>
@@ -36,7 +38,11 @@ function renderCaption(text: string): ReactNode[] {
     }
     if (part.length > 1 && part.startsWith("@")) {
       return (
-        <Link key={i} href={`/${part.slice(1)}`} className="text-ig-link">
+        <Link
+          key={i}
+          href={`/${part.slice(1)}`}
+          className="text-ig-link underline decoration-ig-link/30 underline-offset-2"
+        >
           {part}
         </Link>
       );
@@ -45,12 +51,26 @@ function renderCaption(text: string): ReactNode[] {
   });
 }
 
-export function PostCard({ post }: { post: PostDto }) {
+export function PostCard({
+  post,
+  priority = false,
+}: {
+  post: PostDto;
+  priority?: boolean;
+}) {
+  const [share, setShare] = useState(false);
   const [index, setIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [text, setText] = useState("");
   const heartTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (heartTimer.current) clearTimeout(heartTimer.current);
+    },
+    [],
+  );
 
   const like = useToggleLike();
   const favorite = useToggleFavorite();
@@ -59,7 +79,7 @@ export function PostCard({ post }: { post: PostDto }) {
   const files = post.images;
   const current = files[index];
   const url = mediaUrl(current);
-    const content = post.content ?? "";
+  const content = post.content ?? "";
   const longCaption = content.length > CAPTION_LIMIT;
   const caption =
     longCaption && !expanded
@@ -67,7 +87,7 @@ export function PostCard({ post }: { post: PostDto }) {
       : content;
 
   const onDoubleTap = () => {
-    if (!post.postLike) like.mutate(post);
+    if (!post.postLike && !like.isPending) like.mutate(post);
     setShowHeart(true);
     if (heartTimer.current) clearTimeout(heartTimer.current);
     heartTimer.current = setTimeout(() => setShowHeart(false), 700);
@@ -81,8 +101,8 @@ export function PostCard({ post }: { post: PostDto }) {
   };
 
   return (
-    <article className="border-b border-ig-separator pb-4">
-      <header className="flex items-center gap-3 py-3">
+    <article className="mb-5 border-b border-ig-separator pb-4">
+      <header className="flex items-center gap-3 px-1 py-3">
         <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
         <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
           <Link href={`/${post.userName}`} className="truncate font-semibold">
@@ -92,13 +112,7 @@ export function PostCard({ post }: { post: PostDto }) {
             {formatRelativeTime(new Date(post.datePublished).getTime())}
           </span>
         </div>
-        <button
-          type="button"
-          aria-label="More options"
-          className="rounded-lg p-1 hover:bg-ig-hover-overlay"
-        >
-          <MoreHorizontal className="size-5" />
-        </button>
+        <PostOptions postId={post.postId} userId={post.userId} />
       </header>
 
       <div
@@ -114,8 +128,11 @@ export function PostCard({ post }: { post: PostDto }) {
             className="size-full object-cover"
           />
         ) : url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
+            preload={priority}
+            unoptimized
+            width={470}
+            height={588}
             src={url}
             alt={post.title || `Post by ${post.userName}`}
             draggable={false}
@@ -128,7 +145,7 @@ export function PostCard({ post }: { post: PostDto }) {
           fill="currentColor"
           className={cn(
             "pointer-events-none absolute left-1/2 top-1/2 size-24 -translate-x-1/2 -translate-y-1/2 text-ig-text-on-media transition-all duration-300",
-            showHeart ? "scale-100 opacity-100" : "scale-50 opacity-0",
+            showHeart ? "animate-ig-heart" : "opacity-0",
           )}
         />
 
@@ -176,8 +193,9 @@ export function PostCard({ post }: { post: PostDto }) {
         <button
           type="button"
           aria-label={post.postLike ? "Unlike" : "Like"}
+          disabled={like.isPending}
           onClick={() => like.mutate(post)}
-          className={post.postLike ? "text-ig-badge" : undefined}
+          className={cn("ig-post-action", post.postLike && "text-ig-badge ig-liked")}
         >
           <Heart
             className="size-6"
@@ -187,14 +205,15 @@ export function PostCard({ post }: { post: PostDto }) {
         <Link href={`/p/${post.postId}`} aria-label="Comment">
           <MessageCircle className="size-6" />
         </Link>
-        <button type="button" aria-label="Share">
+        <button type="button" aria-label="Share" onClick={() => setShare(true)}>
           <Send className="size-6" />
         </button>
         <button
           type="button"
           aria-label={post.postFavorite ? "Unsave" : "Save"}
+          disabled={favorite.isPending}
           onClick={() => favorite.mutate(post)}
-          className="ml-auto"
+          className="ig-post-action ml-auto"
         >
           <Bookmark
             className="size-6"
@@ -253,6 +272,13 @@ export function PostCard({ post }: { post: PostDto }) {
           </button>
         ) : null}
       </form>
+      {share && (
+        <SharePostDialog
+          postId={post.postId}
+          open={share}
+          onOpenChange={setShare}
+        />
+      )}
     </article>
   );
 }

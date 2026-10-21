@@ -18,8 +18,9 @@ export const postKeys = {
   allReplies: ["replies"] as const,
 };
 
-export function usePost(id: number, enabled = true) {
+export function usePost(id: number, enabled = true, initialData?: PostDto) {
   return useQuery({
+    initialData,
     queryKey: postKeys.detail(id),
     queryFn: () => postApi.getPost(id),
     enabled,

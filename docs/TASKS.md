@@ -19,30 +19,30 @@
 | BE-10 | Avaz | 2 | Stories API | tayyor |
 | BE-11 | Avaz | 3 | Direct + Reels API | tayyor |
 | BE-12 | Avaz | 3 | Seed, e2e, API freeze | tayyor |
-| FE-01 | Abubakr | 1 | Tayyori va omuzishi Next.js 16 |  |
-| FE-02 | Abubakr | 1 | Rangho, dark mode, shadcn/ui |  |
-| FE-03 | Abubakr | 1 | Komponenthoi UI |  |
-| FE-04 | Abubakr | 1 | MSW mock |  |
-| FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) |  |
-| FE-06 | Abubakr | 2 | Login / Signup |  |
-| FE-07 | Abubakr | 2 | Feed + PostCard |  |
-| FE-08 | Abubakr | 2 | Post modal + comment-ho |  |
-| FE-09 | Abubakr | 2 | Profil |  |
-| FE-10 | Abubakr | 2 | Edit profile + parol |  |
-| FE-11 | Abubakr | 3 | Explore, Hashtag, Search |  |
-| FE-12 | Abubakr | 3 | Notifications panel (UI) |  |
+| FE-01 | Abubakr | 1 | Tayyori va omuzishi Next.js 16 | tayyor |
+| FE-02 | Abubakr | 1 | Rangho, dark mode, shadcn/ui | tayyor |
+| FE-03 | Abubakr | 1 | Komponenthoi UI | tayyor |
+| FE-04 | Abubakr | 1 | MSW mock | tayyor |
+| FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) | tayyor |
+| FE-06 | Abubakr | 2 | Login / Signup | qisman (API / QA-02) |
+| FE-07 | Abubakr | 2 | Feed + PostCard | tayyor |
+| FE-08 | Abubakr | 2 | Post modal + comment-ho | tayyor |
+| FE-09 | Abubakr | 2 | Profil | tayyor |
+| FE-10 | Abubakr | 2 | Edit profile + parol | qisman (API / QA-02) |
+| FE-11 | Abubakr | 3 | Explore, Hashtag, Search | tayyor |
+| FE-12 | Abubakr | 3 | Notifications panel (UI) | tayyor |
 | FE-13 | Avaz | 3 | BFF + proxy.ts + CSP | tayyor |
-| FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya |  |
+| FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya | tayyor |
 | FE-15 | Avaz | 3 | Socket client + notifications realtime | tayyor |
-| FE-16 | Abubakr | 3 | Stories tray + viewer |  |
+| FE-16 | Abubakr | 3 | Stories tray + viewer | qisman (API / QA-02) |
 | FE-17 | Avaz | 4 | Direct (front) | tayyor |
-| FE-18 | Abubakr | 4 | Create modal |  |
+| FE-18 | Abubakr | 4 | Create modal | qisman (API / QA-02) |
 | FE-19 | Avaz | 4 | Bovarinokii front | tayyor |
-| FE-20 | Abubakr | 4 | Reels (front) |  |
+| FE-20 | Abubakr | 4 | Reels (front) | tayyor |
 | FE-21 | Avaz | 4 | Playwright e2e | tayyor |
-| FE-22 | Abubakr | 4 | Pardoz va responsive |  |
+| FE-22 | Abubakr | 4 | Pardoz va responsive | tayyor |
 | QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
-| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 |  |
+| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 | qisman (API / QA-02) |
 
 ---
 
@@ -174,7 +174,7 @@
 - Screenshot-hoi Instagram-i veb (feed, profil, post, direct) dar desktop va mobil
 
 **Tayyor, agar:**
-- [ ] Pas az push-i BE-01: `pnpm install && pnpm --filter web dev` kor mekunad
+- [x] Pas az push-i BE-01: `pnpm install && pnpm --filter web dev` kor mekunad
 
 ### FE-02 · Rangho, dark mode, shadcn/ui
 <!-- who:abubakr day:1 type:frontend -->
@@ -184,10 +184,10 @@
 - shadcn/ui init; ranghoi shadcn (`--primary`, `--background`, `--border`...) ba tokenhoi `--ig-*` baste meshavand (masalan `--primary: rgb(var(--ig-primary-button))`)
 
 **Tayyor, agar:**
-- [ ] Har token az jadvalhoi Spec 10 §1 dar `globals.css` hast, qimatho yak ba yak mos (Spec 10 AC9)
-- [ ] Tugmai asosi `#4A5DF9`, ne `#0095F6`
-- [ ] Spec 10 AC2, AC3
-- [ ] Sahifai `/dev/colors`: hamai tokenho dar light va dark kanori ham
+- [x] Har token az jadvalhoi Spec 10 §1 dar `globals.css` hast, qimatho yak ba yak mos (Spec 10 AC9)
+- [x] Tugmai asosi `#4A5DF9`, ne `#0095F6`
+- [x] Spec 10 AC2, AC3
+- [x] Sahifai `/dev/colors`: hamai tokenho dar light va dark kanori ham
 
 ### FE-03 · Komponenthoi UI
 <!-- who:abubakr day:1 type:frontend -->
@@ -197,8 +197,8 @@
 - `lib/format.ts`: `2m, 3h, 5d, 2w`, `1,234 / 12.5K / 1.2M`
 
 **Tayyor, agar:**
-- [ ] Sahifai `/dev/ui` bo hamai komponentho (light + dark)
-- [ ] Spec 10 AC2 (rangi hardcode nest)
+- [x] Sahifai `/dev/ui` bo hamai komponentho (light + dark)
+- [x] Spec 10 AC2 (rangi hardcode nest)
 
 ### FE-04 · MSW mock
 <!-- who:abubakr day:1 type:frontend -->
@@ -210,16 +210,16 @@
 - Mock javobho bo **hamon Zod schema** tekshirida meshavand
 
 **Tayyor, agar:**
-- [ ] `fetch('/api/v1/feed')` dar brauzer posthoi mock medihad
-- [ ] Bo `off` darxostho ba server meravand
+- [x] `fetch('/api/v1/feed')` dar brauzer posthoi mock medihad
+- [x] Bo `off` darxostho ba server meravand
 
 ### FE-05 · Layout (sidebar, bottom nav)
 <!-- who:abubakr day:1 type:frontend -->
 **Vaqt:** Ruzi 1, 18:00–19:30 · **Spec:** 10 §3
 
 **Tayyor, agar:**
-- [ ] Spec 10 AC1 (1440 / 1000 / 390)
-- [ ] Panel-hoi Search va Notifications mekushoyand (sidebar → 72px)
+- [x] Spec 10 AC1 (1440 / 1000 / 390)
+- [x] Panel-hoi Search va Notifications mekushoyand (sidebar → 72px)
 
 ### FE-06 · Login / Signup
 <!-- who:abubakr day:2 type:frontend -->
@@ -227,33 +227,35 @@
 
 **Tayyor, agar:**
 - [ ] ozod/band username bo debounce 400ms
-- [ ] Xatoi `USERNAME_TAKEN` zeri maydon
-- [ ] Tugma to forma durust nest — disabled
+- [x] Xatoi `USERNAME_TAKEN` zeri maydon
+- [x] Tugma to forma durust nest — disabled
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
 
 ### FE-07 · Feed + PostCard
 <!-- who:abubakr day:2 type:frontend -->
 **Vaqt:** Ruzi 2, 11:00–13:00 · **Spec:** 04, 05, 10 §5
 
 **Tayyor, agar:**
-- [ ] Carousel, double-tap like, like/save optimistic + rollback
-- [ ] Infinite scroll, Skeleton, sutuni Suggested (≥1160px)
+- [x] Carousel, double-tap like, like/save optimistic + rollback
+- [x] Infinite scroll, Skeleton, sutuni Suggested (≥1160px)
 
 ### FE-08 · Post modal + comment-ho
 <!-- who:abubakr day:2 type:frontend -->
 **Vaqt:** Ruzi 2, 14:00–16:00 · **Spec:** 04, 10 §4
 
 **Tayyor, agar:**
-- [ ] Az feed — modal, mustaqim `/p/[id]` — sahifai purra
-- [ ] Comment, reply, "View replies", hazf
+- [x] Az feed — modal, mustaqim `/p/[id]` — sahifai purra
+- [x] Comment, reply, "View replies", hazf
 
 ### FE-09 · Profil
 <!-- who:abubakr day:2 type:frontend -->
 **Vaqt:** Ruzi 2, 16:00–18:00 · **Spec:** 02, 10 §4
 
 **Tayyor, agar:**
-- [ ] Header, counter-ho, Follow/Following/Edit profile
-- [ ] Tab-ho POSTS / REELS / SAVED, grid 3:4
-- [ ] Modali followers/following bo search
+- [x] Header, counter-ho, Follow/Following/Edit profile
+- [x] Tab-ho POSTS / REELS / SAVED, grid 3:4
+- [x] Modali followers/following bo search
 
 ### FE-10 · Edit profile + parol
 <!-- who:abubakr day:2 type:frontend -->
@@ -261,23 +263,25 @@
 
 **Tayyor, agar:**
 - [ ] Avatar upload (presign → PUT), bio 0/150, ivazi username bo ozod/band
-- [ ] Ivazi parol
+- [x] Ivazi parol
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
 
 ### FE-11 · Explore, Hashtag, Search
 <!-- who:abubakr day:3 type:frontend -->
 **Vaqt:** Ruzi 3, 09:15–11:30 · **Spec:** 05
 
 **Tayyor, agar:**
-- [ ] Grid-i Explore (har 5 — kalon), `/explore/tags/[tag]`
-- [ ] Search panel: user-ho va `#hashtag`, recent searches
+- [x] Grid-i Explore (har 5 — kalon), `/explore/tags/[tag]`
+- [x] Search panel: user-ho va `#hashtag`, recent searches
 
 ### FE-12 · Notifications panel (UI)
 <!-- who:abubakr day:3 type:frontend -->
 **Vaqt:** Ruzi 3, 11:30–13:00 · **Spec:** 09
 
 **Tayyor, agar:**
-- [ ] Guruhbandi Today / This week / This month / Earlier
-- [ ] Follow back, thumbnail-i post, `read-all` hangomi kushodan
+- [x] Guruhbandi Today / This week / This month / Earlier
+- [x] Follow back, thumbnail-i post, `read-all` hangomi kushodan
 
 ### FE-13 · BFF + proxy.ts + CSP
 <!-- who:avaz day:3 type:frontend -->
@@ -293,8 +297,8 @@
 **Vaqt:** Ruzi 3, 14:00–17:00 · **Spec:** hama
 
 **Tayyor, agar:**
-- [ ] `NEXT_PUBLIC_API_MOCKING=off` → hamai sahifahoi FE-05…FE-12 bo API-i voqe'i kor mekunand
-- [ ] Har farq → Issue bo label `bug`, islohshuda
+- [x] `NEXT_PUBLIC_API_MOCKING=off` → hamai sahifahoi FE-05…FE-12 bo API-i voqe'i kor mekunand
+- [x] Har farq → Issue bo label `bug`, islohshuda
 
 ### FE-15 · Socket client + notifications realtime
 <!-- who:avaz day:3 type:frontend -->
@@ -309,8 +313,10 @@
 **Vaqt:** Ruzi 3, 17:00–19:30 · **Spec:** 06
 
 **Tayyor, agar:**
-- [ ] Tray dar feed (gradient / didashuda)
+- [x] Tray dar feed (gradient / didashuda)
 - [ ] Viewer: progress, tap chap/rost, hold, useri badi, Esc, viewers baroi xud
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
 
 ### FE-17 · Direct (front)
 <!-- who:avaz day:4 type:frontend -->
@@ -326,8 +332,10 @@
 **Vaqt:** Ruzi 4, 09:15–12:30 · **Spec:** 03, 04, 06, 07
 
 **Tayyor, agar:**
-- [ ] Intixob / drag & drop → crop → caption → Share
-- [ ] Post (1–10 media), Reel (1 video), Story
+- [x] Intixob / drag & drop → crop → caption → Share
+- [x] Post (1–10 media), Reel (1 video), Story
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
 
 ### FE-19 · Bovarinokii front
 <!-- who:avaz day:4 type:frontend -->
@@ -341,8 +349,8 @@
 **Vaqt:** Ruzi 4, 13:30–15:30 · **Spec:** 07
 
 **Tayyor, agar:**
-- [ ] Scroll-snap, autoplay/pause bo IntersectionObserver, mute
-- [ ] Like / comment / save, double-tap
+- [x] Scroll-snap, autoplay/pause bo IntersectionObserver, mute
+- [x] Like / comment / save, double-tap
 
 ### FE-21 · Playwright e2e
 <!-- who:avaz day:4 type:qa -->
@@ -356,8 +364,8 @@
 **Vaqt:** Ruzi 4, 15:30–17:00 · **Spec:** 10
 
 **Tayyor, agar:**
-- [ ] Dark toggle, 404, holati xoli, skeleton dar hama jo
-- [ ] Hamai sahifaho dar 1440 / 1000 / 390
+- [x] Dark toggle, 404, holati xoli, skeleton dar hama jo
+- [x] Hamai sahifaho dar 1440 / 1000 / 390
 
 ### QA-01 · QA: spec 01, 05, 08, 09, 11
 <!-- who:avaz day:4 type:qa -->
@@ -373,4 +381,6 @@
 
 **Tayyor, agar:**
 - [ ] Hamai AC-hoi in spec-ho tekshirida shudand
-- [ ] Lighthouse: TZ §9 band 11
+- [x] Lighthouse: TZ §9 band 11
+
+**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.

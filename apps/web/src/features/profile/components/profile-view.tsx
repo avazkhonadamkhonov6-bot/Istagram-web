@@ -2,7 +2,11 @@
 
 import type { UserProfile } from "@repo/shared";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { createChat } from "@/features/direct/api";
+import { toast } from "@/components/ui/toast";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
@@ -40,16 +44,43 @@ function FollowButton({ profile }: { profile: UserProfile }) {
   );
 }
 
+function MessageButton({ userId }: { userId: string }) {
+  const router = useRouter();
+  const chat = useMutation({
+    mutationFn: () => createChat(userId),
+    onSuccess: (id) => router.push(`/direct/t/${id}`),
+    onError: () => toast.error("Could not open messages. Try again."),
+  });
+  return (
+    <Button
+      variant="secondary"
+      disabled={chat.isPending}
+      onClick={() => chat.mutate()}
+    >
+      Message
+    </Button>
+  );
+}
+
 export function ProfileView({
   username,
   modal,
+  initialTab = "posts",
+  initialProfile,
 }: {
   username: string;
   modal?: "followers" | "following";
+  initialTab?: Tab;
+  initialProfile?: UserProfile;
 }) {
-  const { data: profile, isPending } = useProfile(username);
+  const {
+    data: profile,
+    isPending,
+    isError,
+    refetch,
+  } = useProfile(username, initialProfile);
   const { data: me } = useMe();
-  const [tab, setTab] = useState<Tab>("posts");
+  const tab = initialTab;
 
   if (isPending) {
     return (
@@ -65,6 +96,16 @@ export function ProfileView({
     );
   }
 
+  if (isError)
+    return (
+      <div className="py-24 text-center">
+        <p>Could not load this profile.</p>
+        <Button variant="borderless" onClick={() => void refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+
   if (!profile) {
     return (
       <div className="py-24 text-center">
@@ -72,9 +113,13 @@ export function ProfileView({
           Sorry, this page isn&apos;t available.
         </h1>
         <p className="mt-2 text-sm text-ig-text-secondary">
-          The link you followed may be broken, or the page may have been removed.
+          The link you followed may be broken, or the page may have been
+          removed.
         </p>
-        <Link href="/" className="mt-4 inline-block text-sm text-ig-link-action">
+        <Link
+          href="/"
+          className="mt-4 inline-block text-sm text-ig-link-action"
+        >
           Go back to Instagram
         </Link>
       </div>
@@ -83,6 +128,8 @@ export function ProfileView({
 
   const isSelf = me?.userId === profile.userId;
   const tabs = isSelf ? TABS : TABS.slice(0, 2);
+  if (tab === "saved" && !isSelf)
+    return <div className="py-24 text-center">Saved posts are private.</div>;
   const base = `/${profile.userName}`;
 
   return (
@@ -104,10 +151,13 @@ export function ProfileView({
                 Edit profile
               </Link>
             ) : (
-              <FollowButton profile={profile} />
+              <>
+                <FollowButton profile={profile} />
+                <MessageButton userId={profile.userId} />
+              </>
             )}
           </div>
-          <ul className="flex gap-8 text-base">
+          <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm md:gap-8 md:text-base">
             <li>
               <span className="font-semibold">
                 {formatCount(profile.postCount)}
@@ -142,14 +192,16 @@ export function ProfileView({
         </div>
       </header>
 
-      <div role="tablist" className="flex justify-center gap-12 border-t border-ig-separator">
+      <div
+        role="tablist"
+        className="flex justify-center gap-12 border-t border-ig-separator"
+      >
         {tabs.map((t) => (
-          <button
+          <Link
             key={t.key}
-            type="button"
+            href={t.key === "posts" ? base : `${base}/${t.key}`}
             role="tab"
             aria-selected={tab === t.key}
-            onClick={() => setTab(t.key)}
             className={cn(
               "-mt-px border-t py-4 text-xs font-semibold tracking-widest",
               tab === t.key
@@ -158,7 +210,7 @@ export function ProfileView({
             )}
           >
             {t.label}
-          </button>
+          </Link>
         ))}
       </div>
 

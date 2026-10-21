@@ -1,6 +1,9 @@
 "use client";
+import Image from "next/image";
 
-import type { CommentDto } from "@repo/shared";
+import { PostOptions } from "./post-options";
+import { SharePostDialog } from "./share-post-dialog";
+import type { CommentDto, PostDto } from "@repo/shared";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import {
@@ -77,11 +80,13 @@ function CommentRow({
 function CommentThread({
   comment,
   meId,
+  canModerate,
   onReply,
   onDelete,
 }: {
   comment: CommentDto;
   meId: string | undefined;
+  canModerate: boolean;
   onReply: (rootId: number, userName: string) => void;
   onDelete: (commentId: number) => void;
 }) {
@@ -92,7 +97,7 @@ function CommentThread({
     <div>
       <CommentRow
         comment={comment}
-        canDelete={meId === comment.userId}
+        canDelete={canModerate || meId === comment.userId}
         onReply={() => onReply(comment.postCommentId, comment.userName)}
         onDelete={() => onDelete(comment.postCommentId)}
       />
@@ -114,7 +119,7 @@ function CommentThread({
                   key={r.postCommentId}
                   comment={r}
                   isReply
-                  canDelete={meId === r.userId}
+                  canDelete={canModerate || meId === r.userId}
                   onReply={() => onReply(comment.postCommentId, r.userName)}
                   onDelete={() => onDelete(r.postCommentId)}
                 />
@@ -127,9 +132,19 @@ function CommentThread({
   );
 }
 
-export function PostDetail({ postId }: { postId: number }) {
+export function PostDetail({
+  postId,
+  initialPost,
+}: {
+  postId: number;
+  initialPost?: PostDto;
+}) {
   const valid = Number.isInteger(postId) && postId > 0;
-  const { data: post, isPending, isError } = usePost(postId, valid);
+  const {
+    data: post,
+    isPending,
+    isError,
+  } = usePost(postId, valid, initialPost);
   const comments = useComments(postId, valid);
   const { data: me } = useMe();
   const like = usePostLike(postId);
@@ -137,11 +152,13 @@ export function PostDetail({ postId }: { postId: number }) {
   const addComment = useAddPostComment(postId);
   const deleteComment = useDeleteComment(postId);
 
+  const [share, setShare] = useState(false);
   const [index, setIndex] = useState(0);
   const [text, setText] = useState("");
-  const [replyTo, setReplyTo] = useState<{ id: number; userName: string } | null>(
-    null,
-  );
+  const [replyTo, setReplyTo] = useState<{
+    id: number;
+    userName: string;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (!valid || isError) {
@@ -192,6 +209,15 @@ export function PostDetail({ postId }: { postId: number }) {
 
   return (
     <div className="flex size-full flex-col md:flex-row">
+      <header className="flex shrink-0 items-center gap-3 border-b border-ig-separator p-4 md:hidden">
+        <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
+        <Link href={`/${post.userName}`} className="font-semibold">
+          {post.userName}
+        </Link>
+        <span className="ml-auto">
+          <PostOptions postId={post.postId} userId={post.userId} />
+        </span>
+      </header>
       <div className="relative aspect-square w-full shrink-0 bg-ig-bg-secondary md:aspect-auto md:flex-1">
         {url && isVideoFile(current) ? (
           <video
@@ -201,8 +227,10 @@ export function PostDetail({ postId }: { postId: number }) {
             className="size-full object-contain"
           />
         ) : url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
+            unoptimized
+            width={800}
+            height={800}
             src={url}
             alt={post.title || `Post by ${post.userName}`}
             className="size-full object-contain"
@@ -230,12 +258,18 @@ export function PostDetail({ postId }: { postId: number }) {
         ) : null}
       </div>
 
+      {share && (
+        <SharePostDialog postId={postId} open={share} onOpenChange={setShare} />
+      )}
       <div className="flex min-h-0 w-full flex-col border-ig-separator bg-ig-bg-elevated md:w-[335px] md:shrink-0 md:border-l">
-        <header className="flex items-center gap-3 border-b border-ig-separator p-4">
+        <header className="hidden items-center gap-3 border-b border-ig-separator p-4 md:flex">
           <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
           <Link href={`/${post.userName}`} className="text-sm font-semibold">
             {post.userName}
           </Link>
+          <span className="ml-auto">
+            <PostOptions postId={post.postId} userId={post.userId} />
+          </span>
         </header>
 
         <div className="max-h-[320px] min-h-0 flex-1 overflow-y-auto px-4 py-2 md:max-h-none">
@@ -252,12 +286,15 @@ export function PostDetail({ postId }: { postId: number }) {
             </div>
           ) : null}
 
-          {comments.isPending ? <Skeleton className="mt-2 h-10 w-full" /> : null}
+          {comments.isPending ? (
+            <Skeleton className="mt-2 h-10 w-full" />
+          ) : null}
           {roots.map((c) => (
             <CommentThread
               key={c.postCommentId}
               comment={c}
               meId={me?.userId}
+              canModerate={me?.userId === post.userId}
               onReply={startReply}
               onDelete={(id) => deleteComment.mutate(id)}
             />
@@ -292,8 +329,15 @@ export function PostDetail({ postId }: { postId: number }) {
                 fill={post.postLike ? "currentColor" : "none"}
               />
             </button>
-            <MessageCircle className="size-6" aria-hidden />
-            <Send className="size-6" aria-hidden />
+            <button
+              aria-label="Add a comment"
+              onClick={() => inputRef.current?.focus()}
+            >
+              <MessageCircle className="size-6" />
+            </button>
+            <button aria-label="Share" onClick={() => setShare(true)}>
+              <Send className="size-6" />
+            </button>
             <button
               type="button"
               aria-label={post.postFavorite ? "Unsave" : "Save"}
