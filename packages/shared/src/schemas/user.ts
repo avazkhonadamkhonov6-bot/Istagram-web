@@ -55,6 +55,8 @@ export const userProfileSchema = z.object({
   subscribersCount: z.number().int(),
   subscriptionsCount: z.number().int(),
   dateUpdated: z.string(),
+  /** Spec 14 §1.1 */
+  isPrivate: z.boolean().default(false),
 });
 export type UserProfile = z.infer<typeof userProfileSchema>;
 
@@ -72,5 +74,39 @@ export const followListQuerySchema = z.object({ UserId: z.string().uuid() });
 export const followResultSchema = z.object({
   isFollowing: z.boolean(),
   subscribersCount: z.number().int(),
+  /** Darxost ba hisobi private (Spec 14 §1.1) */
+  isRequested: z.boolean().default(false),
 });
 export type FollowResult = z.infer<typeof followResultSchema>;
+
+/** Spec 14 §1 */
+export const updatePrivacySchema = z.object({ isPrivate: z.boolean() }).strict();
+export const userIdQuerySchema = z.object({ userId: z.string().uuid() });
+export const muteQuerySchema = z.object({
+  userId: z.string().uuid(),
+  Posts: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
+  Stories: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
+});
+export const FOLLOW_STATUSES = ['none', 'requested', 'following'] as const;
+export type FollowStatus = (typeof FOLLOW_STATUSES)[number];
+/** Holati man nisbat ba user-i digar — baroi menyui profil */
+export const relationStatusSchema = z.object({
+  followStatus: z.enum(FOLLOW_STATUSES),
+  followsMe: z.boolean(),
+  isBlocked: z.boolean(),
+  isMutedPosts: z.boolean(),
+  isMutedStories: z.boolean(),
+  isRestricted: z.boolean(),
+  isCloseFriend: z.boolean(),
+});
+export type RelationStatus = z.infer<typeof relationStatusSchema>;
+
+export const REPORT_TARGETS = ['POST', 'COMMENT', 'USER', 'STORY', 'MESSAGE'] as const;
+export const addReportSchema = z
+  .object({
+    targetType: z.enum(REPORT_TARGETS),
+    targetId: z.string().trim().min(1).max(64),
+    reason: z.string().trim().min(1).max(500),
+  })
+  .strict();
+export type AddReportDto = z.infer<typeof addReportSchema>;

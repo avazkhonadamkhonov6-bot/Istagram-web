@@ -1,7 +1,16 @@
 import { Body, Controller, Delete, Get, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { chatIdQuerySchema, createChatQuerySchema, deleteMessageQuerySchema, sendMessageBodySchema } from '@repo/shared';
+import {
+  addGroupMembersSchema,
+  chatIdQuerySchema,
+  createChatQuerySchema,
+  createGroupSchema,
+  deleteMessageQuerySchema,
+  messageIdQuerySchema,
+  sendMessageBodySchema,
+  updateGroupSchema,
+} from '@repo/shared';
 import type { z } from 'zod';
 import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ZodPipe } from '../../common/pipes/zod.pipe';
@@ -39,7 +48,15 @@ export class ChatController {
     @Body(new ZodPipe(sendMessageBodySchema)) body: z.infer<typeof sendMessageBodySchema>,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return ok(await this.chat.sendMessage(me.id, body.ChatId, body.MessageText, file, body.SharedPostId));
+    return ok(
+      await this.chat.sendMessage(me.id, body.ChatId, {
+        text: body.MessageText,
+        file,
+        sharedPostId: body.SharedPostId,
+        sharedStoryId: body.SharedStoryId,
+        replyToId: body.ReplyToMessageId,
+      }),
+    );
   }
 
   /** Spec 13 §4 */
@@ -61,5 +78,31 @@ export class ChatController {
   @Delete('delete-chat')
   async deleteChat(@CurrentUser() me: AuthUser, @Query(new ZodPipe(chatIdQuerySchema)) q: ChatIdQuery) {
     return ok(await this.chat.deleteChat(me.id, q.chatId));
+  }
+
+  /** Spec 14 §4 */
+  @Post('like-message')
+  async likeMessage(@CurrentUser() me: AuthUser, @Query(new ZodPipe(messageIdQuerySchema)) q: z.infer<typeof messageIdQuerySchema>) {
+    return ok(await this.chat.likeMessage(me.id, q.messageId));
+  }
+
+  @Post('create-group')
+  async createGroup(@CurrentUser() me: AuthUser, @Body(new ZodPipe(createGroupSchema)) dto: z.infer<typeof createGroupSchema>) {
+    return ok(await this.chat.createGroup(me.id, dto.title, dto.userIds));
+  }
+
+  @Put('update-group')
+  async updateGroup(@CurrentUser() me: AuthUser, @Body(new ZodPipe(updateGroupSchema)) dto: z.infer<typeof updateGroupSchema>) {
+    return ok(await this.chat.updateGroup(me.id, dto.chatId, dto.title));
+  }
+
+  @Post('add-group-members')
+  async addMembers(@CurrentUser() me: AuthUser, @Body(new ZodPipe(addGroupMembersSchema)) dto: z.infer<typeof addGroupMembersSchema>) {
+    return ok(await this.chat.addMembers(me.id, dto.chatId, dto.userIds));
+  }
+
+  @Delete('leave-group')
+  async leaveGroup(@CurrentUser() me: AuthUser, @Query(new ZodPipe(chatIdQuerySchema)) q: ChatIdQuery) {
+    return ok(await this.chat.leaveGroup(me.id, q.chatId));
   }
 }

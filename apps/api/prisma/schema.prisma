@@ -18,6 +18,7 @@ model User {
   avatar         String? // nomi fayl dar UPLOAD_DIR
   about          String?  @db.VarChar(150)
   gender         Int?
+  isPrivate      Boolean  @default(false) // Spec 14 §1.1
   postsCount     Int      @default(0)
   followersCount Int      @default(0)
   followingCount Int      @default(0)
@@ -43,6 +44,65 @@ model User {
   searchedBy      UserSearchHistory[]  @relation("searched")
   notifications   Notification[]       @relation("recipient")
   actedNotifs     Notification[]       @relation("actor")
+
+  // Spec 14
+  sentRequests     FollowRequest[] @relation("requester")
+  receivedRequests FollowRequest[] @relation("requestTarget")
+  relations        UserRelation[]  @relation("relOwner")
+  relatedBy        UserRelation[]  @relation("relTarget")
+  reports          Report[]
+  commentLikes     CommentLike[]
+  postTags         PostTag[]
+  collections      Collection[]
+  highlights       Highlight[]
+  chatMembers      ChatMember[]
+  messageLikes     MessageLike[]
+}
+
+/// Spec 14 §1.1
+model FollowRequest {
+  requesterId String
+  targetId    String
+  createdAt   DateTime @default(now())
+  requester   User     @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  target      User     @relation("requestTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([requesterId, targetId])
+  @@index([targetId, createdAt])
+}
+
+enum UserRelationType {
+  BLOCK
+  MUTE_POSTS
+  MUTE_STORIES
+  RESTRICT
+  CLOSE_FRIEND
+}
+
+/// Block, mute, restrict, close friends (Spec 14 §1.2–1.6): ownerId -> targetId
+model UserRelation {
+  ownerId   String
+  targetId  String
+  type      UserRelationType
+  createdAt DateTime         @default(now())
+  owner     User             @relation("relOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  target    User             @relation("relTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([ownerId, targetId, type])
+  @@index([targetId, type])
+}
+
+/// Spec 14 §1.5
+model Report {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  targetType String
+  targetId   String
+  reason     String   @db.VarChar(500)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
 }
 
 model PasswordResetToken {
@@ -78,30 +138,74 @@ model Location {
 }
 
 model Post {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  title        String?  @db.VarChar(200)
-  content      String?  @db.VarChar(2200)
-  isReel       Boolean  @default(false)
-  likeCount    Int      @default(0)
-  commentCount Int      @default(0)
-  viewCount    Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               Int       @id @default(autoincrement())
+  userId           String
+  title            String?   @db.VarChar(200)
+  content          String?   @db.VarChar(2200)
+  isReel           Boolean   @default(false)
+  likeCount        Int       @default(0)
+  commentCount     Int       @default(0)
+  viewCount        Int       @default(0)
+  // Spec 14 §2
+  location         String?   @db.VarChar(100)
+  hideLikeCount    Boolean   @default(false)
+  commentsDisabled Boolean   @default(false)
+  isArchived       Boolean   @default(false)
+  pinnedAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images        PostImage[]
-  likes         PostLike[]
-  views         PostView[]
-  comments      PostComment[]
-  favorites     PostFavorite[]
-  hashtags      PostHashtag[]
-  stories       Story[]
-  sharedIn      Message[]
-  notifications Notification[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags            PostTag[]
+  collectionItems CollectionItem[]
+  images          PostImage[]
+  likes           PostLike[]
+  views           PostView[]
+  comments        PostComment[]
+  favorites       PostFavorite[]
+  hashtags        PostHashtag[]
+  stories         Story[]
+  sharedIn        Message[]
+  notifications   Notification[]
 
   @@index([userId, createdAt])
   @@index([isReel, createdAt])
+  @@index([location])
+}
+
+/// Tag-i odam dar aks (Spec 14 §2)
+model PostTag {
+  postId     Int
+  userId     String
+  imageIndex Int    @default(0)
+  x          Float
+  y          Float
+  post       Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId])
+}
+
+model Collection {
+  id        Int              @id @default(autoincrement())
+  userId    String
+  name      String           @db.VarChar(50)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CollectionItem[]
+
+  @@index([userId])
+}
+
+model CollectionItem {
+  collectionId Int
+  postId       Int
+  createdAt    DateTime   @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  post         Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, postId])
 }
 
 model PostImage {
@@ -142,15 +246,29 @@ model PostComment {
   parentId      Int? // javob ba comment (1 sath, Spec 13 §3)
   comment       String         @db.VarChar(2200)
   replyCount    Int            @default(0)
+  likeCount     Int            @default(0)
+  isRestricted  Boolean        @default(false) // Spec 14 §1.4
   createdAt     DateTime       @default(now())
   post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent        PostComment?   @relation("replies", fields: [parentId], references: [id], onDelete: Cascade)
   replies       PostComment[]  @relation("replies")
   notifications Notification[]
+  likes         CommentLike[]
 
   @@index([postId, createdAt])
   @@index([parentId])
+}
+
+model CommentLike {
+  userId    String
+  commentId Int
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   PostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+  @@index([commentId])
 }
 
 model PostFavorite {
@@ -180,19 +298,43 @@ model PostHashtag {
 }
 
 model Story {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  fileName  String?
-  postId    Int?
-  createdAt DateTime @default(now())
-  expiresAt DateTime // createdAt + 24 soat
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  id           Int      @id @default(autoincrement())
+  userId       String
+  fileName     String?
+  postId       Int?
+  closeFriends Boolean  @default(false) // Spec 14 §3
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime // createdAt + 24 soat
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post         Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
 
-  views StoryView[]
-  likes StoryLike[]
+  views      StoryView[]
+  likes      StoryLike[]
+  highlights HighlightStory[]
+  messages   Message[]
 
   @@index([userId, expiresAt])
+}
+
+/// Spec 14 §3
+model Highlight {
+  id        Int              @id @default(autoincrement())
+  userId    String
+  title     String           @db.VarChar(30)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stories   HighlightStory[]
+
+  @@index([userId])
+}
+
+model HighlightStory {
+  highlightId Int
+  storyId     Int
+  highlight   Highlight @relation(fields: [highlightId], references: [id], onDelete: Cascade)
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@id([highlightId, storyId])
 }
 
 model StoryView {
@@ -217,18 +359,22 @@ model StoryLike {
 }
 
 model Chat {
-  id                Int       @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
   sendUserId        String
   receiveUserId     String
   // jufti tartibdor (min, max) — baroi yak chat bayni du user
-  pairKey           String    @unique
+  pairKey           String       @unique
   // "Seen" va unread (Spec 13 §4)
   sendUserReadAt    DateTime?
   receiveUserReadAt DateTime?
-  createdAt         DateTime  @default(now())
-  lastMessageAt     DateTime  @default(now())
-  sendUser          User      @relation("sendUser", fields: [sendUserId], references: [id], onDelete: Cascade)
-  receiveUser       User      @relation("receiveUser", fields: [receiveUserId], references: [id], onDelete: Cascade)
+  createdAt         DateTime     @default(now())
+  lastMessageAt     DateTime     @default(now())
+  // Group chat (Spec 14 §4): pairKey = "group:<uuid>", sendUserId = receiveUserId = sozanda
+  isGroup           Boolean      @default(false)
+  title             String?      @db.VarChar(50)
+  members           ChatMember[]
+  sendUser          User         @relation("sendUser", fields: [sendUserId], references: [id], onDelete: Cascade)
+  receiveUser       User         @relation("receiveUser", fields: [receiveUserId], references: [id], onDelete: Cascade)
   messages          Message[]
 
   @@index([sendUserId])
@@ -236,18 +382,48 @@ model Chat {
 }
 
 model Message {
-  id           Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   chatId       Int
   userId       String
-  messageText  String?  @db.VarChar(1000)
+  messageText  String?       @db.VarChar(1000)
   file         String?
+  fileType     String? // image | video | audio (Spec 14 §4)
   sharedPostId Int? // share post ba Direct (Spec 13 §4)
-  createdAt    DateTime @default(now())
-  chat         Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sharedPost   Post?    @relation(fields: [sharedPostId], references: [id], onDelete: SetNull)
+  storyId      Int? // javob / share-i story (Spec 14 §3)
+  replyToId    Int?
+  createdAt    DateTime      @default(now())
+  chat         Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sharedPost   Post?         @relation(fields: [sharedPostId], references: [id], onDelete: SetNull)
+  story        Story?        @relation(fields: [storyId], references: [id], onDelete: SetNull)
+  replyTo      Message?      @relation("messageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies      Message[]     @relation("messageReplies")
+  likes        MessageLike[]
 
   @@index([chatId, createdAt])
+}
+
+/// A'zoi group chat (Spec 14 §4)
+model ChatMember {
+  chatId   Int
+  userId   String
+  readAt   DateTime?
+  joinedAt DateTime  @default(now())
+  chat     Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([chatId, userId])
+  @@index([userId])
+}
+
+model MessageLike {
+  messageId Int
+  userId    String
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId])
 }
 
 model SearchHistory {
@@ -277,6 +453,11 @@ enum NotificationType {
   COMMENT
   COMMENT_REPLY
   FOLLOW
+  FOLLOW_REQUEST
+  FOLLOW_ACCEPTED
+  COMMENT_LIKE
+  MENTION
+  TAG
 }
 
 /// Spec 13 §1

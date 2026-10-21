@@ -52,11 +52,13 @@ export class RealtimeGateway implements OnGatewayConnection {
     if (!userId || !parsed.success) return;
     const chat = await this.prisma.chat.findUnique({
       where: { id: parsed.data.chatId },
-      select: { sendUserId: true, receiveUserId: true },
+      select: { sendUserId: true, receiveUserId: true, isGroup: true, members: { select: { userId: true } } },
     });
-    if (!chat || (chat.sendUserId !== userId && chat.receiveUserId !== userId)) return;
-    const peerId = chat.sendUserId === userId ? chat.receiveUserId : chat.sendUserId;
-    this.emitToUser(peerId, SocketEvent.TYPING, { ...parsed.data, userId });
+    if (!chat) return;
+    // Group chat (Spec 14 §4): ba hamai a'zoi digar
+    const members = chat.isGroup ? chat.members.map((m) => m.userId) : [chat.sendUserId, chat.receiveUserId];
+    if (!members.includes(userId)) return;
+    members.filter((id) => id !== userId).forEach((id) => this.emitToUser(id, SocketEvent.TYPING, { ...parsed.data, userId }));
   }
 
   emitToUser(userId: string, event: string, payload: unknown) {
