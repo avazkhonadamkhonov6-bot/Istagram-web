@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
+import { useNotificationsRealtime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { useDirectRealtime } from "../hooks";
 import { ChatList } from "./chat-list";
@@ -11,6 +12,8 @@ export function DirectShell({ children }: { children: ReactNode }) {
   const params = useParams<{ id?: string }>();
   const activeId = params.id ? Number(params.id) : null;
   useDirectRealtime(activeId);
+  // Hozir faqat dar Direct; Abubakr onro ba root layout meguzorad (FE-12)
+  useNotificationsRealtime();
 
   return (
     <div className="flex h-[calc(100dvh-110px)] md:h-dvh">

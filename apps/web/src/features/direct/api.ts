@@ -32,6 +32,11 @@ export function sendMessage(chatId: number, text: string, file?: File) {
 export const deleteMessage = (messageId: number) =>
   api<boolean>(`/Chat/delete-message?massageId=${messageId}`, { method: "DELETE" });
 
+export const readChat = (chatId: number) =>
+  api<{ chatId: number; readAt: string }>(`/Chat/read-chat?chatId=${chatId}`, { method: "POST" });
+
+export const getUnreadCount = () => api<{ count: number }>("/Chat/get-unread-count");
+
 export const deleteChat = (chatId: number) => api<boolean>(`/Chat/delete-chat?chatId=${chatId}`, { method: "DELETE" });
 
 type Paged<T> = { data: T[] };

@@ -33,7 +33,7 @@ Tafsiloti har papka — dar `README.md`-i xudi on.
 | [docs/TASKS.md](docs/TASKS.md) | Hamai vazifaho bo ID (BE-xx, FE-xx, QA-xx) |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | Chi tayyor, chi monda |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Versiyaho v0.1 → v2.0 |
-| [docs/specs/](docs/specs/) | Spec-i har modul (API, AC); **kontrakti amaldori API — [Spec 12](docs/specs/12-api-kontrakt.md)** |
+| [docs/specs/](docs/specs/) | Spec-i har modul (API, AC); **kontrakti amaldori API — [Spec 12](docs/specs/12-api-kontrakt.md) + ilovaho [Spec 13](docs/specs/13-ilovaho-tz.md)** |
 | [docs/qa/QA-01.md](docs/qa/QA-01.md) | Hisoboti QA (spec 01, 05, 08, 09, 11) |
 
 ## Ogoz

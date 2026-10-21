@@ -30,17 +30,19 @@ model User {
   views           PostView[]
   comments        PostComment[]
   favorites       PostFavorite[]
-  followers       Follow[]            @relation("following")
-  following       Follow[]            @relation("follower")
+  followers       Follow[]             @relation("following")
+  following       Follow[]             @relation("follower")
   stories         Story[]
   storyViews      StoryView[]
   storyLikes      StoryLike[]
-  sentChats       Chat[]              @relation("sendUser")
-  receivedChats   Chat[]              @relation("receiveUser")
+  sentChats       Chat[]               @relation("sendUser")
+  receivedChats   Chat[]               @relation("receiveUser")
   messages        Message[]
   searchHistories SearchHistory[]
-  userSearches    UserSearchHistory[] @relation("searcher")
-  searchedBy      UserSearchHistory[] @relation("searched")
+  userSearches    UserSearchHistory[]  @relation("searcher")
+  searchedBy      UserSearchHistory[]  @relation("searched")
+  notifications   Notification[]       @relation("recipient")
+  actedNotifs     Notification[]       @relation("actor")
 }
 
 model PasswordResetToken {
@@ -87,14 +89,16 @@ model Post {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images    PostImage[]
-  likes     PostLike[]
-  views     PostView[]
-  comments  PostComment[]
-  favorites PostFavorite[]
-  hashtags  PostHashtag[]
-  stories   Story[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images        PostImage[]
+  likes         PostLike[]
+  views         PostView[]
+  comments      PostComment[]
+  favorites     PostFavorite[]
+  hashtags      PostHashtag[]
+  stories       Story[]
+  sharedIn      Message[]
+  notifications Notification[]
 
   @@index([userId, createdAt])
   @@index([isReel, createdAt])
@@ -132,15 +136,21 @@ model PostView {
 }
 
 model PostComment {
-  id        Int      @id @default(autoincrement())
-  postId    Int
-  userId    String
-  comment   String   @db.VarChar(2200)
-  createdAt DateTime @default(now())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int            @id @default(autoincrement())
+  postId        Int
+  userId        String
+  parentId      Int? // javob ba comment (1 sath, Spec 13 §3)
+  comment       String         @db.VarChar(2200)
+  replyCount    Int            @default(0)
+  createdAt     DateTime       @default(now())
+  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent        PostComment?   @relation("replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       PostComment[]  @relation("replies")
+  notifications Notification[]
 
   @@index([postId, createdAt])
+  @@index([parentId])
 }
 
 model PostFavorite {
@@ -207,30 +217,35 @@ model StoryLike {
 }
 
 model Chat {
-  id            Int       @id @default(autoincrement())
-  sendUserId    String
-  receiveUserId String
+  id                Int       @id @default(autoincrement())
+  sendUserId        String
+  receiveUserId     String
   // jufti tartibdor (min, max) — baroi yak chat bayni du user
-  pairKey       String    @unique
-  createdAt     DateTime  @default(now())
-  lastMessageAt DateTime  @default(now())
-  sendUser      User      @relation("sendUser", fields: [sendUserId], references: [id], onDelete: Cascade)
-  receiveUser   User      @relation("receiveUser", fields: [receiveUserId], references: [id], onDelete: Cascade)
-  messages      Message[]
+  pairKey           String    @unique
+  // "Seen" va unread (Spec 13 §4)
+  sendUserReadAt    DateTime?
+  receiveUserReadAt DateTime?
+  createdAt         DateTime  @default(now())
+  lastMessageAt     DateTime  @default(now())
+  sendUser          User      @relation("sendUser", fields: [sendUserId], references: [id], onDelete: Cascade)
+  receiveUser       User      @relation("receiveUser", fields: [receiveUserId], references: [id], onDelete: Cascade)
+  messages          Message[]
 
   @@index([sendUserId])
   @@index([receiveUserId])
 }
 
 model Message {
-  id          Int      @id @default(autoincrement())
-  chatId      Int
-  userId      String
-  messageText String?  @db.VarChar(1000)
-  file        String?
-  createdAt   DateTime @default(now())
-  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
+  chatId       Int
+  userId       String
+  messageText  String?  @db.VarChar(1000)
+  file         String?
+  sharedPostId Int? // share post ba Direct (Spec 13 §4)
+  createdAt    DateTime @default(now())
+  chat         Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sharedPost   Post?    @relation(fields: [sharedPostId], references: [id], onDelete: SetNull)
 
   @@index([chatId, createdAt])
 }
@@ -255,4 +270,31 @@ model UserSearchHistory {
 
   @@unique([userId, userSearchId])
   @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  COMMENT_REPLY
+  FOLLOW
+}
+
+/// Spec 13 §1
+model Notification {
+  id          Int              @id @default(autoincrement())
+  // Kalidi yakxela: LIKE:<actor>:<post>, FOLLOW:<actor>:<recipient>, COMMENT:<commentId> — takror nest
+  key         String           @unique
+  type        NotificationType
+  recipientId String
+  actorId     String
+  postId      Int?
+  commentId   Int?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  recipient   User             @relation("recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor       User             @relation("actor", fields: [actorId], references: [id], onDelete: Cascade)
+  post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment     PostComment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, createdAt])
 }

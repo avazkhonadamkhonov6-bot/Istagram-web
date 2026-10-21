@@ -45,7 +45,10 @@ export function ChatList({ className }: { className?: string }) {
         {chats?.map((chat) => {
           const peer = peerOf(chat, me?.userId);
           const last = chat.lastMessage;
-          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${last.messageText ?? "Sent an attachment"}` : "Start a conversation";
+          const body = last?.messageText ?? (last?.sharedPost ? "Sent a post" : "Sent an attachment");
+          const preview = last ? `${last.userId === me?.userId ? "You: " : ""}${body}` : "Start a conversation";
+          // Paymi naxonda — matni gafs va nuqtai kabud, misli Instagram (Spec 13 §4)
+          const unread = chat.unreadCount > 0 && activeId !== chat.chatId;
           return (
             <Link
               key={chat.chatId}
@@ -57,12 +60,13 @@ export function ChatList({ className }: { className?: string }) {
             >
               <Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={56} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{peer.userName}</p>
-                <p className="truncate text-xs text-ig-text-secondary">
+                <p className={cn("truncate text-sm", unread && "font-semibold")}>{peer.userName}</p>
+                <p className={cn("truncate text-xs", unread ? "font-semibold text-ig-text" : "text-ig-text-secondary")}>
                   {preview}
                   {last && ` · ${formatRelativeTime(last.sendMassageDate)}`}
                 </p>
               </div>
+              {unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-ig-primary" />}
             </Link>
           );
         })}
