@@ -3,10 +3,10 @@ import {
   favoriteResultSchema,
   likeResultSchema,
   postDtoSchema,
-  userListItemSchema,
+  suggestionSchema,
   type CommentDto,
   type PostDto,
-  type UserListItem,
+  type Suggestion,
 } from "@repo/shared";
 import { api } from "@/lib/api-client";
 
@@ -42,8 +42,8 @@ export const addComment = (postId: number, comment: string) =>
   });
 
 export const getSuggestions = () =>
-  api<UserListItem[]>("/User/get-suggestions", {
-    schema: userListItemSchema.array(),
+  api<Suggestion[]>("/User/get-suggestions", {
+    schema: suggestionSchema.array(),
   });
 
 export const followUser = (userId: string) =>

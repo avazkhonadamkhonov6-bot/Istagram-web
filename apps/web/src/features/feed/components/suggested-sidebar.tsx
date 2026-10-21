@@ -1,12 +1,12 @@
 "use client";
 
-import type { UserListItem } from "@repo/shared";
+import type { Suggestion } from "@repo/shared";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/media";
 import { useFollow, useSuggestions } from "../hooks";
 import { SmallAvatar } from "./small-avatar";
 
-function SuggestedRow({ user }: { user: UserListItem }) {
+function SuggestedRow({ user }: { user: Suggestion }) {
   const follow = useFollow();
 
   return (

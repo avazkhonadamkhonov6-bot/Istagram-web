@@ -60,21 +60,75 @@ const mockNotifications = [
   createMockNotification({ id: 2, type: "FOLLOW", post: null }),
 ];
 
+const followed = new Set<string>();
+
 export const handlers = [
-      http.get("/api/images/:name", () =>
+    http.get("/api/images/:name", () =>
     new HttpResponse(
       '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="100%" height="100%" fill="#8e8e8e"/></svg>',
       { headers: { "Content-Type": "image/svg+xml" } },
     ),
   ),
 
-    http.post("/api/FollowingRelationShip/add-following-relation-ship", () =>
-    HttpResponse.json({
-      data: { isFollowing: true, subscribersCount: 1 },
+     http.post("/api/FollowingRelationShip/add-following-relation-ship", ({ request }) => {
+    followed.add(new URL(request.url).searchParams.get("followingUserId") ?? "");
+    return HttpResponse.json({
+      data: { isFollowing: true, subscribersCount: 100 + followed.size },
       errors: [],
       statusCode: 200,
-    }),
+    });
+  }),
+
+  http.delete("/api/FollowingRelationShip/delete-following-relation-ship", ({ request }) => {
+    followed.delete(new URL(request.url).searchParams.get("followingUserId") ?? "");
+    return HttpResponse.json({
+      data: { isFollowing: false, subscribersCount: 100 + followed.size },
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.get("/api/UserProfile/get-is-follow-user-profile-by-id", ({ request }) => {
+    const id = new URL(request.url).searchParams.get("followingUserId") ?? "";
+    return HttpResponse.json({ data: followed.has(id), errors: [], statusCode: 200 });
+  }),
+
+  http.get("/api/FollowingRelationShip/get-subscribers", () =>
+    HttpResponse.json({ data: mockUsers, errors: [], statusCode: 200 }),
   ),
+
+  http.get("/api/FollowingRelationShip/get-subscriptions", () =>
+    HttpResponse.json({ data: mockUsers.slice(1), errors: [], statusCode: 200 }),
+  ),
+
+  http.get("/api/Post/get-posts", ({ request }) => {
+    const params = new URL(request.url).searchParams;
+    const userId = params.get("UserId");
+    const page = Number(params.get("PageNumber") ?? "1");
+    const items = mockPosts.filter((p) => !userId || p.userId === userId);
+    return HttpResponse.json({
+      pageNumber: page,
+      pageSize: 12,
+      totalPage: 1,
+      totalRecord: items.length,
+      data: items.slice((page - 1) * 12, page * 12),
+      errors: [],
+      statusCode: 200,
+    });
+  }),
+
+  http.get("/api/UserProfile/get-post-favorites", () => {
+    const items = mockPosts.filter((p) => p.postFavorite);
+    return HttpResponse.json({
+      pageNumber: 1,
+      pageSize: 12,
+      totalPage: 1,
+      totalRecord: items.length,
+      data: items,
+      errors: [],
+      statusCode: 200,
+    });
+  }),
 
   http.get("/api/v1/feed", () =>
     HttpResponse.json({
