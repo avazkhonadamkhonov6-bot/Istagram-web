@@ -3,10 +3,14 @@ import { ErrorCode, FollowResult, UserShort } from '@repo/shared';
 import { badRequest, notFound } from '../../common/app-exception';
 import { toUserShort, userShortSelect } from '../../common/mappers';
 import { PrismaService } from '../../infra/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FollowsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   private async assertUser(userId: string) {
     const u = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
@@ -28,15 +32,17 @@ export class FollowsService {
   async follow(me: string, target: string): Promise<FollowResult> {
     if (me === target) throw badRequest(ErrorCode.CANNOT_FOLLOW_SELF);
     await this.assertUser(target);
-    const followersCount = await this.prisma.$transaction(async (tx) => {
+    const { followersCount, created } = await this.prisma.$transaction(async (tx) => {
       const { count } = await tx.follow.createMany({ data: [{ followerId: me, followingId: target }], skipDuplicates: true });
       if (count === 1) {
         await tx.user.update({ where: { id: me }, data: { followingCount: { increment: 1 } } });
-        return (await tx.user.update({ where: { id: target }, data: { followersCount: { increment: 1 } }, select: { followersCount: true } }))
-          .followersCount;
+        const u = await tx.user.update({ where: { id: target }, data: { followersCount: { increment: 1 } }, select: { followersCount: true } });
+        return { followersCount: u.followersCount, created: true };
       }
-      return (await tx.user.findUniqueOrThrow({ where: { id: target }, select: { followersCount: true } })).followersCount;
+      const u = await tx.user.findUniqueOrThrow({ where: { id: target }, select: { followersCount: true } });
+      return { followersCount: u.followersCount, created: false };
     });
+    if (created) await this.notifications.notify({ type: 'FOLLOW', actorId: me, recipientId: target });
     return { isFollowing: true, subscribersCount: followersCount };
   }
 
@@ -51,6 +57,7 @@ export class FollowsService {
       }
       return (await tx.user.findUniqueOrThrow({ where: { id: target }, select: { followersCount: true } })).followersCount;
     });
+    await this.notifications.retract({ type: 'FOLLOW', actorId: me, recipientId: target });
     return { isFollowing: false, subscribersCount: followersCount };
   }
 

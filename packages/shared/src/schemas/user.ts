@@ -19,6 +19,9 @@ export type UserListItem = z.infer<typeof userListItemSchema>;
 export const addSearchHistoryQuerySchema = z.object({ Text: z.string().trim().min(1).max(100) });
 export const addUserSearchHistoryQuerySchema = z.object({ UserSearchId: z.string().uuid() });
 export const deleteUserQuerySchema = z.object({ userId: z.string().uuid() });
+export const suggestionsQuerySchema = z.object({ Limit: z.coerce.number().int().min(1).max(30).default(5) });
+export const suggestionSchema = userShortSchema.extend({ subscribersCount: z.number().int() });
+export type Suggestion = z.infer<typeof suggestionSchema>;
 
 export const searchHistorySchema = z.object({
   id: z.number().int(),

@@ -6,6 +6,7 @@ import {
   deleteUserQuerySchema,
   getUsersQuerySchema,
   intIdQuerySchema,
+  suggestionsQuerySchema,
 } from '@repo/shared';
 import type { z } from 'zod';
 import { AuthUser, CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -22,6 +23,11 @@ export class UserController {
   async getUsers(@Query(new ZodPipe(getUsersQuerySchema)) q: z.infer<typeof getUsersQuerySchema>) {
     const { items, total } = await this.users.getUsers(q);
     return paged(items, total, q);
+  }
+
+  @Get('get-suggestions')
+  async suggestions(@CurrentUser() me: AuthUser, @Query(new ZodPipe(suggestionsQuerySchema)) q: z.infer<typeof suggestionsQuerySchema>) {
+    return ok(await this.users.getSuggestions(me.id, q.Limit));
   }
 
   @Post('add-search-history')

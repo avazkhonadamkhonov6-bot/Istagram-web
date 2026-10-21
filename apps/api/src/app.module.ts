@@ -13,6 +13,7 @@ import { AccountModule } from './modules/account/account.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { LocationModule } from './modules/location/location.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { StoriesModule } from './modules/stories/stories.module';
@@ -50,6 +51,7 @@ const config = loadConfig();
     StoriesModule,
     ChatModule,
     LocationModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { CommentDto, ErrorCode, HASHTAG_REGEX, MEDIA_RULES, PaginationQuery, PostDto } from '@repo/shared';
+import { CommentDto, ErrorCode, HASHTAG_REGEX, HashtagDto, MEDIA_RULES, PaginationQuery, PostDto } from '@repo/shared';
 import { badRequest, forbidden, notFound } from '../../common/app-exception';
 import { toUserShort, userShortSelect } from '../../common/mappers';
 import { skipTake } from '../../common/response';
 import { PrismaService } from '../../infra/prisma.service';
 import { StorageService } from '../../infra/storage.service';
 import { FollowsService } from '../follows/follows.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 /** Hamai relation-ho bo yak include — har relation yak query, bidun N+1 (Spec 05 AC5) */
 const postInclude = {
   user: { select: userShortSelect },
   images: { orderBy: { order: 'asc' }, select: { fileName: true } },
-  comments: { orderBy: { createdAt: 'desc' }, take: 3, include: { user: { select: userShortSelect } } },
+  comments: { where: { parentId: null }, orderBy: { createdAt: 'desc' }, take: 3, include: { user: { select: userShortSelect } } },
   likes: { orderBy: { createdAt: 'desc' }, take: 2, select: { user: { select: userShortSelect } } },
 } satisfies Prisma.PostInclude;
 
@@ -32,6 +33,7 @@ export class PostsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly follows: FollowsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   toCommentDto(c: CommentRow): CommentDto {
@@ -43,6 +45,8 @@ export class PostsService {
       userImage: c.user.avatar,
       comment: c.comment,
       dateCommented: c.createdAt.toISOString(),
+      parentId: c.parentId,
+      replyCount: c.replyCount,
     };
   }
 
@@ -184,8 +188,8 @@ export class PostsService {
 
   /** Toggle; counter faqat agar satr voqean sohta/hazf shud — hech vaqt takror yo manfi nest */
   async toggleLike(me: string, postId: number) {
-    await this.assertExists(postId);
-    return this.prisma.$transaction(async (tx) => {
+    const post = await this.assertExists(postId);
+    const result = await this.prisma.$transaction(async (tx) => {
       const removed = await tx.postLike.deleteMany({ where: { userId: me, postId } });
       if (removed.count === 1) {
         const p = await tx.post.update({ where: { id: postId }, data: { likeCount: { decrement: 1 } }, select: { likeCount: true } });
@@ -197,6 +201,9 @@ export class PostsService {
         : await tx.post.findUniqueOrThrow({ where: { id: postId }, select: { likeCount: true } });
       return { isLiked: true, likeCount: p.likeCount };
     });
+    const event = { type: 'LIKE' as const, actorId: me, recipientId: post.userId, postId };
+    await (result.isLiked ? this.notifications.notify(event) : this.notifications.retract(event));
+    return result;
   }
 
   /** Yak user = yak view */
@@ -219,24 +226,106 @@ export class PostsService {
     return { isFavorite: true };
   }
 
-  async addComment(me: string, postId: number, comment: string) {
-    await this.assertExists(postId);
+  async addComment(me: string, postId: number, comment: string, parentId?: number | null) {
+    const post = await this.assertExists(postId);
+    // Javob faqat ba comment-i sathi yakumi hamin post (Spec 13 §3)
+    const parent = parentId
+      ? await this.prisma.postComment.findUnique({ where: { id: parentId }, select: { postId: true, parentId: true, userId: true } })
+      : null;
+    if (parentId && (!parent || parent.postId !== postId || parent.parentId !== null)) {
+      throw badRequest(ErrorCode.INVALID_PARENT_COMMENT);
+    }
     const created = await this.prisma.$transaction(async (tx) => {
-      const c = await tx.postComment.create({ data: { postId, userId: me, comment }, include: { user: { select: userShortSelect } } });
+      const c = await tx.postComment.create({
+        data: { postId, userId: me, comment, parentId: parentId ?? null },
+        include: { user: { select: userShortSelect } },
+      });
       await tx.post.update({ where: { id: postId }, data: { commentCount: { increment: 1 } } });
+      if (parentId) await tx.postComment.update({ where: { id: parentId }, data: { replyCount: { increment: 1 } } });
       return c;
     });
+    await this.notifications.notify(
+      parent
+        ? { type: 'COMMENT_REPLY', actorId: me, recipientId: parent.userId, postId, commentId: created.id }
+        : { type: 'COMMENT', actorId: me, recipientId: post.userId, postId, commentId: created.id },
+    );
     return this.toCommentDto(created);
   }
 
+  /** Comment-hoi sathi yakum, nav → kuhna (Spec 13 §3) */
+  async getComments(postId: number, q: PaginationQuery) {
+    await this.assertExists(postId);
+    const where: Prisma.PostCommentWhereInput = { postId, parentId: null };
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.postComment.findMany({
+        where,
+        include: { user: { select: userShortSelect } },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...skipTake(q),
+      }),
+      this.prisma.postComment.count({ where }),
+    ]);
+    return { items: rows.map((c) => this.toCommentDto(c)), total };
+  }
+
+  async getReplies(commentId: number) {
+    const parent = await this.prisma.postComment.findUnique({ where: { id: commentId }, select: { id: true } });
+    if (!parent) throw notFound(ErrorCode.COMMENT_NOT_FOUND);
+    const rows = await this.prisma.postComment.findMany({
+      where: { parentId: commentId },
+      include: { user: { select: userShortSelect } },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map((c) => this.toCommentDto(c));
+  }
+
+  /** Explore: na xudam va na follow-shudaho; populyar avval (Spec 13 §2) */
+  async getExplore(me: string, q: PaginationQuery) {
+    const exclude = [me, ...(await this.follows.followingIds(me))];
+    const [ranked, total] = await Promise.all([
+      this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT "id" FROM "Post"
+        WHERE "userId" <> ALL(${exclude}::text[])
+        ORDER BY ("likeCount" + 2 * "commentCount") DESC, "createdAt" DESC, "id" DESC
+        LIMIT ${q.PageSize} OFFSET ${(q.PageNumber - 1) * q.PageSize}`,
+      this.prisma.post.count({ where: { userId: { notIn: exclude } } }),
+    ]);
+    const rows = await this.prisma.post.findMany({ where: { id: { in: ranked.map((r) => r.id) } }, include: postInclude });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const ordered = ranked.map((r) => byId.get(r.id)).filter((r): r is PostRow => !!r);
+    return { items: await this.toDtos(ordered, me), total };
+  }
+
+  async searchHashtags(query: string): Promise<HashtagDto[]> {
+    const rows = await this.prisma.hashtag.findMany({
+      where: { name: { startsWith: query } },
+      select: { name: true, _count: { select: { posts: true } } },
+      take: 20,
+    });
+    return rows.map((h) => ({ name: h.name, postsCount: h._count.posts })).sort((a, b) => b.postsCount - a.postsCount);
+  }
+
+  getHashtagPosts(me: string, name: string, q: PaginationQuery) {
+    return this.list({ hashtags: { some: { hashtag: { name } } } }, q, me);
+  }
+
+
   /** Muallifi comment yo muallifi post */
   async deleteComment(me: string, commentId: number) {
-    const c = await this.prisma.postComment.findUnique({ where: { id: commentId }, select: { userId: true, postId: true, post: { select: { userId: true } } } });
+    const c = await this.prisma.postComment.findUnique({
+      where: { id: commentId },
+      select: { userId: true, postId: true, parentId: true, post: { select: { userId: true } } },
+    });
     if (!c) throw notFound(ErrorCode.COMMENT_NOT_FOUND);
     if (c.userId !== me && c.post.userId !== me) throw forbidden();
+    // Comment bo hamai javobhoyash va notification-hoyash (cascade) hazf meshavad
     await this.prisma.$transaction(async (tx) => {
+      const replies = await tx.postComment.count({ where: { parentId: commentId } });
       const { count } = await tx.postComment.deleteMany({ where: { id: commentId } });
-      if (count === 1) await tx.post.update({ where: { id: c.postId }, data: { commentCount: { decrement: 1 } } });
+      if (count === 1) {
+        await tx.post.update({ where: { id: c.postId }, data: { commentCount: { decrement: 1 + replies } } });
+        if (c.parentId) await tx.postComment.updateMany({ where: { id: c.parentId }, data: { replyCount: { decrement: 1 } } });
+      }
     });
     return true;
   }

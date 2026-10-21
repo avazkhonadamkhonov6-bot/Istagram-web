@@ -14,7 +14,19 @@ import { formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { deleteChat } from "../api";
-import { directKeys, peerOf, useChats, useDeleteMessage, useMe, useMessages, useSendMessage, type UiMessage } from "../hooks";
+import {
+  directKeys,
+  peerOf,
+  useChats,
+  useDeleteMessage,
+  useMarkRead,
+  useMe,
+  useMessages,
+  usePeerTyping,
+  useSendMessage,
+  useTypingEmitter,
+  type UiMessage,
+} from "../hooks";
 
 const GAP_MS = 15 * 60_000;
 
@@ -26,6 +38,9 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const { data: messages, isPending, isError, error, refetch } = useMessages(chatId);
   const send = useSendMessage(chatId);
   const remove = useDeleteMessage(chatId);
+  const peerTyping = usePeerTyping(chatId);
+  const typing = useTypingEmitter(chatId);
+  useMarkRead(chatId, messages, me?.userId);
   const [text, setText] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -35,7 +50,12 @@ export function ChatWindow({ chatId }: { chatId: number }) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages?.length]);
+  }, [messages?.length, peerTyping]);
+
+  // "Seen" zeri paymi oxirini xud, agar tarafi digar pas az on xondaast (Spec 13 §4)
+  const last = messages?.[messages.length - 1];
+  const seen =
+    !!last && last.userId === me?.userId && !last.pending && !!chat?.peerReadAt && chat.peerReadAt >= last.sendMassageDate;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,6 +63,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
     if (!value) return;
     send.mutate({ text: value });
     setText("");
+    typing.stop();
   }
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -90,13 +111,22 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         {forbidden && <p className="py-8 text-center text-sm text-ig-text-secondary">You don&apos;t have access to this chat.</p>}
         {isError && !forbidden && <ErrorFallback compact title="Couldn't load messages" onRetry={() => refetch()} />}
         {messages && <MessageList messages={messages} myId={me?.userId} onUnsend={(id) => remove.mutate(id)} />}
+        {seen && <p className="mt-1 text-right text-xs text-ig-text-secondary">Seen</p>}
+        {peerTyping && peer && (
+          <p className="mt-2 text-xs text-ig-text-secondary" aria-live="polite">
+            {peer.userName} is typing...
+          </p>
+        )}
         <div ref={bottomRef} />
       </div>
 
       <form onSubmit={submit} className="m-4 flex items-center gap-3 rounded-full border border-ig-stroke px-4 py-2">
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (e.target.value) typing.onInput();
+          }}
           placeholder="Message..."
           maxLength={1000}
           className="flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
@@ -144,10 +174,8 @@ function MessageList({ messages, myId, onUnsend }: { messages: UiMessage[]; myId
               <div
                 className={cn(
                   "max-w-[70%] overflow-hidden rounded-[22px] text-[15px]",
-                  file ? "" : "px-3 py-2",
-                  mine
-                    ? "ig-bubble-out"
-                    : "ig-bubble-in",
+                  file || m.sharedPost ? "" : "px-3 py-2",
+                  mine ? "ig-bubble-out" : "ig-bubble-in",
                   m.pending && "opacity-60",
                 )}
               >
@@ -158,7 +186,8 @@ function MessageList({ messages, myId, onUnsend }: { messages: UiMessage[]; myId
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={file} alt="" className="max-h-80 w-full object-cover" />
                   ))}
-                {m.messageText && <p className={cn("whitespace-pre-wrap break-words", file && "px-3 py-2")}>{m.messageText}</p>}
+                {m.sharedPost && <SharedPostCard post={m.sharedPost} />}
+                {m.messageText && <p className={cn("whitespace-pre-wrap break-words", (file || m.sharedPost) && "px-3 py-2")}>{m.messageText}</p>}
               </div>
               {mine && !m.pending && (
                 <button
@@ -174,5 +203,22 @@ function MessageList({ messages, myId, onUnsend }: { messages: UiMessage[]; myId
         );
       })}
     </ul>
+  );
+}
+
+/** Posti share-shuda dar Direct (Spec 13 §4) */
+function SharedPostCard({ post }: { post: NonNullable<UiMessage["sharedPost"]> }) {
+  const image = mediaUrl(post.image);
+  return (
+    <Link href={`/p/${post.postId}`} className="block w-56">
+      <span className="block px-3 py-2 text-sm font-semibold">{post.userName}</span>
+      {image &&
+        (isVideoFile(post.image!) ? (
+          <video src={image} muted className="aspect-square w-full object-cover" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt={`Post by ${post.userName}`} className="aspect-square w-full object-cover" />
+        ))}
+    </Link>
   );
 }

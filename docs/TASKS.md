@@ -2,7 +2,7 @@
 
 > Har vazifa dar GitHub **Issue**-i alohida ast (milestone = ruz, label = `backend` / `frontend` / `qa` va nomi odam).
 > **Holat (2026-10-21):** hamai vazifahoi Avaz tayyor — `[x]` tayyor va sanjida shud, `[-]` buridashud (sabab navishta shud). Tafsilot: [PROGRESS.md](PROGRESS.md), [qa/QA-01.md](qa/QA-01.md).
-> **Kontrakti API (az 2026-10-21):** [specs/12-api-kontrakt.md](specs/12-api-kontrakt.md) — URL va DTO-ho az onjo, ne az spec-hoi 01–09.
+> **Kontrakti API (az 2026-10-21):** [specs/12-api-kontrakt.md](specs/12-api-kontrakt.md) — URL va DTO-ho az onjo, ne az spec-hoi 01–09. Ilovaho (Notifications, Explore, Hashtag, replies, Seen/typing/unread, share post, Suggestions) — [specs/13-ilovaho-tz.md](specs/13-ilovaho-tz.md).
 > Tartib va vaqt — dar [PLAN.md](PLAN.md). Pas az tamom: PR bo `Closes #<issue>` → Issue xud baste meshavad.
 
 | ID | Kas | Ruz | Vazifa | Holat |
@@ -128,7 +128,7 @@
 **Vaqt:** Ruzi 2, 14:00–16:00 · **Spec:** 05
 
 **Tayyor, agar:**
-- [x] Spec 05 AC1, AC2, AC4, AC5 (`get-following-post`, `get-posts`, `get-users`); AC3 Explore — dar Spec 12 nest
+- [x] Spec 05 AC1–AC5 (`get-following-post`, `get-posts`, `get-users`; Explore va Hashtag — Spec 13 §2)
 
 ### BE-09 · Realtime + Notifications API
 <!-- who:avaz day:2 type:backend -->
@@ -139,7 +139,7 @@
 
 **Tayyor, agar:**
 - [x] `RealtimeGateway` `/ws` + `emitToUser` (ticket-i 60 s)
-- [-] Notifications, Redis adapter, queue/worker — buridashud: dar kontrakti Spec 12 nest (P1)
+- [x] Notifications (Spec 13 §1): like/comment/reply/follow → DB + `notification:new`; Redis adapter va queue/worker — nest (Redis dar loyiha nest)
 
 ### BE-10 · Stories API
 <!-- who:avaz day:2 type:backend -->
@@ -153,7 +153,7 @@
 **Vaqt:** Ruzi 3, 09:15–11:30 · **Spec:** 07, 08
 
 **Tayyor, agar:**
-- [x] Spec 08 AC1–AC4 (2 socket-client dar test); AC5 (unread/Seen) — dar kontrakt nest
+- [x] Spec 08 AC1–AC5 (2 socket-client dar test; unread/Seen — Spec 13 §4)
 - [x] Spec 07: `get-reels` faqat reel; reel = aniq 1 video (2 video yo aks → posti oddi, ne reel)
 
 ### BE-12 · Seed, e2e, API freeze
@@ -302,7 +302,7 @@
 
 **Tayyor, agar:**
 - [x] `lib/socket.ts`: ticket, reconnect, refetch pas az reconnect
-- [-] Badge/toast hangomi `notification:new` — notifications dar kontrakt nest; toast hangomi `message:new` hast
+- [x] Badge/toast hangomi `notification:new` — `lib/notifications.ts` (`useNotificationsUnread`, `useNotificationsRealtime`); badge dar sidebar — Abubakr
 
 ### FE-16 · Stories tray + viewer
 <!-- who:abubakr day:3 type:frontend -->
@@ -317,8 +317,8 @@
 **Vaqt:** Ruzi 4, 09:15–12:30 · **Spec:** 08
 
 **Tayyor, agar:**
-- [x] Inbox, chat, optimistic, unsend, fayl; typing/Seen — dar kontrakt nest (PLAN, buridan #6)
-- [x] "New message"; share post — dar kontrakt nest
+- [x] Inbox, chat, optimistic, unsend, fayl, typing, Seen, nuqtai naxonda (Spec 13 §4)
+- [x] "New message"; share post — API va namoish dar chat (Spec 13 §4), tugmai Share dar PostCard — Abubakr
 - [x] Spec 08 AC1 dar du brauzer — Playwright
 
 ### FE-18 · Create modal

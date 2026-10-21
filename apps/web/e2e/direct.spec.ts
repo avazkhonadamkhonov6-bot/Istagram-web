@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signedInContext } from "./helpers";
+import { PNG, signedInContext } from "./helpers";
 
 test("direct: du brauzer — paym va unsend dar realtime (Spec 08 AC1)", async ({ browser }) => {
   const a = await signedInContext(browser, "da");
@@ -77,6 +77,44 @@ test("direct: internet qat' → paym rollback + toast (Spec 10 AC7)", async ({ b
 
   await a.context.setOffline(false);
   await expect(page.getByText("No internet connection")).toHaveCount(0);
+  await a.context.close();
+  await b.context.close();
+});
+
+test("direct: unread, Seen, typing va toast-i notification (Spec 13)", async ({ browser }) => {
+  const a = await signedInContext(browser, "sa");
+  const b = await signedInContext(browser, "sb");
+  const chatId = (await (await a.context.request.post(`/api/Chat/create-chat?receiverUserId=${b.me.userId}`)).json()).data as number;
+
+  const pageB = await b.context.newPage();
+  await pageB.goto("/direct/inbox");
+  await expect(pageB.getByText("No messages yet.")).toHaveCount(0);
+
+  // A paym mefiristad → B nuqtai "Unread" mebinad
+  await a.context.request.put("/api/Chat/send-message", { multipart: { ChatId: String(chatId), MessageText: "Naxonda" } });
+  await expect(pageB.getByLabel("Unread")).toBeVisible();
+
+  // A chat-ro mekushoyad; B chat-ro mekushoyad → A "Seen" mebinad
+  const pageA = await a.context.newPage();
+  await pageA.goto(`/direct/t/${chatId}`);
+  await expect(pageA.locator("li").getByText("Naxonda", { exact: true })).toBeVisible();
+  await expect(pageA.getByText("Seen", { exact: true })).toHaveCount(0);
+  await pageB.goto(`/direct/t/${chatId}`);
+  await expect(pageA.getByText("Seen", { exact: true })).toBeVisible({ timeout: 5_000 });
+  await expect(pageB.getByLabel("Unread")).toHaveCount(0);
+
+  // Typing: A menavisad → B "... is typing..." mebinad
+  await pageA.getByPlaceholder("Message...").fill("navishta");
+  await expect(pageB.getByText(`${a.me.userName} is typing...`)).toBeVisible({ timeout: 5_000 });
+
+  // Notification: A posti B-ro like mekunad → B toast megirad
+  const created = await b.context.request.post("/api/Post/add-post", {
+    multipart: { Images: { name: "n.png", mimeType: "image/png", buffer: PNG } },
+  });
+  const postId = (await created.json()).data.postId as number;
+  await a.context.request.post(`/api/Post/like-post?postId=${postId}`);
+  await expect(pageB.getByText("liked your post.")).toBeVisible({ timeout: 5_000 });
+
   await a.context.close();
   await b.context.close();
 });

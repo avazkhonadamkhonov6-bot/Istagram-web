@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ErrorCode, UpdateUserProfileDto, UserListItem, UserProfile, UserSearchHistory } from '@repo/shared';
+import { ErrorCode, Suggestion, UpdateUserProfileDto, UserListItem, UserProfile, UserSearchHistory } from '@repo/shared';
 import { forbidden, notFound } from '../../common/app-exception';
 import { toUserShort, userShortSelect } from '../../common/mappers';
 import { skipTake } from '../../common/response';
@@ -73,6 +73,28 @@ export class UsersService {
     });
     this.storage.remove(user.avatar);
     return true;
+  }
+
+  /** Spec 13 §5: avval follow-i follow-hoi man, ba'd populyartarin */
+  async getSuggestions(me: string, limit: number): Promise<Suggestion[]> {
+    const following = await this.prisma.follow.findMany({ where: { followerId: me }, select: { followingId: true } });
+    const exclude = [me, ...following.map((f) => f.followingId)];
+    const select = { ...userShortSelect, followersCount: true } as const;
+    const friendsOfFriends = following.length
+      ? await this.prisma.user.findMany({
+          where: { id: { notIn: exclude }, followers: { some: { followerId: { in: following.map((f) => f.followingId) } } } },
+          select,
+          orderBy: [{ followersCount: 'desc' }, { userName: 'asc' }],
+          take: limit,
+        })
+      : [];
+    const popular = await this.prisma.user.findMany({
+      where: { id: { notIn: [...exclude, ...friendsOfFriends.map((u) => u.id)] } },
+      select,
+      orderBy: [{ followersCount: 'desc' }, { userName: 'asc' }],
+      take: limit - friendsOfFriends.length,
+    });
+    return [...friendsOfFriends, ...popular].map((u) => ({ ...toUserShort(u), subscribersCount: u.followersCount }));
   }
 
   // ---- Search history ----

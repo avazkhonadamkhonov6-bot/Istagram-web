@@ -39,7 +39,18 @@ export class ChatController {
     @Body(new ZodPipe(sendMessageBodySchema)) body: z.infer<typeof sendMessageBodySchema>,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return ok(await this.chat.sendMessage(me.id, body.ChatId, body.MessageText, file));
+    return ok(await this.chat.sendMessage(me.id, body.ChatId, body.MessageText, file, body.SharedPostId));
+  }
+
+  /** Spec 13 §4 */
+  @Post('read-chat')
+  async read(@CurrentUser() me: AuthUser, @Query(new ZodPipe(chatIdQuerySchema)) q: ChatIdQuery) {
+    return ok(await this.chat.readChat(me.id, q.chatId));
+  }
+
+  @Get('get-unread-count')
+  async unreadCount(@CurrentUser() me: AuthUser) {
+    return ok(await this.chat.unreadCount(me.id));
   }
 
   @Delete('delete-message')

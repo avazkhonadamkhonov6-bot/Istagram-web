@@ -6,3 +6,4 @@ export * from './schemas/post';
 export * from './schemas/story';
 export * from './schemas/chat';
 export * from './schemas/location';
+export * from './schemas/notification';

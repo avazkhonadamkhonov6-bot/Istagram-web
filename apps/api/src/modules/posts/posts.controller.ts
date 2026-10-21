@@ -8,6 +8,7 @@ import {
   addPostBodySchema,
   addPostFavoriteSchema,
   commentIdQuerySchema,
+  getCommentsQuerySchema,
   followingPostsQuerySchema,
   getPostsQuerySchema,
   intIdQuerySchema,
@@ -38,6 +39,25 @@ export class PostsController {
   async getReels(@CurrentUser() me: AuthUser, @Query(new ZodPipe(paginationQuerySchema)) q: z.infer<typeof paginationQuerySchema>) {
     const { items, total } = await this.posts.getReels(me.id, q);
     return paged(items, total, q);
+  }
+
+  /** Spec 13 §2 */
+  @Get('get-explore-posts')
+  async getExplore(@CurrentUser() me: AuthUser, @Query(new ZodPipe(paginationQuerySchema)) q: z.infer<typeof paginationQuerySchema>) {
+    const { items, total } = await this.posts.getExplore(me.id, q);
+    return paged(items, total, q);
+  }
+
+  /** Spec 13 §3 */
+  @Get('get-comments')
+  async getComments(@Query(new ZodPipe(getCommentsQuerySchema)) q: z.infer<typeof getCommentsQuerySchema>) {
+    const { items, total } = await this.posts.getComments(q.postId, q);
+    return paged(items, total, q);
+  }
+
+  @Get('get-comment-replies')
+  async getReplies(@Query(new ZodPipe(commentIdQuerySchema)) q: z.infer<typeof commentIdQuerySchema>) {
+    return ok(await this.posts.getReplies(q.commentId));
   }
 
   @Get('get-post-by-id')
@@ -87,7 +107,7 @@ export class PostsController {
 
   @Post('add-comment')
   async addComment(@CurrentUser() me: AuthUser, @Body(new ZodPipe(addCommentSchema)) dto: AddCommentDto) {
-    return ok(await this.posts.addComment(me.id, dto.postId, dto.comment));
+    return ok(await this.posts.addComment(me.id, dto.postId, dto.comment, dto.parentId));
   }
 
   @Delete('delete-comment')

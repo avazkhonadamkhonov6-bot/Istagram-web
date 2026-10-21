@@ -24,8 +24,21 @@ export const addCommentSchema = z
   .object({
     comment: z.string().trim().min(1).max(2200),
     postId: z.number().int().positive(),
+    /** Javob ba comment (Spec 13 §3) */
+    parentId: z.number().int().positive().nullable().optional(),
   })
   .strict();
+
+export const getCommentsQuerySchema = paginationQuerySchema.extend({ postId: z.coerce.number().int().positive() });
+
+export const hashtagSearchQuerySchema = z.object({
+  Query: z.string().trim().min(1).max(100).transform((v) => v.replace(/^#/, '').toLowerCase()),
+});
+export const hashtagPostsQuerySchema = paginationQuerySchema.extend({
+  Name: z.string().trim().min(1).max(100).transform((v) => v.replace(/^#/, '').toLowerCase()),
+});
+export const hashtagDtoSchema = z.object({ name: z.string(), postsCount: z.number().int() });
+export type HashtagDto = z.infer<typeof hashtagDtoSchema>;
 export type AddCommentDto = z.infer<typeof addCommentSchema>;
 
 export const addPostFavoriteSchema = z.object({ postId: z.number().int().positive() }).strict();
@@ -38,6 +51,8 @@ export const commentDtoSchema = z.object({
   userImage: z.string().nullable(),
   comment: z.string(),
   dateCommented: z.string(),
+  parentId: z.number().int().nullable(),
+  replyCount: z.number().int(),
 });
 export type CommentDto = z.infer<typeof commentDtoSchema>;
 

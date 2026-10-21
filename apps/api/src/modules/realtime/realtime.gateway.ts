@@ -1,8 +1,17 @@
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { SocketEvent, typingSchema } from '@repo/shared';
 import type { Server, Socket } from 'socket.io';
 import { JwtPayload } from '../../common/guards/jwt-auth.guard';
+import { PrismaService } from '../../infra/prisma.service';
 
 export const userRoom = (userId: string) => `user:${userId}`;
 
@@ -14,7 +23,10 @@ export class RealtimeGateway implements OnGatewayConnection {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async handleConnection(client: Socket) {
     const raw = (client.handshake.auth as { token?: unknown })?.token;
@@ -30,6 +42,21 @@ export class RealtimeGateway implements OnGatewayConnection {
       this.logger.debug(`Socket rad shud: ${client.id}`);
       client.disconnect(true);
     }
+  }
+
+  /** Typing (Spec 13 §4): faqat ishtirokchi; ba tarafi digar meravad */
+  @SubscribeMessage(SocketEvent.TYPING)
+  async onTyping(@ConnectedSocket() client: Socket, @MessageBody() body: unknown) {
+    const userId = client.data.userId as string | undefined;
+    const parsed = typingSchema.safeParse(body);
+    if (!userId || !parsed.success) return;
+    const chat = await this.prisma.chat.findUnique({
+      where: { id: parsed.data.chatId },
+      select: { sendUserId: true, receiveUserId: true },
+    });
+    if (!chat || (chat.sendUserId !== userId && chat.receiveUserId !== userId)) return;
+    const peerId = chat.sendUserId === userId ? chat.receiveUserId : chat.sendUserId;
+    this.emitToUser(peerId, SocketEvent.TYPING, { ...parsed.data, userId });
   }
 
   emitToUser(userId: string, event: string, payload: unknown) {
