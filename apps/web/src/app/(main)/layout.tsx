@@ -1,20 +1,29 @@
+import { Suspense, type ReactNode } from "react";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Sidebar } from "@/components/layout/sidebar";
 import { SidePanel } from "@/components/layout/side-panel";
 import { TopBar } from "@/components/layout/top-bar";
 
+export const instant = false;
+
 export default function MainLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+  modal,
+}: Readonly<{ children: ReactNode; modal: ReactNode }>) {
   return (
     <>
-      <Sidebar />
-      <TopBar />
-      <SidePanel />
+      <Suspense fallback={null}>
+        <Sidebar />
+        <TopBar />
+        <SidePanel />
+      </Suspense>
       <main className="flex-1 pb-[50px] pt-[60px] md:ml-[72px] md:pb-0 md:pt-0 min-[1264px]:ml-[245px]">
         {children}
       </main>
-      <BottomNav />
+      {modal}
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
     </>
   );
 }

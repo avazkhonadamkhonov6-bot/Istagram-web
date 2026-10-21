@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Camera } from "lucide-react";
+import { useMe } from "@/features/auth/hooks";
+import { useDirectUnreadCount } from "@/features/direct/hooks";
+import { CURRENT_USERNAME } from "@/lib/constants";
+import {
+  useNotificationsRealtime,
+  useNotificationsUnread,
+} from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
 import { MoreMenu } from "./more-menu";
@@ -10,10 +17,18 @@ import { NAV_ITEMS, isItemActive } from "./nav-items";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: me } = useMe();
+  const { data: notifUnread } = useNotificationsUnread();
+  const { data: directUnread } = useDirectUnreadCount();
+  useNotificationsRealtime();
+
   const panel = useUiStore((s) => s.panel);
   const togglePanel = useUiStore((s) => s.togglePanel);
   const closePanel = useUiStore((s) => s.closePanel);
   const setCreateOpen = useUiStore((s) => s.setCreateOpen);
+
+  const myUsername = me?.userName ?? CURRENT_USERNAME;
+  const profileHref = `/${myUsername}`;
 
   // Когда открыта панель Search / Notifications, sidebar сжимается до 72px
   const compact = panel !== null;
@@ -45,20 +60,43 @@ export function Sidebar() {
       </Link>
 
       <ul className="flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((rawItem) => {
+          const item =
+            rawItem.key === "profile" && rawItem.kind === "link"
+              ? {
+                  ...rawItem,
+                  href: profileHref,
+                  match: (p: string) =>
+                    p === profileHref || p.startsWith(`${profileHref}/`),
+                }
+              : rawItem;
+
           const active = isItemActive(item, pathname, panel);
           const Icon = item.icon;
           const rowCls = cn(
             "flex w-full items-center gap-4 rounded-lg p-3 text-base transition-colors hover:bg-ig-hover-overlay",
             active ? "font-semibold" : "font-normal",
           );
+
+          const hasBadge =
+            (item.key === "notifications" && (notifUnread?.count ?? 0) > 0) ||
+            (item.key === "messages" && (directUnread?.count ?? 0) > 0);
+
           const content = (
             <>
-              <Icon
-                className="size-6 shrink-0"
-                strokeWidth={active ? 2.75 : 2}
-                fill={active && item.fillWhenActive ? "currentColor" : "none"}
-              />
+              <span className="relative inline-flex shrink-0">
+                <Icon
+                  className="size-6 shrink-0"
+                  strokeWidth={active ? 2.75 : 2}
+                  fill={active && item.fillWhenActive ? "currentColor" : "none"}
+                />
+                {hasBadge ? (
+                  <span
+                    aria-label="Unread"
+                    className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-ig-badge ring-2 ring-ig-bg"
+                  />
+                ) : null}
+              </span>
               <span className={labelCls}>{item.label}</span>
             </>
           );

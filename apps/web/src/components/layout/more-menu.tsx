@@ -9,11 +9,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bookmark, Menu, Settings } from "@/components/ui/icons";
+import { Bookmark, Menu, Moon, Settings, Sun } from "@/components/ui/icons";
+import { useLogout, useMe } from "@/features/auth/hooks";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useUiStore } from "@/store/ui.store";
 
 export function MoreMenu({ compact }: { compact: boolean }) {
+  const { data: me } = useMe();
+  const logoutMutation = useLogout();
+  const theme = useUiStore((s) => s.theme);
+  const toggleTheme = useUiStore((s) => s.toggleTheme);
+
+  const username = me?.userName ?? CURRENT_USERNAME;
   const labelCls = compact ? "hidden" : "hidden min-[1264px]:inline";
 
   return (
@@ -36,14 +44,24 @@ export function MoreMenu({ compact }: { compact: boolean }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/${CURRENT_USERNAME}/saved`}>
+          <Link href={`/${username}/saved`}>
             <Bookmark className="size-5" />
             Saved
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={toggleTheme}>
+          {theme === "dark" ? (
+            <Sun className="size-5" />
+          ) : (
+            <Moon className="size-5" />
+          )}
+          Switch appearance
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/* Выход подключим вместе с авторизацией (FE-06 / FE-14) */}
-        <DropdownMenuItem destructive>
+        <DropdownMenuItem
+          destructive
+          onSelect={() => logoutMutation.mutate()}
+        >
           <LogOut className="size-5" />
           Log out
         </DropdownMenuItem>

@@ -18,22 +18,22 @@
 | [x] | BE-01 Monorepo (pnpm 10, NestJS 11, tsconfig strict) | [x] | FE-01 Tayyori, Next 16 docs |
 | [x] | BE-02 Kontrakt (Zod) — Spec 12, `packages/shared` | [x] | FE-02 Rangho, dark, shadcn |
 | [x] | BE-03 Prisma + migratsiya, infra, CI, docker-compose (faqat Postgres) | [x] | FE-03 Komponenthoi UI |
-| [x] | BE-04 Account API | [ ] | FE-04 MSW mock |
+| [x] | BE-04 Account API | [x] | FE-04 MSW mock |
 | [x] | BE-05 User, UserProfile, FollowingRelationShip | [x] | FE-05 Layout |
 
 ## RUZI 2
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [ ] | FE-06 Login / Signup |
-| [x] | BE-07 Post, like, comment, favorite | [ ] | FE-07 Feed + PostCard |
-| [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [ ] | FE-08 Post modal |
-| [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [ ] | FE-09 Profil |
-| [x] | BE-10 Story API | [ ] | FE-10 Edit profile + parol |
+| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [x] | FE-06 Login / Signup |
+| [x] | BE-07 Post, like, comment, favorite | [x] | FE-07 Feed + PostCard |
+| [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [x] | FE-08 Post modal |
+| [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [x] | FE-09 Profil |
+| [x] | BE-10 Story API | [x] | FE-10 Edit profile + parol |
 
 ## RUZI 3
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-11 Chat + Reels + Location API | [ ] | FE-11 Explore, Search |
+| [x] | BE-11 Chat + Reels + Location API | [x] | FE-11 Explore, Search |
 | [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [ ] | FE-12 Notifications panel |
 | [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [ ] | FE-14 Mock xomush, integratsiya |
 | [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [ ] | FE-16 Stories |
