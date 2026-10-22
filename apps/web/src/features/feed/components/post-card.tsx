@@ -23,14 +23,14 @@ import { SmallAvatar } from "./small-avatar";
 const TOKEN = /(#[\p{L}\p{N}_]+|@[a-z0-9._]+)/giu;
 const CAPTION_LIMIT = 125;
 
-function renderCaption(text: string): ReactNode[] {
+export function renderCaption(text: string): ReactNode[] {
   return text.split(TOKEN).map((part, i) => {
     if (part.length > 1 && part.startsWith("#")) {
       return (
         <Link
           key={i}
           href={`/explore/tags/${encodeURIComponent(part.slice(1))}`}
-          className="text-ig-link underline decoration-ig-link/30 underline-offset-2"
+          className="text-ig-link hover:underline"
         >
           {part}
         </Link>
@@ -41,7 +41,7 @@ function renderCaption(text: string): ReactNode[] {
         <Link
           key={i}
           href={`/${part.slice(1)}`}
-          className="text-ig-link underline decoration-ig-link/30 underline-offset-2"
+          className="text-ig-link hover:underline"
         >
           {part}
         </Link>
