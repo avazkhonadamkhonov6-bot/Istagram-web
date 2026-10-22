@@ -1,6 +1,6 @@
 "use client";
 
-import { Circle, Square, X } from "lucide-react";
+import { Circle, Square, SwitchCamera, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
@@ -227,7 +227,7 @@ export function VideoMessageDialog({
                   onSend(preview.file, preview.sec);
                   onOpenChange(false);
                 }}
-                className="rounded-lg bg-ig-link px-5 py-2 text-sm font-semibold text-white"
+                className="rounded-lg bg-ig-primary px-5 py-2 text-sm font-semibold text-ig-text-on-color hover:bg-ig-primary-hover"
               >
                 Send
               </button>
@@ -241,6 +241,144 @@ export function VideoMessageDialog({
               className="flex size-16 items-center justify-center rounded-full border-4 border-white disabled:opacity-40"
             >
               {recording ? <Square className="size-6 text-ig-error" fill="currentColor" /> : <Circle className="size-11 text-ig-error" fill="currentColor" />}
+            </button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Aksi fawri bo kamera (misli tugmai kamera dar Direct-i Instagram) */
+export function PhotoCaptureDialog({
+  open,
+  onOpenChange,
+  onSend,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSend: (file: File) => void;
+}) {
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facing, setFacing] = useState<"user" | "environment">("user");
+  const [shot, setShot] = useState<{ file: File; url: string } | null>(null);
+  const videoBox = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    let s: MediaStream | null = null;
+    navigator.mediaDevices
+      ?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false })
+      .then((m) => {
+        if (!active) return stopStream(m);
+        s = m;
+        setStream(m);
+      })
+      .catch(() => {
+        toast.error("Camera is not available. Allow camera access in the browser.");
+        onOpenChange(false);
+      });
+    return () => {
+      active = false;
+      stopStream(s);
+      setStream(null);
+    };
+  }, [open, facing, onOpenChange]);
+
+  const close = (value: boolean) => {
+    if (!value) retake();
+    onOpenChange(value);
+  };
+
+  function capture() {
+    const video = videoBox.current?.querySelector("video");
+    if (!video || !video.videoWidth) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    // Kamerai pesh oinavor nishon doda meshavad — aks ham hamon xel boshad
+    if (facing === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: "image/jpeg" });
+        setShot({ file, url: URL.createObjectURL(file) });
+      },
+      "image/jpeg",
+      0.9,
+    );
+  }
+
+  function retake() {
+    setShot((p) => {
+      if (p) URL.revokeObjectURL(p.url);
+      return null;
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={close}>
+      <DialogContent className="max-w-[420px] bg-black text-white" showClose={false}>
+        <DialogTitle className="sr-only">Take a photo</DialogTitle>
+        <div ref={videoBox} className="relative aspect-[3/4] w-full">
+          {shot ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shot.url} alt="Captured photo" className="size-full bg-black object-cover" />
+          ) : (
+            <MediaVideo stream={stream} muted mirror={facing === "user"} className="size-full" />
+          )}
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => close(false)}
+            className="absolute left-3 top-3 rounded-full bg-black/50 p-1.5"
+          >
+            <X className="size-5" />
+          </button>
+          {!shot && (
+            <button
+              type="button"
+              aria-label="Switch camera"
+              onClick={() => setFacing((f) => (f === "user" ? "environment" : "user"))}
+              className="absolute right-3 top-3 rounded-full bg-black/50 p-1.5"
+            >
+              <SwitchCamera className="size-5" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center justify-center gap-6 p-4">
+          {shot ? (
+            <>
+              <button type="button" onClick={retake} className="text-sm font-semibold">
+                Retake
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSend(shot.file);
+                  close(false);
+                }}
+                className="rounded-lg bg-ig-primary px-5 py-2 text-sm font-semibold text-ig-text-on-color hover:bg-ig-primary-hover"
+              >
+                Send
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              aria-label="Take photo"
+              disabled={!stream}
+              onClick={capture}
+              className="flex size-16 items-center justify-center rounded-full border-4 border-white disabled:opacity-40"
+            >
+              <Circle className="size-12 text-white" fill="currentColor" />
             </button>
           )}
         </div>

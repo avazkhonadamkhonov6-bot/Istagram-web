@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -284,6 +285,13 @@ export function CreateModal() {
                   {k}
                 </Button>
               ))}
+              <Link
+                href="/live/new"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center rounded-lg bg-ig-secondary px-4 text-sm font-semibold text-ig-btn-secondary-text hover:bg-ig-secondary-hover"
+              >
+                Live
+              </Link>
             </div>
             <Images className="size-20 stroke-1" />
             <p className="text-xl">Drag photos and videos here</p>

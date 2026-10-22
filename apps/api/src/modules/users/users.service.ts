@@ -41,7 +41,8 @@ export class UsersService {
     const where = {
       id: { notIn: await this.relations.blockedIds(me) },
       ...(q.UserName ? { userName: { contains: q.UserName.toLowerCase() } } : {}),
-      ...(q.Email ? { email: { contains: q.Email.toLowerCase() } } : {}),
+      // Email faqat aynan (bidun justujui qismi): email-hoi begona-ro ruyxat kardan namesavad
+      ...(q.Email ? { email: q.Email.trim().toLowerCase() } : {}),
     };
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
@@ -56,7 +57,8 @@ export class UsersService {
       id: u.id,
       userName: u.userName,
       fullName: u.fullName,
-      email: u.email,
+      // Email — ma'lumoti shaxsi: faqat baroi xudam
+      email: u.id === me ? u.email : '',
       avatar: u.avatar,
       subscribersCount: u.followersCount,
     }));
@@ -154,7 +156,9 @@ export class UsersService {
   /** Profil-i begona: blok → 404 (Spec 14 §1.2) */
   async getProfileFor(me: string, userId: string): Promise<UserProfile> {
     if (await this.relations.isBlockedEither(me, userId)) throw notFound(ErrorCode.USER_NOT_FOUND);
-    return this.getProfile(userId);
+    const profile = await this.getProfile(userId);
+    // Email-i user-i digar nishon doda nameshavad
+    return userId === me ? profile : { ...profile, email: '' };
   }
 
   /** Private → public: hamai darxostho qabul (Spec 14 §1.1) */

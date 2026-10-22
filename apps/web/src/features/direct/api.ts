@@ -67,3 +67,6 @@ export async function searchUsers(q: string): Promise<UserListItem[]> {
   if (!res.ok) return [];
   return ((await res.json()) as Paged<UserListItem>).data;
 }
+
+export const addGroupMembers = (chatId: number, userIds: string[]) =>
+  api<boolean>("/Chat/add-group-members", { method: "POST", ...json({ chatId, userIds }) });

@@ -352,10 +352,21 @@ test("reel upload, autoplay, mute, like and save", async ({ page }) => {
         .evaluate((video: HTMLVideoElement) => video.paused),
     )
     .toBe(false);
+  // Reels bo ovoz sar meshavand (misli Instagram); Mute / Unmute baroi hamai reel-ho
+  await page.getByRole("button", { name: "Mute", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Unmute", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Unmute", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Mute", exact: true }),
   ).toBeVisible();
+  expect(
+    await page
+      .locator("video")
+      .filter({ visible: true })
+      .evaluate((video: HTMLVideoElement) => video.muted),
+  ).toBe(false);
   await page
     .getByRole("button", { name: "Like", exact: true })
     .filter({ visible: true })

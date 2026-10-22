@@ -1,18 +1,36 @@
 "use client";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { SocketEvent } from "@repo/shared";
+import { useEffect } from "react";
 import { StoryRing } from "@/components/ui/story-ring";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { mediaUrl } from "@/lib/media";
 import { useUiStore } from "@/store/ui.store";
+import { getLives } from "@/features/rtc/api";
+import { getSocket } from "@/lib/socket";
 import { getStories, storyKey } from "../api";
 export function StoriesTray() {
   const stories = useQuery({ queryKey: storyKey, queryFn: getStories });
   const { data: me } = useMe();
   const create = useUiStore((s) => s.setCreateOpen);
+  const qc = useQueryClient();
+  // Efirhoi faol (Spec 16 §3): dar avvali qatori story, misli Instagram
+  const lives = useQuery({ queryKey: ["lives"], queryFn: getLives, refetchInterval: 30_000 });
+  useEffect(() => {
+    const socket = getSocket();
+    const refresh = () => void qc.invalidateQueries({ queryKey: ["lives"] });
+    socket.on(SocketEvent.LIVE_STARTED, refresh);
+    socket.on(SocketEvent.LIVE_ENDED, refresh);
+    return () => {
+      socket.off(SocketEvent.LIVE_STARTED, refresh);
+      socket.off(SocketEvent.LIVE_ENDED, refresh);
+    };
+  }, [qc]);
+  const liveUsers = new Set((lives.data ?? []).map((l) => l.user.id));
   return (
     <section
       aria-label="Stories"
@@ -33,6 +51,26 @@ export function StoriesTray() {
         </span>
         <span className="text-xs text-ig-text-secondary">Your story</span>
       </button>
+      {(lives.data ?? []).map((live) => (
+        <Link
+          key={`live-${live.liveId}`}
+          aria-label={`${live.user.userName} is live`}
+          href={`/live/${live.liveId}`}
+          className="flex w-[66px] shrink-0 flex-col items-center gap-2"
+        >
+          <span className="relative">
+            <span className="block rounded-full bg-[linear-gradient(45deg,rgb(var(--decorative-ig-lavender)),rgb(var(--ig-live-badge)))] p-[2px]">
+              <span className="block rounded-full bg-ig-bg p-[2px]">
+                <SmallAvatar src={mediaUrl(live.user.avatar)} name={live.user.userName} className="size-14" />
+              </span>
+            </span>
+            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-[4px] border-2 border-ig-bg bg-[linear-gradient(90deg,rgb(var(--decorative-ig-lavender)),rgb(var(--ig-live-badge)))] px-1 text-[10px] font-bold leading-[14px] tracking-wide text-ig-text-on-color">
+              LIVE
+            </span>
+          </span>
+          <span className="w-full truncate text-center text-xs">{live.user.userName}</span>
+        </Link>
+      ))}
       {stories.isPending ? (
         [1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="size-[66px] shrink-0 rounded-full" />
@@ -46,7 +84,7 @@ export function StoriesTray() {
         </button>
       ) : (
         stories.data
-          ?.filter((u) => u.stories.length > 0)
+          ?.filter((u) => u.stories.length > 0 && !liveUsers.has(u.userId))
           .map((u) => (
             <Link
               key={u.userId}

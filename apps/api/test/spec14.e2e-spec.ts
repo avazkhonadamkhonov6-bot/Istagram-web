@@ -234,7 +234,7 @@ describe('API (Spec 14)', () => {
       .put('/Chat/send-message')
       .field('ChatId', String(chatId))
       .field('ReplyToMessageId', String(m.messageId))
-      .attach('File', Buffer.from('OggS-fake-audio'), { filename: 'v.weba', contentType: 'audio/webm' })
+      .attach('File', Buffer.from('1a45dfa3010000000000001f4286', 'hex'), { filename: 'v.weba', contentType: 'audio/webm' })
       .set(auth('b'))
       .expect(200);
     expect(r.body.data).toMatchObject({ fileType: 'audio', replyTo: { messageId: m.messageId } });

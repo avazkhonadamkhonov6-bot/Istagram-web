@@ -59,7 +59,7 @@ function NotificationRow({ item }: { item: NotificationDto }) {
   });
   return (
     <li className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-ig-hover-overlay">
-      <Link href={`/${item.actor.userName}`} onClick={close}>
+      <Link href={item.type === "LIVE_STARTED" ? "/live" : `/${item.actor.userName}`} onClick={close}>
         <SmallAvatar
           src={mediaUrl(item.actor.avatar)}
           name={item.actor.userName}

@@ -23,6 +23,10 @@ const PASS_RESPONSE_HEADERS = [
 
 async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   const { path } = await ctx.params;
+  // '.' / '..' dar roh URL-ro dar API tagyir medihand (masalan, ba account/login) — man' ast
+  if (path.some((p) => p === "." || p === ".." || p.includes("/") || p.includes("\\"))) {
+    return json({ data: null, errors: ["Yoft nashud"], statusCode: 404 });
+  }
   const target = path.map(encodeURIComponent).join("/");
   if (BLOCKED.has(target.toLowerCase())) {
     return json({ data: null, errors: ["Yoft nashud"], statusCode: 404 });
