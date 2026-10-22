@@ -2,7 +2,7 @@
 
 import type { UserShort } from "@repo/shared";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
@@ -106,9 +106,28 @@ function TagRow({
   );
 }
 
-export function SearchPanel() {
+/**
+ * Justujui odamon va hashtag-ho.
+ * `panel` — dar paneli kanor; `inline` — satri justuju dar bolo-i Explore (misli instagram.com 2025),
+ * natijaho dar ruyxati kushoda zeri input.
+ */
+export function SearchPanel({ variant = "panel" }: { variant?: "panel" | "inline" }) {
   const closePanel = useUiStore((s) => s.closePanel);
+  const inline = variant === "inline";
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
+  const done = inline ? () => setOpen(false) : closePanel;
+
+  // Click berun az satri justuju — ruyxat baste meshavad
+  useEffect(() => {
+    if (!inline || !open) return;
+    const onDown = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [inline, open]);
   const typed = query.trim();
   const q = useDebounced(typed, 300);
 
@@ -122,11 +141,11 @@ export function SearchPanel() {
 
   const openUser = (id: string) => {
     record.mutate({ kind: "user", id });
-    closePanel();
+    done();
   };
   const openTag = (name: string) => {
     record.mutate({ kind: "tag", name });
-    closePanel();
+    done();
   };
 
   const loading = typed !== q || users.isFetching || tags.isFetching;
@@ -136,15 +155,27 @@ export function SearchPanel() {
     !loading && userItems.length === 0 && tagItems.length === 0;
 
   return (
-    <div className="pb-4">
-      <div className="px-4 pb-6">
+    <div ref={box} className={inline ? "ig-explore-search-box" : "pb-4"}>
+      <div className={inline ? "" : "px-4 pb-6"}>
         <label className="ig-search-field">
           <Search aria-hidden className="size-4 shrink-0 text-ig-text-secondary" />
           <input
-            autoFocus
+            autoFocus={!inline}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Escape" && query && (e.stopPropagation(), setQuery(""))}
+            onFocus={() => setOpen(true)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== "Escape") return;
+              if (query) {
+                e.stopPropagation();
+                setQuery("");
+              } else if (inline) {
+                setOpen(false);
+              }
+            }}
             placeholder="Search"
             aria-label="Search"
             enterKeyHint="search"
@@ -165,7 +196,7 @@ export function SearchPanel() {
         </label>
       </div>
 
-      <div className="border-t border-ig-separator pt-3">
+      {(!inline || open) && <div className={inline ? "ig-explore-search-results" : "border-t border-ig-separator pt-3"}>
         {typed ? (
           <ul>
             {userItems.map((u) => (
@@ -231,7 +262,7 @@ export function SearchPanel() {
             </ul>
           </>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

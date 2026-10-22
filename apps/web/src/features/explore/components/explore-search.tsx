@@ -1,9 +1,8 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { useUiStore } from "@/store/ui.store";
+import { SearchPanel } from "@/features/search/components/search-panel";
 
+/** Satri justuju dar bolo-i Explore, misli instagram.com (2025) */
 export function ExploreSearch() {
-  const toggle = useUiStore((s) => s.togglePanel);
-  return <button type="button" onClick={() => toggle("search")} className="ig-explore-search" aria-label="Search people and hashtags"><Search className="size-4" />Search</button>;
+  return <SearchPanel variant="inline" />;
 }

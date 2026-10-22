@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Clapperboard,
-  Compass,
   Heart,
   House,
   Search,
@@ -25,6 +24,7 @@ export type NavItem = {
 
 const profileHref = `/${CURRENT_USERNAME}`;
 
+// Tartib misli instagram.com (2025): Search — sahifai Explore bo satri justuju dar bolo
 export const NAV_ITEMS: NavItem[] = [
   {
     key: "home",
@@ -34,15 +34,6 @@ export const NAV_ITEMS: NavItem[] = [
     kind: "link",
     href: "/",
     match: (p) => p === "/",
-  },
-  { key: "search", label: "Search", icon: Search, kind: "panel", panel: "search" },
-  {
-    key: "explore",
-    label: "Explore",
-    icon: Compass,
-    kind: "link",
-    href: "/explore",
-    match: (p) => p.startsWith("/explore"),
   },
   {
     key: "reels",
@@ -59,6 +50,14 @@ export const NAV_ITEMS: NavItem[] = [
     kind: "link",
     href: "/direct/inbox",
     match: (p) => p.startsWith("/direct"),
+  },
+  {
+    key: "search",
+    label: "Search",
+    icon: Search,
+    kind: "link",
+    href: "/explore",
+    match: (p) => p.startsWith("/explore"),
   },
   {
     key: "notifications",
@@ -80,7 +79,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-/** Satri poyoni mobil, misli Instagram dar telefon: Search ba /explore meravad */
+/** Satri poyoni mobil, misli Instagram dar telefon */
 export const BOTTOM_NAV_KEYS = ["home", "search", "reels", "create", "messages", "profile"];
 
 export function isItemActive(

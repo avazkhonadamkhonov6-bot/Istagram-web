@@ -251,6 +251,10 @@ export const handlers = [
       statusCode: 200,
     });
   }),
+  // Ruyxati chat-ho (avatar-hoi tugmai Messages) — dar mock chat nest
+  http.get("/api/Chat/get-chats", () =>
+    HttpResponse.json({ data: [], errors: [], statusCode: 200 }),
+  ),
   // Efirhoi faol (Spec 16 §3) — dar mock efir nest
   http.get("/api/Live/get-lives", () =>
     HttpResponse.json({ data: [], errors: [], statusCode: 200 }),
