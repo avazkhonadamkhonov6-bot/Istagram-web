@@ -7,6 +7,7 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/format";
 import { getSocket, onReconnect } from "@/lib/socket";
+import { useHydrated } from "@/lib/use-hydrated";
 import * as directApi from "./api";
 
 export const directKeys = {
@@ -17,8 +18,12 @@ export const directKeys = {
 };
 
 /** Badge-i Direct dar sidebar (Spec 13 §4) — baroi Abubakr */
-export const useDirectUnreadCount = () =>
-  useQuery({ queryKey: directKeys.unread, queryFn: directApi.getUnreadCount, refetchInterval: 60_000 });
+/** Shumorai paymhoi naxonda; to hydration — undefined (HTML-i server bidun badge) */
+export function useDirectUnreadCount() {
+  const hydrated = useHydrated();
+  const query = useQuery({ queryKey: directKeys.unread, queryFn: directApi.getUnreadCount, refetchInterval: 60_000 });
+  return { ...query, data: hydrated ? query.data : undefined };
+}
 
 /** "Seen": chat-i kushodaro xonda qayd mekunad, agar paymi naxondai tarafi digar boshad */
 export function useMarkRead(chatId: number, messages: UiMessage[] | undefined, myId: string | undefined) {
@@ -83,7 +88,12 @@ export function useTypingEmitter(chatId: number) {
 /** Paymi optimistic — id-i manfi, to javobi API */
 export type UiMessage = MessageDto & { pending?: boolean };
 
-export const useMe = () => useQuery({ queryKey: directKeys.me, queryFn: directApi.getMyProfile, staleTime: 5 * 60_000 });
+/** Profili xud; to hydration — undefined, to HTML-i server va client yaksa boshad */
+export function useMe() {
+  const hydrated = useHydrated();
+  const query = useQuery({ queryKey: directKeys.me, queryFn: directApi.getMyProfile, staleTime: 5 * 60_000 });
+  return { ...query, data: hydrated ? query.data : undefined };
+}
 
 export const useChats = () => useQuery({ queryKey: directKeys.chats, queryFn: directApi.getChats });
 

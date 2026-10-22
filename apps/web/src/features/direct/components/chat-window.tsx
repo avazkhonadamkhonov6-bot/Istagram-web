@@ -1,24 +1,19 @@
 "use client";
 
-import { ChevronLeft, Heart, ImageIcon, LogOut, Mic, Pencil, Phone, Reply, Send, Trash2, Video, X } from "lucide-react";
+import { Camera, ChevronLeft, Heart, ImageIcon, Info, Mic, Pencil, Phone, Reply, Send, Video, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { ErrorFallback } from "@/components/error-fallback";
 import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
 import { startCall, useCallStore } from "@/features/rtc/call-store";
 import { formatDuration } from "@/features/rtc/peer";
 import { ApiError } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { deleteChat, leaveGroup } from "../api";
 import {
   activityLabel,
-  directKeys,
   peerOf,
   useChats,
   useDeleteMessage,
@@ -33,15 +28,14 @@ import {
   type UiMessage,
 } from "../hooks";
 import { CallMessage, VideoMessage, VoiceMessage } from "./message-media";
-import { mediaDuration, useVoiceRecorder, VideoMessageDialog } from "./recorders";
+import { ChatDetails } from "./chat-details";
+import { mediaDuration, PhotoCaptureDialog, useVoiceRecorder, VideoMessageDialog } from "./recorders";
 
 const GAP_MS = 15 * 60_000;
 /** Spec 15 §3 */
 const EDIT_WINDOW_MS = 15 * 60_000;
 
 export function ChatWindow({ chatId }: { chatId: number }) {
-  const router = useRouter();
-  const qc = useQueryClient();
   const { data: me } = useMe();
   const { data: chats } = useChats();
   const { data: messages, isPending, isError, error, refetch } = useMessages(chatId);
@@ -60,6 +54,8 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder((file, durationSec) => send.mutate({ text: "", file, durationSec }));
   const [videoOpen, setVideoOpen] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const inCall = useCallStore((st) => st.phase !== "idle" && st.phase !== "ended");
 
   const chat = chats?.find((c) => c.chatId === chatId);
@@ -100,17 +96,6 @@ export function ChatWindow({ chatId }: { chatId: number }) {
     send.mutate({ text: "", file, replyTo: reply, durationSec: await mediaDuration(file) });
   }
 
-  async function removeChat() {
-    if (!window.confirm(isGroup ? "Leave this group?" : "Delete this chat?")) return;
-    try {
-      await (isGroup ? leaveGroup(chatId) : deleteChat(chatId));
-      await qc.invalidateQueries({ queryKey: directKeys.chats });
-      router.push("/direct/inbox");
-    } catch {
-      toast.error(isGroup ? "Couldn't leave group" : "Couldn't delete chat");
-    }
-  }
-
   function startReply(m: UiMessage) {
     setEditing(null);
     setReplyTo(m);
@@ -129,21 +114,46 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const forbidden = error instanceof ApiError && error.status === 403;
 
   return (
-    <section className="flex h-full min-w-0 flex-1 flex-col">
+    <div className="flex h-full min-w-0 flex-1">
+    <section className={cn("flex h-full min-w-0 flex-1 flex-col", detailsOpen && "hidden md:flex")}>
       <header className="flex h-[75px] items-center gap-3 border-b border-ig-separator px-4">
         <Link href="/direct/inbox" aria-label="Back" className="text-ig-icon md:hidden">
           <ChevronLeft className="size-7" />
         </Link>
         {peer && (
           <>
-            <Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={44} />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-base font-semibold">{peer.userName}</span>
-              {isGroup && chat && (
-                <span className="block truncate text-xs text-ig-text-secondary">{chat.members.length} members</span>
+            <button
+              type="button"
+              onClick={() => setDetailsOpen(true)}
+              aria-label={isGroup ? "Group details" : "Conversation details"}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left"
+            >
+              {isGroup && chat && chat.members.length > 1 ? (
+                <span className="relative size-11 shrink-0">
+                  {chat.members
+                    .filter((m) => m.id !== me?.userId)
+                    .slice(0, 2)
+                    .map((m, i) => (
+                      <Avatar
+                        key={m.id}
+                        src={mediaUrl(m.avatar)}
+                        alt={m.userName}
+                        size={32}
+                        className={cn("absolute ring-2 ring-ig-bg", i === 0 ? "left-0 top-0" : "bottom-0 right-0")}
+                      />
+                    ))}
+                </span>
+              ) : (
+                <Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={44} />
               )}
-              {status && <span className="block truncate text-xs text-ig-text-secondary">{status}</span>}
-            </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-base font-semibold">{peer.userName}</span>
+                {isGroup && chat && (
+                  <span className="block truncate text-xs text-ig-text-secondary">{chat.members.length} members</span>
+                )}
+                {status && <span className="block truncate text-xs text-ig-text-secondary">{status}</span>}
+              </span>
+            </button>
             <button
               type="button"
               aria-label="Audio call"
@@ -164,11 +174,12 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             </button>
             <button
               type="button"
-              aria-label={isGroup ? "Leave group" : "Delete chat"}
-              onClick={removeChat}
-              className="text-ig-icon hover:text-ig-error"
+              aria-label="Conversation information"
+              aria-pressed={detailsOpen}
+              onClick={() => setDetailsOpen((v) => !v)}
+              className="text-ig-icon"
             >
-              {isGroup ? <LogOut className="size-6" /> : <Trash2 className="size-6" />}
+              <Info className="size-6" fill={detailsOpen ? "currentColor" : "none"} stroke={detailsOpen ? "rgb(var(--ig-primary-background))" : "currentColor"} />
             </button>
           </>
         )}
@@ -245,12 +256,22 @@ export function ChatWindow({ chatId }: { chatId: number }) {
               <span className="tabular-nums">{formatDuration(voice.elapsed)}</span>
               <span className="text-ig-text-secondary">Recording...</span>
             </span>
-            <button type="button" aria-label="Send voice message" onClick={voice.stop} className="text-ig-link hover:text-ig-link-action">
+            <button type="button" aria-label="Send voice message" onClick={voice.stop} className="text-ig-borderless hover:text-ig-borderless-hover">
               <Send className="size-5" />
             </button>
           </>
         ) : (
           <>
+            {!editing && (
+              <button
+                type="button"
+                aria-label="Take a photo"
+                onClick={() => setPhotoOpen(true)}
+                className="-ml-2 flex size-8 shrink-0 items-center justify-center rounded-full bg-ig-primary text-ig-text-on-color hover:bg-ig-primary-hover"
+              >
+                <Camera className="size-[18px]" />
+              </button>
+            )}
             <input
               ref={inputRef}
               value={text}
@@ -263,7 +284,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
               className="flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
             />
             {text.trim() ? (
-              <button type="submit" className="text-sm font-semibold text-ig-link hover:text-ig-link-action">
+              <button type="submit" className="text-sm font-semibold text-ig-borderless hover:text-ig-borderless-hover">
                 {editing ? "Save" : "Send"}
               </button>
             ) : (
@@ -288,7 +309,10 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         onOpenChange={setVideoOpen}
         onSend={(file, durationSec) => send.mutate({ text: "", file, durationSec })}
       />
+      <PhotoCaptureDialog open={photoOpen} onOpenChange={setPhotoOpen} onSend={(file) => send.mutate({ text: "", file })} />
     </section>
+    {detailsOpen && chat && <ChatDetails chat={chat} myId={me?.userId} onClose={() => setDetailsOpen(false)} />}
+    </div>
   );
 }
 

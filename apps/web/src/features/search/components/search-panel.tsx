@@ -3,7 +3,7 @@
 import type { UserShort } from "@repo/shared";
 import Link from "next/link";
 import { useState } from "react";
-import { X } from "@/components/ui/icons";
+import { Search, X } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { formatCount } from "@/lib/format";
@@ -137,25 +137,32 @@ export function SearchPanel() {
 
   return (
     <div className="pb-4">
-      <div className="relative px-4 pb-4">
-        <input
-          autoFocus
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search"
-          aria-label="Search"
-          className="w-full rounded-lg bg-ig-bg-secondary px-4 py-2 pr-10 text-sm outline-none"
-        />
-        {query ? (
-          <button
-            type="button"
-            aria-label="Clear search"
-            onClick={() => setQuery("")}
-            className="absolute right-7 top-1/2 -translate-y-[calc(50%+8px)]"
-          >
-            <X className="size-4 text-ig-text-secondary" />
-          </button>
-        ) : null}
+      <div className="px-4 pb-6">
+        <label className="ig-search-field">
+          <Search aria-hidden className="size-4 shrink-0 text-ig-text-secondary" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && query && (e.stopPropagation(), setQuery(""))}
+            placeholder="Search"
+            aria-label="Search"
+            enterKeyHint="search"
+            className="ig-search-input"
+          />
+          {loading && typed ? (
+            <span aria-hidden className="size-4 shrink-0 animate-spin rounded-full border-2 border-ig-text-secondary border-t-transparent" />
+          ) : query ? (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => setQuery("")}
+              className="flex size-4 shrink-0 items-center justify-center rounded-full bg-ig-text-tertiary text-ig-bg"
+            >
+              <X className="size-3" strokeWidth={3} />
+            </button>
+          ) : null}
+        </label>
       </div>
 
       <div className="border-t border-ig-separator pt-3">

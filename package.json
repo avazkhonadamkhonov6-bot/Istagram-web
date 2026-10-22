@@ -2,20 +2,29 @@
   "name": "instagram-clone",
   "private": true,
   "scripts": {
-    "dev": "npx --yes pnpm@10.34.7 --filter @repo/shared build && npx --yes pnpm@10.34.7 --filter web dev",
+    "dev": "node scripts/dev.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "start": "pnpm --filter api db:deploy && pnpm --filter api start:render",
     "dev:all": "npx --yes pnpm@10.34.7 exec turbo run dev",
-    "check:api": "node scripts/check-backend.mjs"
+    "check:api": "node scripts/check-backend.mjs",
+    "dev:pnpm": "npx --yes pnpm@10.34.7 --filter @repo/shared build && npx --yes pnpm@10.34.7 --filter web dev"
   },
   "devDependencies": {
     "turbo": "^2"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@nestjs/core", "@prisma/client", "@prisma/engines", "argon2", "prisma", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "argon2",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "engines": {
     "node": ">=22"

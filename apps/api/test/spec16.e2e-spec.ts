@@ -170,10 +170,17 @@ describe('API (Spec 16)', () => {
       .put('/Chat/send-message')
       .field('ChatId', String(chatId))
       .field('Duration', '12')
-      .attach('File', Buffer.from('fake mp4'), { filename: 'v.mp4', contentType: 'video/mp4' })
+      .attach('File', Buffer.from('00000018667479706d703432', 'hex'), { filename: 'v.mp4', contentType: 'video/mp4' })
       .set(auth('a'))
       .expect(200);
     expect(video.body.data).toMatchObject({ fileType: 'video', durationSec: 12 });
+    // Fayli qalbaki (HTML bo nomi .mp4) — 400
+    await http()
+      .put('/Chat/send-message')
+      .field('ChatId', String(chatId))
+      .attach('File', Buffer.from('<html><script>alert(1)</script></html>'), { filename: 'x.mp4', contentType: 'video/mp4' })
+      .set(auth('a'))
+      .expect(400);
     await http().put('/Chat/send-message').field('ChatId', String(chatId)).field('Duration', '-1').field('MessageText', 'x').set(auth('a')).expect(400);
   });
 

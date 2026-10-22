@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, readToken, upstreamError } from "@/lib/bff";
+import { UPLOAD_TIMEOUT_MS, apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, readToken, upstreamError } from "@/lib/bff";
 
 /**
  * BFF-proxy: /api/<Controller>/<action> → API_URL/<Controller>/<action>
@@ -23,6 +23,10 @@ const PASS_RESPONSE_HEADERS = [
 
 async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   const { path } = await ctx.params;
+  // '.' / '..' dar roh URL-ro dar API tagyir medihand (masalan, ba account/login) — man' ast
+  if (path.some((p) => p === "." || p === ".." || p.includes("/") || p.includes("\\"))) {
+    return json({ data: null, errors: ["Yoft nashud"], statusCode: 404 });
+  }
   const target = path.map(encodeURIComponent).join("/");
   if (BLOCKED.has(target.toLowerCase())) {
     return json({ data: null, errors: ["Yoft nashud"], statusCode: 404 });
@@ -47,11 +51,12 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
       method: req.method,
       headers,
       token,
+      ...(req.headers.get("content-type")?.startsWith("multipart/") ? { timeoutMs: UPLOAD_TIMEOUT_MS } : {}),
       requestId: req.headers.get("x-request-id") ?? undefined,
       body: mutating ? req.body : undefined,
       // stream-i body (multipart) bidun buffer
       ...(mutating ? { duplex: "half" } : {}),
-    } as RequestInit & { token?: string });
+    } as RequestInit & { token?: string; timeoutMs?: number });
   } catch (err) {
     return upstreamError(err);
   }

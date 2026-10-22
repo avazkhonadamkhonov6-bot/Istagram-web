@@ -188,3 +188,13 @@
 @media (min-width: 1280px) {
   .ig-post-modal-card { max-width: min(1300px, calc(var(--ig-post-h) + 500px)); }
 }
+
+/* Search (panel va Explore): pill-i xokistari bidun xati kabud, misli instagram.com */
+.ig-search-field { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px; border-radius: 999px; background: rgb(var(--ig-secondary-background)); color: rgb(var(--ig-primary-text)); cursor: text; }
+.ig-search-input { min-width: 0; flex: 1; height: 100%; border: 0; background: transparent; color: inherit; font-size: 16px; outline: none; }
+.ig-search-input:focus-visible { outline: none; }
+.ig-search-input::placeholder { color: rgb(var(--ig-secondary-text)); }
+.ig-search-input::-webkit-search-cancel-button { display: none; }
+.ig-side-panel h2 { padding-bottom: 24px; }
+.ig-explore-search { border: 0; cursor: text; transition: background-color 150ms; }
+.ig-explore-search:hover { background: rgb(var(--ig-elevated-highlight-background)); }

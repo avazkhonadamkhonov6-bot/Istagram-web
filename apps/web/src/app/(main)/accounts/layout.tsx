@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import { SettingsNav } from "@/features/account/components/settings-nav";
+
+export const metadata: Metadata = { title: "Settings" };
 
 export default function AccountsLayout({ children }: { children: ReactNode }) {
   return (

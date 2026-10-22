@@ -2,7 +2,7 @@
 import { postDtoSchema, type PostDto } from "@repo/shared";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   Bookmark,
   Heart,
@@ -26,10 +26,58 @@ import { api } from "@/lib/api-client";
 import { formatCount } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 const key = ["reels"];
+
+// Ovoz baroi hamai reel-ho yakest (misli Instagram): yak bor unmute — reel-i bad ham bo ovoz.
+// Brauzer autoplay-ro bo ovoz bidun amali user man' mekunad; on gah muted ogoz meshavad.
+let reelsMuted = false;
+/** Ovozro brauzer xomush kard (na user) — bo avvalin click / tugma ovoz bargardonida meshavad */
+let autoMuted = false;
+const muteListeners = new Set<() => void>();
+function setReelsMuted(value: boolean) {
+  reelsMuted = value;
+  autoMuted = false;
+  muteListeners.forEach((l) => l());
+}
+function unmuteAfterGesture(e: Event) {
+  // Tugmai Mute / Unmute xudash ovozro idora mekunad
+  if (!autoMuted || (e.target instanceof Element && e.target.closest("[data-reel-mute]"))) return;
+  setReelsMuted(false);
+  document.querySelectorAll<HTMLVideoElement>("video[data-reel]").forEach((v) => {
+    v.muted = false;
+  });
+}
+if (typeof window !== "undefined") {
+  for (const type of ["pointerdown", "keydown", "touchstart"] as const) {
+    window.addEventListener(type, unmuteAfterGesture, { capture: true, passive: true });
+  }
+}
+function useReelsMuted() {
+  return useSyncExternalStore(
+    (l) => {
+      muteListeners.add(l);
+      return () => muteListeners.delete(l);
+    },
+    () => reelsMuted,
+    () => true,
+  );
+}
+
+/** play() bo ovoz; agar brauzer man' kunad — muted */
+function playWithSound(el: HTMLVideoElement | null) {
+  if (!el) return Promise.reject(new Error("no video"));
+  el.muted = reelsMuted;
+  return el.play().catch((err: unknown) => {
+    if (el.muted || (err as Error).name !== "NotAllowedError") throw err;
+    setReelsMuted(true);
+    autoMuted = true;
+    el.muted = true;
+    return el.play();
+  });
+}
 function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const container = useRef<HTMLDivElement>(null);
-  const [muted, setMuted] = useState(true);
+  const muted = useReelsMuted();
   const [paused, setPaused] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [liked, setLiked] = useState(post.postLike);
@@ -65,8 +113,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
         const visible = entries[0]?.isIntersecting;
         if (visible) {
           if (!paused)
-            void video.current
-              ?.play()
+            void playWithSound(video.current)
               .then(() => setPlaying(true))
               .catch(() => setPlaying(false));
           loadMore?.();
@@ -136,6 +183,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
       >
         <video
           ref={video}
+          data-reel
           src={mediaUrl(post.images[0]) ?? undefined}
           muted={muted}
           playsInline
@@ -148,8 +196,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
               setPaused(true);
               setPlaying(false);
             } else {
-              void video.current
-                ?.play()
+              void playWithSound(video.current)
                 .then(() => {
                   setPaused(false);
                   setPlaying(true);
@@ -177,8 +224,16 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
           />
         )}
         <button
+          data-reel-mute
           aria-label={muted ? "Unmute" : "Mute"}
-          onClick={() => setMuted((m) => !m)}
+          onClick={() => {
+            const next = !muted;
+            setReelsMuted(next);
+            if (video.current) {
+              video.current.muted = next;
+              if (!next && video.current.paused && !paused) void video.current.play().then(() => setPlaying(true)).catch(() => undefined);
+            }
+          }}
           className="absolute right-4 top-4 rounded-full bg-ig-media-blur p-2"
         >
           {muted ? (

@@ -114,6 +114,17 @@ describe('API (Spec 12)', () => {
       expect(JSON.stringify(r.body)).not.toMatch(/password/i);
       expect(r.body.totalRecord).toBeGreaterThanOrEqual(3);
     });
+
+    it('email-i userhoi digar namoyon nest; justujui qismi bo email kor namekunad', async () => {
+      const r = await http().get('/User/get-users').query({ UserName: `e2e_${tag}` }).set(auth('a')).expect(200);
+      const rows = r.body.data as { id: string; email: string }[];
+      expect(rows.find((u) => u.id === users.a!.id)?.email).toContain('@');
+      expect(rows.filter((u) => u.id !== users.a!.id).every((u) => u.email === '')).toBe(true);
+      const part = await http().get('/User/get-users').query({ Email: 'e2e' }).set(auth('a')).expect(200);
+      expect(part.body.data).toHaveLength(0);
+      const p = await http().get('/UserProfile/get-user-profile-by-id').query({ id: users.a!.id }).set(auth('b')).expect(200);
+      expect(p.body.data.email).toBe('');
+    });
   });
 
   describe('Follow va profil', () => {

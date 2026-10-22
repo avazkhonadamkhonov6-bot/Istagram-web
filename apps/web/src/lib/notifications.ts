@@ -2,6 +2,7 @@
 
 import { countSchema, notificationDtoSchema, SocketEvent, type NotificationDto } from "@repo/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useHydrated } from "@/lib/use-hydrated";
 import { useEffect } from "react";
 import { toast } from "@/components/ui/toast";
 import { api } from "./api-client";
@@ -29,12 +30,16 @@ export async function getNotifications(page = 1, pageSize = 20): Promise<Paged<N
 
 export const readAllNotifications = () => api<boolean>("/Notification/read-all", { method: "PUT" });
 
-export const useNotificationsUnread = () =>
-  useQuery({
+export function useNotificationsUnread() {
+  const hydrated = useHydrated();
+  const query = useQuery({
     queryKey: notificationKeys.unread,
     queryFn: () => api<{ count: number }>("/Notification/get-unread-count", { schema: countSchema }),
     refetchInterval: 60_000,
   });
+  // To hydration — undefined: HTML-i server va client yaksa
+  return { ...query, data: hydrated ? query.data : undefined };
+}
 
 /** Matn misli Instagram: "ali liked your post." */
 export function notificationText(n: NotificationDto): string {

@@ -251,6 +251,10 @@ export const handlers = [
       statusCode: 200,
     });
   }),
+  // Efirhoi faol (Spec 16 §3) — dar mock efir nest
+  http.get("/api/Live/get-lives", () =>
+    HttpResponse.json({ data: [], errors: [], statusCode: 200 }),
+  ),
   http.get("/api/Post/get-reels", ({ request }) =>
     pagedMock(
       mockPosts.filter((p) => p.isReel),

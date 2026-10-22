@@ -3,7 +3,7 @@ import { ErrorCode, MEDIA_RULES } from '@repo/shared';
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import sharp, { type Sharp } from 'sharp';
 import { AppException } from '../common/app-exception';
 import { APP_CONFIG, AppConfig } from './config';
@@ -25,6 +25,23 @@ const EXT_BY_MIME: Record<string, string> = {
   'audio/mpeg': '.mp3',
   'audio/mp4': '.m4a',
 };
+
+/**
+ * Sanjishi magic bytes baroi video / audio / GIF (aksho-ro sharp mesanjad): mime-i client-ro bovar namekunem,
+ * to fayli HTML / skript bo nomi `.mp4` bor karda nashavad.
+ */
+function matchesSignature(buf: Buffer | undefined, mime: string): boolean {
+  if (!buf || buf.length < 12) return false;
+  const ascii = (from: number, to: number) => buf.toString('latin1', from, to);
+  if (mime === 'image/gif') return ascii(0, 4) === 'GIF8';
+  if (mime === 'video/webm' || mime === 'audio/webm') return buf.readUInt32BE(0) === 0x1a45dfa3;
+  if (mime === 'audio/ogg') return ascii(0, 4) === 'OggS';
+  if (mime === 'audio/mpeg') return ascii(0, 3) === 'ID3' || (buf[0] === 0xff && (buf[1]! & 0xe0) === 0xe0);
+  if (mime === 'video/mp4' || mime === 'video/quicktime' || mime === 'audio/mp4') {
+    return ['ftyp', 'moov', 'mdat', 'wide', 'free', 'skip'].includes(ascii(4, 8));
+  }
+  return mime.startsWith('image/'); // aks — sharp dar saveImage mesanjad
+}
 
 /** Andozahoi WebP (Spec 03): asosi — 1080, versiyaho — `<id>-640.webp`, `<id>-320.webp` */
 export const IMAGE_WIDTH = 1080;
@@ -95,6 +112,9 @@ export class StorageService {
     if (file.size > max) {
       throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TOO_LARGE);
     }
+    if (file.buffer && !matchesSignature(file.buffer, file.mimetype)) {
+      throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TYPE_NOT_ALLOWED);
+    }
   }
 
   async save(file: Express.Multer.File, kind: UploadKind): Promise<string> {
@@ -107,7 +127,8 @@ export class StorageService {
       await this.backup([image, ...IMAGE_VARIANTS.map((w) => `${id}-${w}.webp`)]);
       return image;
     }
-    const ext = EXT_BY_MIME[file.mimetype] ?? extname(file.originalname).toLowerCase();
+    const ext = EXT_BY_MIME[file.mimetype];
+    if (!ext) throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TYPE_NOT_ALLOWED);
     const fileName = `${id}${ext}`;
     await writeFile(join(this.root, fileName), file.buffer);
     await this.prisma.mediaFile.create({ data: { name: fileName, data: new Uint8Array(file.buffer) } });
