@@ -2,11 +2,15 @@ import { create } from "zustand";
 
 export type SidePanel = "search" | "notifications" | null;
 export type ThemeMode = "light" | "dark";
+export type FeedMode = "following" | "favorites";
 
 type UiState = {
   panel: SidePanel;
   createOpen: boolean;
   theme: ThemeMode;
+  /** Feed-i sahifai asosi: tab-ho (desktop) va menyui "Instagram v" (mobil) */
+  feedMode: FeedMode;
+  setFeedMode: (mode: FeedMode) => void;
   togglePanel: (panel: Exclude<SidePanel, null>) => void;
   closePanel: () => void;
   setCreateOpen: (open: boolean) => void;
@@ -34,6 +38,8 @@ export const useUiStore = create<UiState>((set) => ({
   panel: null,
   createOpen: false,
   theme: "dark",
+  feedMode: "following",
+  setFeedMode: (feedMode) => set({ feedMode }),
   togglePanel: (panel) =>
     set((state) => ({ panel: state.panel === panel ? null : panel })),
   closePanel: () => set({ panel: null }),

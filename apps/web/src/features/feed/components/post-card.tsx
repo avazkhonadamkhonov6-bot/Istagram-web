@@ -104,19 +104,23 @@ export function PostCard({
     <article className="mb-5 border-b border-ig-separator pb-4">
       <header className="flex items-center gap-3 px-1 py-3">
         <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
-          <Link href={`/${post.userName}`} className="truncate font-semibold">
-            {post.userName}
-          </Link>
-          <span className="text-ig-text-secondary">
-            {formatRelativeTime(new Date(post.datePublished).getTime())}
-          </span>
+        <div className="min-w-0 flex-1 text-sm leading-[18px]">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Link href={`/${post.userName}`} className="truncate font-semibold">
+              {post.userName}
+            </Link>
+            <span className="text-ig-text-secondary">
+              &middot; {formatRelativeTime(new Date(post.datePublished).getTime())}
+            </span>
+          </div>
+          {/* Joy — zeri username, misli Instagram */}
+          {post.location && <Link href={`/explore/locations/${encodeURIComponent(post.location)}`} className="block truncate text-xs">{post.location}</Link>}
         </div>
         <PostOptions postId={post.postId} userId={post.userId} />
       </header>
 
-      {post.location && <Link href={`/explore/locations/${encodeURIComponent(post.location)}`} className="mb-2 block text-xs text-ig-text-secondary">{post.location}</Link>}
       <div
+        data-media
         className="relative aspect-[4/5] w-full select-none overflow-hidden rounded-sm border border-ig-separator bg-ig-bg-secondary"
         onDoubleClick={onDoubleTap}
       >

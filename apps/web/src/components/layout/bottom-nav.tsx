@@ -5,10 +5,11 @@ import { mediaUrl } from "@/lib/media";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMe } from "@/features/auth/hooks";
+import { useDirectUnreadCount } from "@/features/direct/hooks";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
-import { BOTTOM_NAV_KEYS, NAV_ITEMS, isItemActive } from "./nav-items";
+import { BOTTOM_NAV_KEYS, NAV_ITEMS, isItemActive, type NavItem } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -19,12 +20,19 @@ export function BottomNav() {
 
   const myUsername = me?.userName ?? CURRENT_USERNAME;
   const profileHref = `/${myUsername}`;
-  const items = NAV_ITEMS.filter((item) => BOTTOM_NAV_KEYS.includes(item.key));
+  const { data: unread } = useDirectUnreadCount();
+  const items = BOTTOM_NAV_KEYS.map((key) => NAV_ITEMS.find((item) => item.key === key)!)
+    // Dar telefon Search — sahifai /explore bo satri justuju (na paneli kanor)
+    .map((item): NavItem =>
+      item.key === "search"
+        ? { ...item, kind: "link", href: "/explore", match: (p: string) => p.startsWith("/explore") }
+        : item,
+    );
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[50px] items-center justify-around border-t border-ig-separator bg-ig-bg md:hidden"
+      className="ig-bottom-nav fixed inset-x-0 bottom-0 z-40 flex h-[50px] items-center justify-around border-t border-ig-separator bg-ig-bg pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       {items.map((rawItem) => {
         const item =
@@ -40,8 +48,7 @@ export function BottomNav() {
         const active = isItemActive(item, pathname, panel);
         const Icon = item.icon;
         const cls = cn(
-          "flex h-full flex-1 items-center justify-center",
-          active ? "text-ig-text" : "text-ig-text-secondary",
+          "relative flex h-full flex-1 items-center justify-center text-ig-icon",
         );
         const icon =
           item.key === "profile" ? (
@@ -54,11 +61,16 @@ export function BottomNav() {
               )}
             />
           ) : (
-            <Icon
-              className="size-6"
-              strokeWidth={active ? 2.75 : 2}
-              fill={active && item.fillWhenActive ? "currentColor" : "none"}
-            />
+            <>
+              <Icon
+                className="size-[26px]"
+                strokeWidth={active ? 2.75 : 2}
+                fill={active && item.fillWhenActive ? "currentColor" : "none"}
+              />
+              {item.key === "messages" && (unread?.count ?? 0) > 0 ? (
+                <span className="ig-unread-count absolute left-1/2 top-1 ml-1">{unread!.count}</span>
+              ) : null}
+            </>
           );
 
         return item.kind === "link" ? (

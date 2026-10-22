@@ -198,3 +198,21 @@
 .ig-side-panel h2 { padding-bottom: 24px; }
 .ig-explore-search { border: 0; cursor: text; transition: background-color 150ms; }
 .ig-explore-search:hover { background: rgb(var(--ig-elevated-highlight-background)); }
+
+/* Mobil (telefon), misli Instagram: post-i purra-arz, satri bolo bidun xat, tugmai mudavvari Messages */
+.ig-messages-fab { position: fixed; z-index: 40; right: 16px; bottom: calc(66px + env(safe-area-inset-bottom)); display: none; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: rgb(var(--ig-elevated-background)); color: rgb(var(--ig-primary-icon)); box-shadow: 0 4px 16px rgb(0 0 0 / .35); }
+@media (max-width: 1159px) { .ig-messages-fab { display: grid; } }
+@media (min-width: 768px) and (max-width: 1159px) { .ig-messages-fab { bottom: 24px; } }
+@media (max-width: 767px) {
+  .ig-home { padding: 0 0 24px; gap: 0; }
+  .ig-feed-tabs { display: none; }
+  .ig-feed-posts { max-width: none; }
+  .ig-feed-posts article { margin-bottom: 12px; border-bottom: 0; padding-bottom: 8px; }
+  .ig-feed-posts article > header { padding-inline: 12px; }
+  .ig-feed-posts article > :not(header):not([data-media]) { padding-inline: 12px; }
+  .ig-stories-tray { margin: 0 0 4px; padding: 6px 12px 10px; gap: 14px; }
+  .ig-stories-tray > a, .ig-stories-tray > button { width: 84px; }
+  .ig-stories-tray img, .ig-stories-tray button > span > div, .ig-stories-tray a > div > div { width: 78px; height: 78px; }
+  .ig-stories-tray span.truncate, .ig-stories-tray > button > span:last-child { font-size: 12px; color: rgb(var(--ig-primary-text)); }
+}
+@media (max-width: 767px) { .ig-feed-posts article > [data-media] { border: 0; border-radius: 0; } }

@@ -30,10 +30,17 @@ export function MessagesDock() {
   const [open, setOpen] = useState(false);
   const { data: unread } = useDirectUnreadCount();
   if (pathname.startsWith("/direct")) return null;
-  return <div className="ig-messages-dock">
+  return <>
+  {/* Telefon va ekrani mayda: tugmai mudavvari Messages, misli Instagram */}
+  {pathname === "/" && <Link href="/direct/inbox" aria-label="Open messages" className="ig-messages-fab">
+    <Send className="size-6" />
+    {!!unread?.count && <span className="ig-unread-count absolute -right-0.5 -top-0.5">{unread.count}</span>}
+  </Link>}
+  <div className="ig-messages-dock">
     {open ? <section aria-label="Messages preview" className="ig-messages-preview">
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-ig-separator px-4"><h2 className="font-semibold">Messages</h2>{!!unread?.count && <span className="ig-unread-count">{unread.count}</span>}<Link href="/direct/inbox" aria-label="Open inbox" className="ml-auto p-1"><Maximize2 className="size-4" /></Link><button onClick={() => setOpen(false)} aria-label="Close messages" className="p-1"><X className="size-5" /></button></header>
       <DockChats />
     </section> : <button onClick={() => setOpen(true)} aria-label="Open messages preview" aria-expanded={false} className="ig-messages-pill"><Send className="size-6" /><span>Messages</span>{!!unread?.count && <span className="ig-unread-count">{unread.count}</span>}</button>}
-  </div>;
+  </div>
+  </>;
 }

@@ -80,7 +80,8 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export const BOTTOM_NAV_KEYS = ["home", "explore", "reels", "create", "profile"];
+/** Satri poyoni mobil, misli Instagram dar telefon: Search ba /explore meravad */
+export const BOTTOM_NAV_KEYS = ["home", "search", "reels", "create", "messages", "profile"];
 
 export function isItemActive(
   item: NavItem,
