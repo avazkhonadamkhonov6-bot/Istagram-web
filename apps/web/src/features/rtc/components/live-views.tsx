@@ -27,7 +27,7 @@ function Hearts({ hearts }: { hearts: FloatingHeart[] }) {
       {hearts.map((h) => (
         <Heart
           key={h.id}
-          className="live-heart absolute bottom-0 size-7 text-[#ff3040]"
+          className="live-heart absolute bottom-0 size-7 text-ig-badge"
           fill="currentColor"
           style={{ left: `${h.left}%` }}
         />

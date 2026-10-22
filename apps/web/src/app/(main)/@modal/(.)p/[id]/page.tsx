@@ -1,3 +1,6 @@
+// The modal renders per request; skip instant-navigation assertions.
+export const instant = false;
+
 import { getServerPost } from "@/lib/server-api";
 import { Suspense } from "react";
 import { PostDetail } from "@/features/posts/components/post-detail";

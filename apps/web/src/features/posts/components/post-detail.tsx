@@ -6,6 +6,8 @@ import { SharePostDialog } from "./share-post-dialog";
 import type { CommentDto, PostDto } from "@repo/shared";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFollow } from "@/features/feed/hooks";
+import { useIsFollowing } from "@/features/profile/hooks";
 import { toast } from "@/components/ui/toast";
 import { likeComment, pinComment } from "@/features/social/api";
 import { useRef, useState } from "react";
@@ -20,6 +22,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
+import { renderCaption } from "@/features/feed/components/post-card";
 import { formatCount, formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -56,24 +59,26 @@ function CommentRow({
   const like = useMutation({ mutationFn: () => likeComment(comment.postCommentId), onSuccess: refresh, onError: () => toast.error("Could not update comment like.") });
   const pin = useMutation({ mutationFn: () => pinComment(comment.postCommentId), onSuccess: refresh, onError: () => toast.error("Could not pin comment. You can pin up to three comments.") });
   return (
-    <div className="flex gap-3 py-2">
-      <SmallAvatar
-        src={mediaUrl(comment.userImage)}
-        name={comment.userName}
-        className={isReply ? "size-6" : "size-8"}
-      />
-      <div className="min-w-0 flex-1 text-sm">
+    <div className="group flex gap-[14px] py-3">
+      <Link href={`/${comment.userName}`} className="shrink-0">
+        <SmallAvatar
+          src={mediaUrl(comment.userImage)}
+          name={comment.userName}
+          className="size-8"
+        />
+      </Link>
+      <div className="min-w-0 flex-1 text-sm leading-[18px]">
         <p className="break-words">
           <Link href={`/${comment.userName}`} className="mr-1 font-semibold">
             {comment.userName}
           </Link>
-          {comment.comment}
+          {renderCaption(comment.comment)}
         </p>
-        <div className="mt-1 flex gap-3 text-xs text-ig-text-secondary">
+        <div className="mt-2 flex items-center gap-3 text-xs leading-4 text-ig-text-secondary">
           <span>{formatRelativeTime(Date.parse(comment.dateCommented))}</span>
           {comment.isPinned && <span>Pinned</span>}
-          {comment.likeCount > 0 && <span>{comment.likeCount} likes</span>}
-          {canPin && <button type="button" disabled={pin.isPending} onClick={() => pin.mutate()}>{comment.isPinned ? "Unpin" : "Pin"}</button>}
+          {comment.likeCount > 0 && <span className="font-semibold">{comment.likeCount} {comment.likeCount === 1 ? "like" : "likes"}</span>}
+          {canPin && !isReply && <button type="button" disabled={pin.isPending} onClick={() => pin.mutate()} className="font-semibold">{comment.isPinned ? "Unpin" : "Pin"}</button>}
           <button type="button" onClick={onReply} className="font-semibold">
             Reply
           </button>
@@ -81,14 +86,14 @@ function CommentRow({
             <button
               type="button"
               onClick={onDelete}
-              className="font-semibold text-ig-error"
+              className="font-semibold text-ig-error opacity-0 group-hover:opacity-100 focus:opacity-100"
             >
               Delete
             </button>
           ) : null}
         </div>
       </div>
-      <button type="button" className="self-start p-1" aria-label={comment.isLiked ? "Unlike comment" : "Like comment"} disabled={like.isPending} onClick={() => like.mutate()}><Heart className={cn("size-3.5", comment.isLiked && "text-ig-badge")} fill={comment.isLiked ? "currentColor" : "none"} /></button>
+      <button type="button" className={cn("ig-post-action mt-1.5 self-start p-1", comment.isLiked ? "text-ig-badge" : "text-ig-text-secondary")} aria-label={comment.isLiked ? "Unlike comment" : "Like comment"} disabled={like.isPending} onClick={() => like.mutate()}><Heart className="size-3" strokeWidth={2.5} fill={comment.isLiked ? "currentColor" : "none"} /></button>
     </div>
   );
 }
@@ -119,12 +124,13 @@ function CommentThread({
         onDelete={() => onDelete(comment.postCommentId)}
       />
       {comment.replyCount > 0 ? (
-        <div className="ml-11">
+        <div className="ml-[46px]">
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="text-xs font-semibold text-ig-text-secondary"
+            className="flex items-center gap-4 py-1 text-xs font-semibold text-ig-text-secondary"
           >
+            <span aria-hidden className="h-px w-6 bg-ig-text-secondary" />
             {open ? "Hide replies" : `View replies (${comment.replyCount})`}
           </button>
           {open ? (
@@ -168,6 +174,10 @@ export function PostDetail({
   const favorite = usePostFavorite(postId);
   const addComment = useAddPostComment(postId);
   const deleteComment = useDeleteComment(postId);
+  const qc = useQueryClient();
+  const isOwn = !!me && !!post && me.userId === post.userId;
+  const following = useIsFollowing(post?.userId ?? "", !!me && !!post && !isOwn);
+  const follow = useFollow();
 
   const [share, setShare] = useState(false);
   const [index, setIndex] = useState(0);
@@ -198,6 +208,27 @@ export function PostDetail({
     );
   }
 
+  const followButton =
+    me && !isOwn && following.data === false ? (
+      <>
+        <span aria-hidden className="text-ig-text-secondary">&middot;</span>
+        <button
+          type="button"
+          disabled={follow.isPending}
+          onClick={() =>
+            follow.mutate(post.userId, {
+              onSuccess: () =>
+                void qc.invalidateQueries({ queryKey: ["is-follow", post.userId] }),
+              onError: () => toast.error("Could not follow. Try again."),
+            })
+          }
+          className="font-semibold text-[rgb(var(--ig-colors-button-borderless-text))] hover:text-[rgb(var(--ig-colors-button-borderless-text--hover))]"
+        >
+          Follow
+        </button>
+      </>
+    ) : null;
+
   const files = post.images;
   const current = files[index];
   const url = mediaUrl(current);
@@ -226,16 +257,24 @@ export function PostDetail({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <header className="flex shrink-0 items-center gap-3 border-b border-ig-separator p-4 md:hidden">
+      <header className="flex shrink-0 items-center gap-3 border-b border-ig-elevated-separator px-4 py-3 md:hidden">
         <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
-        <Link href={`/${post.userName}`} className="font-semibold">
-          {post.userName}
-        </Link>
+        <div className="flex min-w-0 items-center gap-1 text-sm">
+          <Link href={`/${post.userName}`} className="truncate font-semibold">
+            {post.userName}
+          </Link>
+          {followButton}
+        </div>
         <span className="ml-auto">
           <PostOptions postId={post.postId} userId={post.userId} />
         </span>
       </header>
-      <div className="relative aspect-square w-full shrink-0 bg-ig-bg-secondary md:aspect-auto md:flex-1">
+      <div
+        className="ig-post-media relative flex aspect-square w-full shrink-0 items-center justify-center md:aspect-auto md:min-w-0 md:flex-1"
+        onDoubleClick={() => {
+          if (!post.postLike) like.mutate();
+        }}
+      >
         {url && isVideoFile(current) ? (
           <video
             src={url}
@@ -258,7 +297,7 @@ export function PostDetail({
             type="button"
             aria-label="Previous"
             onClick={() => setIndex((i) => i - 1)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-ig-bg-elevated p-1 text-ig-text"
+            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-[rgba(255,255,255,.8)] p-1.5 text-[rgb(38,38,38)] shadow-ig-strong hover:bg-white"
           >
             <ChevronLeft className="size-4" />
           </button>
@@ -268,38 +307,60 @@ export function PostDetail({
             type="button"
             aria-label="Next"
             onClick={() => setIndex((i) => i + 1)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-ig-bg-elevated p-1 text-ig-text"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-[rgba(255,255,255,.8)] p-1.5 text-[rgb(38,38,38)] shadow-ig-strong hover:bg-white"
           >
             <ChevronRight className="size-4" />
           </button>
+        ) : null}
+        {files.length > 1 ? (
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
+            {files.map((f, i) => (
+              <span
+                key={f}
+                className={cn("size-1.5 rounded-full bg-white", i === index ? "opacity-100" : "opacity-40")}
+              />
+            ))}
+          </div>
         ) : null}
       </div>
 
       {share && (
         <SharePostDialog postId={postId} open={share} onOpenChange={setShare} />
       )}
-      <div className="flex min-h-0 w-full flex-col border-ig-separator bg-ig-bg-elevated md:w-[335px] md:shrink-0 md:border-l">
-        <header className="hidden items-center gap-3 border-b border-ig-separator p-4 md:flex">
-          <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
-          <Link href={`/${post.userName}`} className="text-sm font-semibold">
-            {post.userName}
+      <div className="flex min-h-0 w-full flex-1 flex-col border-ig-elevated-separator bg-ig-bg-elevated md:w-[405px] md:flex-none md:shrink-0 md:border-l xl:w-[500px]">
+        <header className="hidden min-h-[60px] items-center gap-3 border-b border-ig-elevated-separator py-[14px] pl-4 pr-2 md:flex">
+          <Link href={`/${post.userName}`} className="shrink-0">
+            <SmallAvatar src={mediaUrl(post.userImage)} name={post.userName} />
           </Link>
+          <div className="flex min-w-0 items-center gap-1 text-sm">
+            <Link href={`/${post.userName}`} className="truncate font-semibold hover:opacity-60">
+              {post.userName}
+            </Link>
+            {followButton}
+          </div>
           <span className="ml-auto">
             <PostOptions postId={post.postId} userId={post.userId} />
           </span>
         </header>
 
-        <div className="max-h-[320px] min-h-0 flex-1 overflow-y-auto px-4 py-2 md:max-h-none">
+        <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-1">
           {post.content ? (
-            <div className="flex gap-3 py-2">
-              <SmallAvatar
-                src={mediaUrl(post.userImage)}
-                name={post.userName}
-              />
-              <p className="min-w-0 flex-1 break-words text-sm">
-                <span className="mr-1 font-semibold">{post.userName}</span>
-                {post.content}
-              </p>
+            <div className="flex gap-[14px] py-3">
+              <Link href={`/${post.userName}`} className="shrink-0">
+                <SmallAvatar
+                  src={mediaUrl(post.userImage)}
+                  name={post.userName}
+                />
+              </Link>
+              <div className="min-w-0 flex-1 text-sm leading-[18px]">
+                <p className="whitespace-pre-line break-words">
+                  <Link href={`/${post.userName}`} className="mr-1 font-semibold">{post.userName}</Link>
+                  {renderCaption(post.content)}
+                </p>
+                <p className="mt-2 text-xs text-ig-text-secondary">
+                  {formatRelativeTime(Date.parse(post.datePublished))}
+                </p>
+              </div>
             </div>
           ) : null}
 
@@ -322,25 +383,27 @@ export function PostDetail({
               type="button"
               onClick={() => void comments.fetchNextPage()}
               disabled={comments.isFetchingNextPage}
-              className="py-2 text-xs font-semibold text-ig-text-secondary"
+              aria-label="Load more comments"
+              className="mx-auto my-2 flex size-6 items-center justify-center rounded-full border border-ig-text text-ig-text hover:opacity-60"
             >
-              Load more comments
+              <span aria-hidden className="text-base leading-none">+</span>
             </button>
           ) : null}
           {!post.commentsDisabled && !comments.isPending && roots.length === 0 ? (
-            <p className="py-6 text-center text-sm text-ig-text-secondary">
-              No comments yet.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-2xl font-bold">No comments yet.</p>
+              <p className="mt-2 text-sm">Start the conversation.</p>
+            </div>
           ) : null}
         </div>
 
-        <div className="border-t border-ig-separator p-4">
-          <div className="flex items-center gap-4 pb-2">
+        <div className="border-t border-ig-elevated-separator px-4 pb-3 pt-1.5">
+          <div className="-ml-2 flex items-center pb-1.5">
             <button
               type="button"
               aria-label={post.postLike ? "Unlike" : "Like"}
               onClick={() => like.mutate()}
-              className={post.postLike ? "text-ig-badge" : undefined}
+              className={cn("ig-post-action p-2", post.postLike && "ig-liked text-ig-badge")}
             >
               <Heart
                 className="size-6"
@@ -348,19 +411,21 @@ export function PostDetail({
               />
             </button>
             <button
-              aria-label="Add a comment"
+              type="button"
+              aria-label="Comment"
               onClick={() => inputRef.current?.focus()}
+              className="ig-post-action p-2"
             >
-              <MessageCircle className="size-6" />
+              <MessageCircle className="size-6 -scale-x-100" />
             </button>
-            <button aria-label="Share" onClick={() => setShare(true)}>
+            <button type="button" aria-label="Share" onClick={() => setShare(true)} className="ig-post-action p-2">
               <Send className="size-6" />
             </button>
             <button
               type="button"
               aria-label={post.postFavorite ? "Unsave" : "Save"}
               onClick={() => favorite.mutate()}
-              className="ml-auto"
+              className="ig-post-action -mr-2 ml-auto p-2"
             >
               <Bookmark
                 className="size-6"
@@ -368,11 +433,18 @@ export function PostDetail({
               />
             </button>
           </div>
-          {!post.hideLikeCount && <p className="text-sm font-semibold">
-            {formatCount(post.postLikeCount)}{" "}
-            {post.postLikeCount === 1 ? "like" : "likes"}
-          </p>}
-          <p className="text-xs text-ig-text-secondary">
+          {!post.hideLikeCount && (post.postLikeCount > 0 ? (
+            <p className="text-sm font-semibold">
+              {formatCount(post.postLikeCount)}{" "}
+              {post.postLikeCount === 1 ? "like" : "likes"}
+            </p>
+          ) : (
+            <p className="text-sm">
+              Be the first to{" "}
+              <button type="button" onClick={() => like.mutate()} className="font-semibold">like this</button>
+            </p>
+          ))}
+          <p className="mt-1 text-xs text-ig-text-secondary">
             {formatRelativeTime(Date.parse(post.datePublished))}
           </p>
         </div>
@@ -380,7 +452,7 @@ export function PostDetail({
         {!post.commentsDisabled && <form
           onSubmit={submit}
           className={cn(
-            "flex items-center gap-2 border-t border-ig-separator px-4 py-3",
+            "flex min-h-[53px] items-center gap-3 border-t border-ig-elevated-separator px-4 py-2",
           )}
         >
           <input
@@ -405,15 +477,13 @@ export function PostDetail({
               Cancel
             </button>
           ) : null}
-          {text.trim() ? (
-            <button
-              type="submit"
-              disabled={addComment.isPending}
-              className="text-sm font-semibold text-ig-link-action"
-            >
-              Post
-            </button>
-          ) : null}
+          <button
+            type="submit"
+            disabled={addComment.isPending || !text.trim()}
+            className="text-sm font-semibold text-[rgb(var(--ig-colors-button-borderless-text))] hover:text-[rgb(var(--ig-colors-button-borderless-text--hover))] disabled:text-[rgb(var(--ig-colors-button-borderless-text--disabled))]"
+          >
+            Post
+          </button>
         </form>}
       </div>
     </div>
