@@ -29,7 +29,11 @@ export function MessagesDock() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { data: unread } = useDirectUnreadCount();
+  const { data: chats } = useChats();
+  const { data: me } = useMe();
   if (pathname.startsWith("/direct")) return null;
+  // Avatar-hoi se chat-i oxirin dar tugmai "Messages", misli instagram.com
+  const faces = (chats ?? []).slice(0, 3).map((chat) => ({ ...peerOf(chat, me?.userId), chatId: chat.chatId }));
   return <>
   {/* Telefon va ekrani mayda: tugmai mudavvari Messages, misli Instagram */}
   {pathname === "/" && <Link href="/direct/inbox" aria-label="Open messages" className="ig-messages-fab">
@@ -40,7 +44,7 @@ export function MessagesDock() {
     {open ? <section aria-label="Messages preview" className="ig-messages-preview">
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-ig-separator px-4"><h2 className="font-semibold">Messages</h2>{!!unread?.count && <span className="ig-unread-count">{unread.count}</span>}<Link href="/direct/inbox" aria-label="Open inbox" className="ml-auto p-1"><Maximize2 className="size-4" /></Link><button onClick={() => setOpen(false)} aria-label="Close messages" className="p-1"><X className="size-5" /></button></header>
       <DockChats />
-    </section> : <button onClick={() => setOpen(true)} aria-label="Open messages preview" aria-expanded={false} className="ig-messages-pill"><Send className="size-6" /><span>Messages</span>{!!unread?.count && <span className="ig-unread-count">{unread.count}</span>}</button>}
+    </section> : <button onClick={() => setOpen(true)} aria-label="Open messages preview" aria-expanded={false} className="ig-messages-pill"><Send className="size-6" /><span>Messages</span>{!!unread?.count && <span className="ig-unread-count">{unread.count}</span>}{faces.length > 0 && <span aria-hidden className="ml-auto flex -space-x-2.5">{faces.map((f) => <SmallAvatar key={f.chatId} src={mediaUrl(f.image)} name={f.userName} className="size-7 ring-2 ring-ig-bg-elevated" />)}</span>}</button>}
   </div>
   </>;
 }

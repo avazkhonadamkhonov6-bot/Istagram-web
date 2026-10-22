@@ -9,7 +9,7 @@ import { useDirectUnreadCount } from "@/features/direct/hooks";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
-import { BOTTOM_NAV_KEYS, NAV_ITEMS, isItemActive, type NavItem } from "./nav-items";
+import { BOTTOM_NAV_KEYS, NAV_ITEMS, isItemActive } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -21,13 +21,7 @@ export function BottomNav() {
   const myUsername = me?.userName ?? CURRENT_USERNAME;
   const profileHref = `/${myUsername}`;
   const { data: unread } = useDirectUnreadCount();
-  const items = BOTTOM_NAV_KEYS.map((key) => NAV_ITEMS.find((item) => item.key === key)!)
-    // Dar telefon Search — sahifai /explore bo satri justuju (na paneli kanor)
-    .map((item): NavItem =>
-      item.key === "search"
-        ? { ...item, kind: "link", href: "/explore", match: (p: string) => p.startsWith("/explore") }
-        : item,
-    );
+  const items = BOTTOM_NAV_KEYS.map((key) => NAV_ITEMS.find((item) => item.key === key)!);
 
   return (
     <nav

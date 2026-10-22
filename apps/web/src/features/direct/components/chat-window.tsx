@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, ChevronLeft, Heart, ImageIcon, Info, Mic, Pencil, Phone, Reply, Send, Video, X } from "lucide-react";
+import { ChevronLeft, Heart, ImageIcon, Info, Mic, Pencil, Phone, Reply, Send, Video, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -29,7 +29,7 @@ import {
 } from "../hooks";
 import { CallMessage, VideoMessage, VoiceMessage } from "./message-media";
 import { ChatDetails } from "./chat-details";
-import { mediaDuration, PhotoCaptureDialog, useVoiceRecorder, VideoMessageDialog } from "./recorders";
+import { mediaDuration, useVoiceRecorder, VideoMessageDialog } from "./recorders";
 
 const GAP_MS = 15 * 60_000;
 /** Spec 15 §3 */
@@ -54,7 +54,6 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder((file, durationSec) => send.mutate({ text: "", file, durationSec }));
   const [videoOpen, setVideoOpen] = useState(false);
-  const [photoOpen, setPhotoOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const inCall = useCallStore((st) => st.phase !== "idle" && st.phase !== "ended");
 
@@ -262,16 +261,6 @@ export function ChatWindow({ chatId }: { chatId: number }) {
           </>
         ) : (
           <>
-            {!editing && (
-              <button
-                type="button"
-                aria-label="Take a photo"
-                onClick={() => setPhotoOpen(true)}
-                className="-ml-2 flex size-8 shrink-0 items-center justify-center rounded-full bg-ig-primary text-ig-text-on-color hover:bg-ig-primary-hover"
-              >
-                <Camera className="size-[18px]" />
-              </button>
-            )}
             <input
               ref={inputRef}
               value={text}
@@ -309,7 +298,6 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         onOpenChange={setVideoOpen}
         onSend={(file, durationSec) => send.mutate({ text: "", file, durationSec })}
       />
-      <PhotoCaptureDialog open={photoOpen} onOpenChange={setPhotoOpen} onSend={(file) => send.mutate({ text: "", file })} />
     </section>
     {detailsOpen && chat && <ChatDetails chat={chat} myId={me?.userId} onClose={() => setDetailsOpen(false)} />}
     </div>

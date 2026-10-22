@@ -13,9 +13,9 @@
 .ig-feed-tabs { max-width: 470px; margin: 0 auto 8px; gap: 20px; }
 .ig-feed-tabs button { font-size: 12px; padding-block: 6px; font-weight: 500; }
 .ig-stories-tray { margin-bottom: 20px; padding-block: 0 8px; gap: 18px; }
-.ig-stories-tray > a, .ig-stories-tray > button { width: 82px; }
+.ig-stories-tray > a, .ig-stories-tray > button { width: 96px; }
 .ig-stories-tray > a > span:first-child, .ig-stories-tray > a > div:first-child { padding: 3px; }
-.ig-stories-tray img, .ig-stories-tray button > span > div, .ig-stories-tray a > div > div { width: 72px; height: 72px; }
+.ig-stories-tray img, .ig-stories-tray button > span > div, .ig-stories-tray a > div > div { width: 87px; height: 87px; }
 .ig-suggestions { display: none; width: 319px; padding-top: 36px; }
 .ig-suggestions li { padding-block: 8px; gap: 12px; }
 .ig-suggestions li > div { font-size: 14px; }
@@ -147,18 +147,19 @@
     left: 0;
     height: 100dvh;
     padding: 8px 12px 20px;
-    border-right: 1px solid rgb(var(--ig-separator));
+    border-right: 0;
     background: rgb(var(--ig-primary-background));
   }
   .ig-sidebar:not([data-compact="true"]):hover,
   .ig-sidebar:not([data-compact="true"]):has(:focus-visible) { box-shadow: var(--ig-strong-shadow); }
   .ig-sidebar > .ig-sidebar-brand { height: 48px; margin: 18px 0 16px; padding-inline: 12px; }
-  .ig-sidebar-links { margin-block: 0 auto; gap: 2px; }
-  .ig-sidebar .ig-nav-item { min-height: 48px; margin-block: 2px; gap: 16px; border-radius: 8px; padding: 12px; font-size: 16px; }
+  /* Menyu dar miyonai baland, misli instagram.com (2025) */
+  .ig-sidebar-links { margin-block: auto; gap: 6px; }
+  .ig-sidebar .ig-nav-item { min-height: 52px; margin-block: 2px; gap: 16px; border-radius: 10px; padding: 12px; font-size: 16px; }
+  .ig-sidebar .ig-nav-item svg { width: 26px; height: 26px; }
   .ig-sidebar .ig-nav-item:hover { background: var(--ig-hover-overlay); }
   .ig-sidebar .ig-nav-item[aria-current="page"],
   .ig-sidebar .ig-nav-item[aria-expanded="true"] { font-weight: 700; }
-  .ig-sidebar .ig-nav-item[aria-expanded="true"] { box-shadow: inset 0 0 0 1px rgb(var(--ig-stroke)); }
   .ig-sidebar-footer { padding-top: 4px; }
   .ig-sidebar-footer button { gap: 16px; border-radius: 8px; font-size: 16px; }
   .ig-main { margin-left: 72px; }
@@ -216,3 +217,14 @@
   .ig-stories-tray span.truncate, .ig-stories-tray > button > span:last-child { font-size: 12px; color: rgb(var(--ig-primary-text)); }
 }
 @media (max-width: 767px) { .ig-feed-posts article > [data-media] { border: 0; border-radius: 0; } }
+
+/* Explore (2025): satri justuju dar bolo bo ruyxati natijaho, tor-i 4 sutun 3:4 */
+.ig-explore-search-box { position: relative; z-index: 30; width: min(100%, 790px); margin: 0 auto 24px; }
+.ig-explore-search-box .ig-search-field { height: 50px; padding-inline: 20px; }
+.ig-explore-search-results { position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: min(520px, 65dvh); overflow-y: auto; padding: 12px 0; border-radius: 16px; background: rgb(var(--ig-elevated-background)); box-shadow: var(--ig-strong-shadow), 0 8px 32px rgb(0 0 0 / .35); }
+@media (min-width: 768px) {
+  .ig-explore-page { width: min(100% - 64px, 1408px); }
+  .ig-explore-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; grid-auto-rows: auto !important; gap: 2px !important; }
+  .ig-explore-grid > a, .ig-explore-grid > div { aspect-ratio: 3 / 4; }
+  .ig-explore-big { grid-column: auto !important; grid-row: auto !important; }
+}
