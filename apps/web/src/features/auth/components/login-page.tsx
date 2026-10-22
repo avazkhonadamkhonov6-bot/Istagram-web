@@ -8,8 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/ui/wordmark";
-import { AuthDivider, AuthFooter, LoginPresentation } from "@/features/auth/components/auth-presentation";
+import { InstagramGlyph } from "@/components/ui/instagram-glyph";
+import { AuthFooter, LoginPresentation } from "@/features/auth/components/auth-presentation";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import * as authApi from "@/features/auth/api";
@@ -69,13 +69,14 @@ function LoginForm() {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page login-page">
+      <Link href="/login" aria-label="Instagram" className="login-brand"><InstagramGlyph gradient /></Link>
       <div className="auth-main">
         <LoginPresentation />
         {/* Responsive authentication card. */}
         <div className="auth-column">
           <div className="auth-card">
-            <h1 className="mb-7"><Wordmark /></h1>
+            <h1 className="login-heading">Log into Instagram</h1>
 
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -129,19 +130,13 @@ function LoginForm() {
                 </p>
               ) : null}
             </form>
-            <AuthDivider />
-            <Link href="/signup" className="text-sm font-semibold text-ig-link-action">Create new account</Link>
+            <div className="login-account-actions">
+              <Link href="/signup" className="login-create-account">Create new account</Link>
+              <div className="login-meta"><svg viewBox="0 0 32 20" aria-hidden="true"><path d="M2 14C2 3 8 1 13 9l6 8c5 5 11 0 11-7S23-1 18 7L9 17C5 21 2 18 2 14Z" fill="none" stroke="currentColor" strokeWidth="2.5" /></svg>Meta</div>
+            </div>
           </div>
 
-          <div className="auth-switch">
-            <span>Don&apos;t have an account?</span>
-            <Link
-              href="/signup"
-              className="font-semibold text-ig-link-action hover:underline"
-            >
-              Sign up
-            </Link>
-          </div>
+
         </div>
       </div>
       <AuthFooter />

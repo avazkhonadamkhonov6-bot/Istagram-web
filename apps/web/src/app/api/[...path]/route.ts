@@ -9,7 +9,7 @@ import { apiFetch, clearToken, clientIp, forbiddenOrigin, isSameOrigin, json, re
  */
 const BLOCKED = new Set(["account/login", "account/register", "account/ws-ticket"]);
 // range / content-range: audio va video-ro Safari faqat bo darxosthoi qismi (206) bozi mekunad
-const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id", "range"];
+const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id", "range", "if-range"];
 const PASS_RESPONSE_HEADERS = [
   "content-type",
   "content-length",
@@ -60,7 +60,13 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   if (res.status === 401 && token) await clearToken();
 
   const out = new Headers();
+  // Node fetch decompresses br/gzip/deflate bodies but keeps upstream headers.
+  // Their Content-Length describes the compressed bytes, so forwarding it
+  // truncates JSON in the browser. Keep it for uncompressed media/ranges.
+  const encoding = res.headers.get("content-encoding")?.toLowerCase();
+  const decoded = Boolean(encoding && encoding !== "identity");
   for (const name of PASS_RESPONSE_HEADERS) {
+    if (name === "content-length" && decoded) continue;
     const v = res.headers.get(name);
     if (v) out.set(name, v);
   }

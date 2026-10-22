@@ -11,7 +11,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: process.env.QA_BASE_URL ?? "http://127.0.0.1:3000",
+    baseURL: process.env.QA_BASE_URL ?? "http://localhost:3000",
     headless: true,
     screenshot: "only-on-failure",
   },

@@ -209,7 +209,7 @@ export function CreateModal() {
     >
       <DialogContent
         showClose={!upload.isPending}
-        className="max-w-[850px]"
+        className="ig-create-dialog max-w-[850px]"
         aria-describedby="create-description"
       >
         <header className="flex h-14 items-center justify-between border-b border-ig-separator px-4 pr-12">
@@ -267,7 +267,7 @@ export function CreateModal() {
               setDragging(false);
               void pick(Array.from(e.dataTransfer.files));
             }}
-            className={`flex min-h-[420px] flex-col items-center justify-center gap-5 p-6 ${dragging ? "bg-ig-bg-highlight" : ""}`}
+            className={`ig-create-dropzone flex min-h-[420px] flex-col items-center justify-center gap-5 p-6 ${dragging ? "bg-ig-bg-highlight" : ""}`}
           >
             <div
               className="mb-5 flex gap-2"

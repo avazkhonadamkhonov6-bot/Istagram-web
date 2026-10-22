@@ -16,7 +16,7 @@ export function StoriesTray() {
   return (
     <section
       aria-label="Stories"
-      className="no-scrollbar -mx-2 mb-5 flex gap-4 overflow-x-auto px-2 py-2"
+      className="ig-stories-tray no-scrollbar -mx-2 mb-5 flex gap-4 overflow-x-auto px-2 py-2"
     >
       <button
         onClick={() => create(true)}

@@ -1,8 +1,10 @@
+import { ExploreSearch } from "@/features/explore/components/explore-search";
 import { ExploreGrid } from "@/features/explore/components/explore-grid";
 
 export default function ExplorePage() {
   return (
-    <div className="mx-auto max-w-[935px] px-4 py-6">
+    <div className="ig-explore-page">
+      <ExploreSearch />
       <ExploreGrid />
     </div>
   );

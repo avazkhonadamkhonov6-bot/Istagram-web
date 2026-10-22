@@ -22,13 +22,21 @@ test("production BFF reads the shared Render API and loads pages", async ({ page
   expect((await context.cookies()).some(c => c.name === "access_token" && c.httpOnly)).toBe(true);
 
   let hasFeedPosts = false;
+  let reelFile: string | undefined;
   // Checks the decompressed body, catching stale upstream Content-Length headers.
-  for (const path of ["/api/Post/get-following-post?PageSize=3", "/api/Story/get-stories", "/api/Chat/get-chats", "/api/Note/get-notes"]) {
+  for (const path of ["/api/Post/get-following-post?PageSize=10", "/api/Post/get-reels?PageSize=5", "/api/Post/get-explore-posts?PageSize=24", "/api/User/get-suggestions", "/api/Story/get-stories", "/api/Chat/get-chats", "/api/Note/get-notes"]) {
     const response = await context.request.get(path);
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(Array.isArray(body.data)).toBe(true);
     if (path.includes("get-following-post")) hasFeedPosts = body.data.length > 0;
+    if (path.includes("get-reels")) reelFile = body.data[0]?.images[0];
+  }
+  if (reelFile) {
+    const partial = await context.request.get(`/api/images/${encodeURIComponent(reelFile)}`, { headers: { Range: "bytes=0-127" } });
+    expect(partial.status()).toBe(206);
+    expect(partial.headers()["content-range"]).toMatch(/^bytes 0-127\/\d+$/);
+    expect((await partial.body()).byteLength).toBe(128);
   }
   await expect(page.getByRole("tab", { name: "following", exact: true })).toBeVisible();
   if (hasFeedPosts) await expect(page.locator("article").first()).toBeVisible();
@@ -37,13 +45,25 @@ test("production BFF reads the shared Render API and loads pages", async ({ page
   await page.getByRole("tab", { name: "favorites", exact: true }).click();
   expect(Array.isArray((await (await favorites).json()).data)).toBe(true);
 
-  for (const path of [`/${username}/reels`, "/accounts/privacy", "/direct/inbox"]) {
+  for (const path of ["/reels", "/explore", `/${username}/reels`, "/accounts/privacy", "/direct/inbox"]) {
     await page.goto(path);
-    if (path.endsWith("/reels")) await expect(page.getByRole("tab", { name: "REELS", exact: true })).toBeVisible();
+    if (path === "/reels") {
+      await expect(page.locator("video").first()).toBeVisible();
+      await expect.poll(() => page.locator("video").first().evaluate((v: HTMLVideoElement) => v.readyState)).toBeGreaterThanOrEqual(2);
+      await expect.poll(() => page.locator("video").first().evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+      await expect.poll(() => page.locator("video").first().evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(0);
+    }
+    if (path === "/explore") await expect(page.locator("main a[href^='/p/']").first()).toBeVisible();
+    if (path !== "/reels" && path.endsWith("/reels")) await expect(page.getByRole("tab", { name: "REELS", exact: true })).toBeVisible();
     if (path.endsWith("/privacy")) await expect(page.getByText("Private account", { exact: true })).toBeVisible();
     if (path.endsWith("/inbox")) await expect(page.getByRole("heading", { name: "Messages", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/reels");
+  await expect(page.locator("video").first()).toBeVisible();
+  await expect.poll(() => page.locator("video").first().evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(apiFailures).toEqual([]);
   expect(errors).toEqual([]);
 });

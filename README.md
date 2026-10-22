@@ -47,7 +47,7 @@ cp apps/web/.env.example apps/web/.env.local
 pnpm --filter @repo/shared build
 pnpm --filter api db:deploy                 # migratsiyaho
 pnpm --filter api db:seed                   # user1…user10, parol password123
-pnpm dev                                    # api :4000, web :3000
+npm run dev:all                              # api :4000, web :3000
 ```
 
 | Chi | Kujo |
@@ -55,6 +55,33 @@ pnpm dev                                    # api :4000, web :3000
 | Sayt | http://localhost:3000 (Direct: `/direct/inbox`) |
 | API + Swagger | http://localhost:4000/swagger |
 | Health | http://localhost:4000/health |
+
+## Запуск с общим backend
+
+Node.js 22+; из корня проекта:
+
+```bash
+npx --yes pnpm@10.34.7 install
+npm run dev
+```
+
+`npm run dev` собирает shared и запускает frontend на http://localhost:3000.
+Он использует закреплённый pnpm через npx, поэтому глобальный pnpm не требуется.
+В `apps/web/.env.local` оба URL (`API_URL`, `NEXT_PUBLIC_WS_URL`) должны указывать
+на `https://istagram-web.onrender.com`, а `NEXT_PUBLIC_API_MOCKING=off`.
+Для запуска всех локальных сервисов используйте `npm run dev:all`
+(предварительно подготовьте PostgreSQL и миграции по инструкции выше,
+а в `apps/web/.env.local` задайте оба URL как `http://localhost:4000`).
+
+```bash
+npm run check:api
+```
+
+Команда проверяет `/health` через Node.js с тем же `API_URL`, что использует Next.js,
+и показывает состояние базы и хранилища. Если страница отдаёт 200, а `/api/*` —
+504 примерно через 60 секунд, Next.js запущен, но backend не ответил за таймаут.
+Проверьте подключение, доступность Render и повторите проверку. В интерфейсе
+при 502/504 появляется сообщение с повторной попыткой; сессия сохраняется.
 
 ## Testho
 

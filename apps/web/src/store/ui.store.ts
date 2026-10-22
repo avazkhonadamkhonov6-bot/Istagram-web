@@ -33,7 +33,7 @@ function applyThemeToDom(theme: ThemeMode) {
 export const useUiStore = create<UiState>((set) => ({
   panel: null,
   createOpen: false,
-  theme: "light",
+  theme: "dark",
   togglePanel: (panel) =>
     set((state) => ({ panel: state.panel === panel ? null : panel })),
   closePanel: () => set({ panel: null }),

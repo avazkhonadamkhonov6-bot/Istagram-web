@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -118,6 +118,7 @@ function NotificationRow({ item }: { item: NotificationDto }) {
 
 export function NotificationsPanel() {
   const qc = useQueryClient();
+  const [filter, setFilter] = useState("All");
   const list = useInfiniteQuery({
     queryKey: notificationKeys.list,
     queryFn: ({ pageParam }) => getNotifications(pageParam),
@@ -149,19 +150,13 @@ export function NotificationsPanel() {
         </Button>
       </div>
     );
-  const items = list.data.pages.flatMap((p) => p.data);
-  if (!items.length)
-    return (
-      <div className="px-6 py-16 text-center">
-        <Heart className="mx-auto mb-4 size-12" />
-        <h3 className="font-semibold">Activity on your posts</h3>
-        <p className="mt-2 text-ig-text-secondary">
-          When someone likes or comments on your posts, you’ll see it here.
-        </p>
-      </div>
-    );
+  const items = list.data.pages.flatMap((p) => p.data).filter(n => filter === "All" || (filter === "Following" ? n.actor.isFollowing : n.type === "COMMENT" || n.type === "COMMENT_REPLY"));
   return (
     <>
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-6 pb-3" role="group" aria-label="Filter notifications">
+        {["All", "Following", "Comments"].map(value => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={`shrink-0 rounded-full border border-ig-stroke px-4 py-2 text-xs font-semibold ${filter === value ? "bg-ig-secondary" : ""}`}>{value}</button>)}
+      </div>
+      {!items.length && <div className="px-6 py-16 text-center"><Heart className="mx-auto mb-4 size-12" /><h3 className="font-semibold">Activity on your posts</h3><p className="mt-2 text-ig-text-secondary">When someone likes or comments on your posts, you’ll see it here.</p></div>}
       {["Today", "This week", "This month", "Earlier"].map((title) => {
         const entries = items.filter((n) => group(n.createdAt) === title);
         return entries.length ? (

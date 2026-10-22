@@ -32,31 +32,29 @@ export function Sidebar() {
   const myUsername = me?.userName ?? CURRENT_USERNAME;
   const profileHref = `/${myUsername}`;
 
-  // Когда открыта панель Search / Notifications, sidebar сжимается до 72px
-  const compact = panel !== null || pathname.startsWith("/direct");
-  const labelCls = compact ? "hidden" : "hidden min-[1264px]:inline";
+  const compact = panel !== null;
+  const labelCls = "ig-sidebar-label";
 
   return (
     <nav
       aria-label="Primary"
+      data-compact={compact}
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-ig-separator bg-ig-bg px-3 pb-5 transition-[width] md:flex",
-        compact ? "w-[72px]" : "w-[72px] min-[1264px]:w-[245px]",
+        "ig-sidebar fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-ig-separator bg-ig-bg px-3 pb-5 transition-[width] md:flex",
+        "w-[72px]",
       )}
     >
       <Link
         href="/"
         onClick={closePanel}
         aria-label="Instagram"
-        className="mb-7 mt-7 flex h-10 items-center rounded-lg px-3 hover:bg-ig-hover-overlay"
+        className="ig-sidebar-brand mb-7 mt-7 flex h-10 items-center gap-3 rounded-lg px-3 hover:bg-ig-hover-overlay"
       >
-        <InstagramGlyph
-          className={cn("size-6", compact ? "" : "min-[1264px]:hidden")}
-        />
-        <span className={cn("ig-wordmark w-[110px] h-10", compact ? "hidden" : "hidden min-[1264px]:inline-block")} aria-hidden />
+        <InstagramGlyph className="size-6 shrink-0" />
+        <span className="ig-sidebar-label font-semibold">Instagram</span>
       </Link>
 
-      <ul className="flex flex-col gap-1">
+      <ul className="ig-sidebar-links flex flex-col gap-1">
         {NAV_ITEMS.map((rawItem) => {
           const item =
             rawItem.key === "profile" && rawItem.kind === "link"
@@ -128,6 +126,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   aria-label={item.label}
+                  aria-expanded={item.kind === "panel" ? active : undefined}
                   onClick={() =>
                     item.kind === "panel"
                       ? togglePanel(item.panel)
@@ -143,8 +142,8 @@ export function Sidebar() {
         })}
       </ul>
 
-      <div className="mt-auto">
-        <MoreMenu compact={compact} />
+      <div className="ig-sidebar-footer mt-auto">
+        <MoreMenu />
       </div>
     </nav>
   );

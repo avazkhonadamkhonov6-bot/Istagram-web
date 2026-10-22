@@ -36,8 +36,8 @@
   --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
 
   /* 1.4 Tugmaho */
-  --ig-primary-button: 0, 149, 246; /* #0095F6 */
-  --ig-primary-button-hover: 0, 149, 246; /* #0095F6 */
+  --ig-primary-button: 81, 85, 255; /* #5155FF */
+  --ig-primary-button-hover: 67, 71, 235; /* #4347EB */
   --ig-colors-button-primary-background--pressed: 0, 149, 246; /* #0095F6 */
   --ig-colors-button-primary-background--disabled: 178, 223, 252; /* #B2DFFC */
   --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
@@ -135,14 +135,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --ig-primary-background: 0, 0, 0; /* #000000 */
-    --ig-secondary-background: 18, 18, 18; /* #121212 */
-    --ig-highlight-background: 18, 18, 18; /* #121212 */
-    --ig-elevated-background: 38, 38, 38; /* #262626 */
+    --ig-primary-background: 20, 23, 26; /* #14171A */
+    --ig-secondary-background: 37, 40, 43; /* #25282B */
+    --ig-highlight-background: 41, 44, 48; /* #292C30 */
+    --ig-elevated-background: 37, 40, 43; /* #25282B */
     --ig-elevated-highlight-background: 54, 54, 54; /* #363636 */
     --ig-banner-background: 38, 38, 38; /* #262626 */
     --ig-dropdown-background: 18, 18, 18; /* #121212 */
-    --ig-menu-background-color: 38, 43, 49; /* #262B31 */
+    --ig-menu-background-color: 43, 45, 47; /* #2B2D2F */
     --ig-hover-overlay: rgba(255, 255, 255, .1);
     --ig-temporary-highlight: 0, 149, 246; /* #0095F6 */
 
@@ -165,12 +165,12 @@
     --ig-tab-underline-active: 245, 245, 245; /* #F5F5F5 */
     --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
 
-    --ig-primary-button: 0, 149, 246; /* #0095F6 */
-    --ig-primary-button-hover: 0, 149, 246; /* #0095F6 */
+    --ig-primary-button: 81, 85, 255; /* #5155FF */
+    --ig-primary-button-hover: 67, 71, 235; /* #4347EB */
     --ig-colors-button-primary-background--pressed: 0, 149, 246; /* #0095F6 */
     --ig-colors-button-primary-background--disabled: 0, 77, 128; /* #004D80 */
     --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
-    --ig-colors-button-secondary-background: 18, 18, 18; /* #121212 */
+    --ig-colors-button-secondary-background: 41, 44, 48; /* #292C30 */
     --ig-colors-button-secondary-background--hover: 54, 60, 68; /* #363C44 */
     --ig-colors-button-secondary-background--disabled: 38, 38, 38; /* #262626 */
     --ig-colors-button-secondary-text: 255, 255, 255; /* #FFFFFF */
@@ -199,14 +199,14 @@
 .dark,
 .__ig-dark-mode {
   /* 1.1 Fon (background) */
-  --ig-primary-background: 0, 0, 0; /* #000000 */
-  --ig-secondary-background: 18, 18, 18; /* #121212 */
-  --ig-highlight-background: 18, 18, 18; /* #121212 */
-  --ig-elevated-background: 38, 38, 38; /* #262626 */
+  --ig-primary-background: 20, 23, 26; /* #14171A */
+  --ig-secondary-background: 37, 40, 43; /* #25282B */
+  --ig-highlight-background: 41, 44, 48; /* #292C30 */
+  --ig-elevated-background: 37, 40, 43; /* #25282B */
   --ig-elevated-highlight-background: 54, 54, 54; /* #363636 */
   --ig-banner-background: 38, 38, 38; /* #262626 */
   --ig-dropdown-background: 18, 18, 18; /* #121212 */
-  --ig-menu-background-color: 38, 43, 49; /* #262B31 */
+  --ig-menu-background-color: 43, 45, 47; /* #2B2D2F */
   --ig-hover-overlay: rgba(255, 255, 255, .1);
   --ig-temporary-highlight: 0, 149, 246; /* #0095F6 */
 
@@ -232,12 +232,12 @@
   --ig-stroke-on-media: 255, 255, 255; /* #FFFFFF */
 
   /* 1.4 Tugmaho */
-  --ig-primary-button: 0, 149, 246; /* #0095F6 */
-  --ig-primary-button-hover: 0, 149, 246; /* #0095F6 */
+  --ig-primary-button: 81, 85, 255; /* #5155FF */
+  --ig-primary-button-hover: 67, 71, 235; /* #4347EB */
   --ig-colors-button-primary-background--pressed: 0, 149, 246; /* #0095F6 */
   --ig-colors-button-primary-background--disabled: 0, 77, 128; /* #004D80 */
   --ig-colors-button-primary-text: 255, 255, 255; /* #FFFFFF */
-  --ig-colors-button-secondary-background: 18, 18, 18; /* #121212 */
+  --ig-colors-button-secondary-background: 41, 44, 48; /* #292C30 */
   --ig-colors-button-secondary-background--hover: 54, 60, 68; /* #363C44 */
   --ig-colors-button-secondary-background--disabled: 38, 38, 38; /* #262626 */
   --ig-colors-button-secondary-text: 255, 255, 255; /* #FFFFFF */

@@ -31,15 +31,12 @@ export function QueryProvider({ children }: { children: ReactNode }) {
     try {
       stored = localStorage.getItem("ig-theme");
     } catch {}
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
     useUiStore
       .getState()
       .setTheme(
         stored === "dark" || stored === "light"
           ? stored
-          : media.matches
-            ? "dark"
-            : "light",
+          : "dark",
       );
   }, []);
 

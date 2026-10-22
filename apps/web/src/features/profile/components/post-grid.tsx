@@ -4,6 +4,8 @@ import Image from "next/image";
 import type { PostDto } from "@repo/shared";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { Camera } from "lucide-react";
+import { useUiStore } from "@/store/ui.store";
 import { Play } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isVideoFile, mediaUrl } from "@/lib/media";
@@ -48,10 +50,12 @@ function Thumb({ post }: { post: PostDto }) {
 
 export function PostGrid({
   kind,
+  isSelf = false,
   userId,
   filter,
 }: {
   kind: GridKind;
+  isSelf?: boolean;
   userId: string;
   filter?: "posts" | "reels";
 }) {
@@ -64,6 +68,7 @@ export function PostGrid({
     isFetchingNextPage,
     fetchNextPage,
   } = useGridPosts(kind, userId);
+  const create = useUiStore(s => s.setCreateOpen);
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -109,14 +114,16 @@ export function PostGrid({
 
   if (items.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-ig-text-secondary">
-        <p>
+      <div className="ig-profile-empty py-16 text-center text-sm">
+        <Camera className="mx-auto mb-6 size-16 rounded-full border border-ig-text p-3 stroke-1" />
+        <h2 className="text-3xl font-bold leading-tight">
           {kind === "saved"
             ? "No saved posts yet."
             : filter === "reels"
               ? "No reels yet."
-              : "No posts yet."}
-        </p>
+              : isSelf ? "Share photos" : "No posts yet."}
+        </h2>
+        {kind === "posts" && isSelf && <><p className="mx-auto mt-4 max-w-[350px]">When you share photos, they will appear on your profile.</p><button className="mt-5 text-ig-link-action" onClick={() => create(true)}>Share your first photo</button></>}
         {hasNextPage && (
           <button
             disabled={isFetchingNextPage}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { AtSign, Grid2X2, LogOut, MessageCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,16 +15,17 @@ import { CURRENT_USERNAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
 
-export function MoreMenu({ compact }: { compact: boolean }) {
+export function MoreMenu() {
   const { data: me } = useMe();
   const logoutMutation = useLogout();
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
 
   const username = me?.userName ?? CURRENT_USERNAME;
-  const labelCls = compact ? "hidden" : "hidden min-[1264px]:inline";
+  const labelCls = "ig-sidebar-label";
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
@@ -73,5 +74,13 @@ export function MoreMenu({ compact }: { compact: boolean }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild><button type="button" aria-label="Other Meta products" className="mt-2 flex w-full items-center gap-4 rounded-lg p-3 text-base hover:bg-ig-hover-overlay"><Grid2X2 className="size-6 shrink-0" /><span className={cn(labelCls, "truncate")}>Other Meta products</span></button></DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="start" className="w-64">
+        <DropdownMenuItem asChild><a href="https://www.whatsapp.com/" target="_blank" rel="noreferrer"><MessageCircle className="size-6" />WhatsApp</a></DropdownMenuItem>
+        <DropdownMenuItem asChild><a href="https://www.threads.com/" target="_blank" rel="noreferrer"><AtSign className="size-6" />Threads</a></DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+    </>
   );
 }
