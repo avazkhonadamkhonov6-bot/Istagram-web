@@ -11,8 +11,13 @@ const spec = readFileSync(
 const light = css.match(/:root,\s*\.__ig-light-mode\s*\{([\s\S]*?)\n\}/)?.[1];
 const dark = css.match(/\.dark,\s*\.__ig-dark-mode\s*\{([\s\S]*?)\n\}/)?.[1];
 assert(light && dark, "Both theme blocks must exist");
+// rgba(r,g,b,1) bo hex-i hamon rang barobar ast
 const normal = (value) =>
-  value.replace(/\s/g, "").replace(/\b0\./g, ".").toLowerCase();
+  value
+    .replace(/\s/g, "")
+    .replace(/\b0\./g, ".")
+    .replace(/^rgba\((\d+,\d+,\d+),1\)$/, "$1")
+    .toLowerCase();
 function expected(value) {
   const hex = value.match(/#([0-9a-f]{6})/i)?.[1];
   if (hex)

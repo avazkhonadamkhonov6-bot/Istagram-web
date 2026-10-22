@@ -10,3 +10,4 @@ export * from './schemas/notification';
 export * from './schemas/note';
 export * from './schemas/call';
 export * from './schemas/live';
+export * from './schemas/instant';

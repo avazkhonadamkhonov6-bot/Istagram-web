@@ -63,6 +63,8 @@ model User {
   callParts        CallParticipant[]
   liveStreams      LiveStream[]
   liveComments     LiveComment[]
+  instants         Instant[]
+  instantViews     InstantView[]
 }
 
 /// Notes (Spec 15 §5): yak note-i faol baroi har user, 24 soat
@@ -586,4 +588,29 @@ model LiveComment {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([liveId, createdAt])
+}
+
+/// Instants (Spec 17): aksi momentali, 24 soat baroi giranda, 1 sol dar archive-i muallif
+model Instant {
+  id           Int           @id @default(autoincrement())
+  userId       String
+  fileName     String
+  closeFriends Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  expiresAt    DateTime
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  views        InstantView[]
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+model InstantView {
+  instantId Int
+  userId    String
+  viewedAt  DateTime @default(now())
+  instant   Instant  @relation(fields: [instantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([instantId, userId])
 }

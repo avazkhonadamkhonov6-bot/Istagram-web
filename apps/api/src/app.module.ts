@@ -15,6 +15,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { LiveModule } from './modules/live/live.module';
 import { LocationModule } from './modules/location/location.module';
+import { InstantsModule } from './modules/instants/instants.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PostsModule } from './modules/posts/posts.module';
@@ -58,6 +59,7 @@ const config = loadConfig();
     LiveModule,
     LocationModule,
     NotesModule,
+    InstantsModule,
     NotificationsModule,
     RelationsModule,
   ],
