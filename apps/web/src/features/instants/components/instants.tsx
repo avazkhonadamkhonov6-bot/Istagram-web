@@ -6,7 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Archive, Camera, ChevronLeft, Eye, RefreshCw, Star, Trash2, X, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { toast } from "@/components/ui/toast";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -149,6 +148,8 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
   const [flash, setFlash] = useState(false);
   // Instant-i oxirin firistoda — bar-i "Undo" dar poyoni kamera (toast-i umumi zeri dialog memonad)
   const [sent, setSent] = useState<InstantDto | null>(null);
+  // Xatoho dar dokhili ekran — toast zeri dialog namoyon nest
+  const [failure, setFailure] = useState<string | null>(null);
   const error = failed === facing || !navigator.mediaDevices?.getUserMedia;
 
   useEffect(() => {
@@ -174,6 +175,11 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
     const t = setTimeout(() => setSent(null), 5000);
     return () => clearTimeout(t);
   }, [sent]);
+  useEffect(() => {
+    if (!failure) return;
+    const t = setTimeout(() => setFailure(null), 4000);
+    return () => clearTimeout(t);
+  }, [failure]);
 
   const undo = useMutation({
     mutationFn: deleteInstant,
@@ -181,15 +187,16 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
       qc.invalidateQueries({ queryKey: instantKeys.archive });
       setSent(null);
     },
-    onError: () => toast.error("Couldn't unsend Instant"),
+    onError: () => setFailure("Couldn't unsend Instant"),
   });
   const send = useMutation({
     mutationFn: (photo: Blob) => addInstant(photo, closeFriends),
     onSuccess: (instant) => {
       qc.invalidateQueries({ queryKey: instantKeys.archive });
+      setFailure(null);
       setSent(instant);
     },
-    onError: () => toast.error("Couldn't send Instant"),
+    onError: () => setFailure("Couldn't send Instant. Try again."),
   });
 
   const shoot = useCallback(() => {
@@ -250,7 +257,12 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
             <video ref={videoRef} autoPlay playsInline muted className={cn("size-full object-cover", facing === "user" && "-scale-x-100")} />
           )}
           {flash && <span className="absolute inset-0 bg-white" />}
-          {sent && (
+          {failure && (
+            <p role="alert" className="absolute inset-x-3 bottom-3 rounded-xl bg-ig-toast px-4 py-3 text-center text-sm font-semibold shadow-ig-strong">
+              {failure}
+            </p>
+          )}
+          {sent && !failure && (
             <div role="status" className="absolute inset-x-3 bottom-3 flex items-center gap-3 rounded-xl bg-ig-toast p-2 pr-4 text-sm shadow-ig-strong">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={mediaUrl(sent.fileName) ?? ""} alt="" className="h-10 w-8 rounded object-cover" />
@@ -298,12 +310,11 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
 /** Archive-i Instants-i man: faqat muallif mebinad, 1 sol */
 function InstantArchive({ onBack }: { onBack: () => void }) {
   const qc = useQueryClient();
-  const { data, isPending } = useQuery({ queryKey: instantKeys.archive, queryFn: getInstantArchive });
+  const { data, isPending, isError } = useQuery({ queryKey: instantKeys.archive, queryFn: getInstantArchive });
   const [now] = useState(Date.now);
   const remove = useMutation({
     mutationFn: deleteInstant,
     onSuccess: (_, id) => qc.setQueryData<InstantDto[]>(instantKeys.archive, (old = []) => old.filter((i) => i.id !== id)),
-    onError: () => toast.error("Couldn't delete Instant"),
   });
 
   return (
@@ -317,6 +328,11 @@ function InstantArchive({ onBack }: { onBack: () => void }) {
       <p className="px-6 pb-3 text-xs text-white/70">Only you can see your archive. Instants are kept for one year.</p>
       <div className="flex-1 overflow-y-auto px-4 pb-6">
         {isPending && <p className="p-6 text-center text-sm text-white/70">Loading...</p>}
+        {(isError || remove.isError) && (
+          <p role="alert" className="p-6 text-center text-sm text-white/70">
+            {isError ? "Couldn't load your Instants." : "Couldn't delete Instant."}
+          </p>
+        )}
         {data?.length === 0 && <p className="p-6 text-center text-sm text-white/70">No Instants yet.</p>}
         <ul className="grid grid-cols-3 gap-1 sm:grid-cols-4">
           {data?.map((i) => {
