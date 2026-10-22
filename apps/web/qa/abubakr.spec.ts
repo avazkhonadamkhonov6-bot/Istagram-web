@@ -17,11 +17,30 @@ for (const width of [1440, 1000, 390]) {
       .getByRole("navigation", { name: "Primary" })
       .filter({ visible: true });
     await expect(nav).toHaveCount(1);
+    await page.mouse.move(width - 20, 20);
+    if (width >= 768) await expect.poll(async () => (await nav.boundingBox())?.width).toBe(72);
     const bounds = await nav.boundingBox();
-    if (width >= 768) expect(bounds?.width).toBe(width >= 1264 ? 245 : 72);
+    if (width >= 768) expect(bounds?.width).toBe(72);
     else expect(bounds?.height).toBe(50);
   });
 }
+
+test("sidebar expands on hover without shifting the page", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  const nav = page.getByRole("navigation", { name: "Primary" }).filter({ visible: true });
+  await page.locator("article").first().waitFor();
+  await page.mouse.move(600, 20);
+  await expect.poll(async () => (await nav.boundingBox())?.width).toBe(72);
+  const left = await page.locator("main").evaluate(el => el.getBoundingClientRect().left);
+  await nav.hover();
+  await expect.poll(async () => (await nav.boundingBox())?.width).toBe(245);
+  await expect(nav.getByText("Home", { exact: true })).toBeVisible();
+  expect(await page.locator("main").evaluate(el => el.getBoundingClientRect().left)).toBe(left);
+  await page.mouse.move(600, 20);
+  await expect.poll(async () => (await nav.boundingBox())?.width).toBe(72);
+  await expect(nav.getByText("Home", { exact: true })).toBeHidden();
+});
 
 test("notifications load and mark read", async ({ page }) => {
   await page.goto("/");
@@ -116,16 +135,17 @@ test("appearance persists after reload", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("article").first()).toBeVisible();
 
+  await expect(page.locator("html")).toHaveClass(/dark/);
   await page.getByRole("button", { name: "More", exact: true }).focus();
   await page.keyboard.press("Enter");
 
   await page.getByRole("menuitem", { name: "Switch appearance" }).click();
 
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveClass(/light/);
 
   await page.reload({ waitUntil: "domcontentloaded" });
 
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveClass(/light/);
 });
 
 test("post opens in modal and supports replies", async ({ page }) => {

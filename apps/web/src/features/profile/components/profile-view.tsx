@@ -7,6 +7,9 @@ import { useMutation } from "@tanstack/react-query";
 import { createChat } from "@/features/direct/api";
 import { toast } from "@/components/ui/toast";
 
+import { Bookmark, Grid3X3, Clapperboard, Plus, Settings } from "lucide-react";
+import { AuthFooter } from "@/features/auth/components/auth-presentation";
+import { useUiStore } from "@/store/ui.store";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
@@ -70,7 +73,7 @@ function ProfilePosts({ profile, tab, isSelf }: { profile: UserProfile; tab: Tab
     if (status.isError) return <div className="py-12 text-center"><Button variant="borderless" onClick={() => void status.refetch()}>Retry access check</Button></div>;
     if (status.data !== "following") return <div className="py-16 text-center"><h2 className="font-semibold">This account is private</h2><p className="mt-2 text-sm text-ig-text-secondary">Follow this account to see their photos and videos.</p></div>;
   }
-  return <PostGrid key={tab} kind={tab} userId={profile.userId} filter={tab === "saved" ? undefined : tab} />;
+  return <PostGrid isSelf={isSelf} key={tab} kind={tab} userId={profile.userId} filter={tab === "saved" ? undefined : tab} />;
 }
 
 export function ProfileView({
@@ -92,6 +95,7 @@ export function ProfileView({
   } = useProfile(username, initialProfile);
   const { data: me } = useMe();
   const tab = initialTab;
+  const create = useUiStore(s => s.setCreateOpen);
 
   if (isPending) {
     return (
@@ -144,23 +148,19 @@ export function ProfileView({
   const base = `/${profile.userName}`;
 
   return (
-    <div className="mx-auto max-w-[935px] px-4 py-6 md:pt-8">
-      <header className="flex gap-6 pb-8 md:gap-20 md:px-10">
+    <div className="ig-profile-page">
+      <header className="ig-profile-header">
         <SmallAvatar
           src={mediaUrl(profile.image)}
           name={profile.userName}
           className="size-20 shrink-0 text-4xl md:size-[150px]"
         />
-        <div className="min-w-0 flex-1 space-y-4">
+        <div className="ig-profile-info min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl">{profile.userName}</h1>
+            <h1 className="text-xl font-semibold">{profile.userName}</h1>
+            {isSelf && <Link href="/accounts/edit" aria-label="Settings"><Settings className="size-6" /></Link>}
             {isSelf ? (
-              <Link
-                href="/accounts/edit"
-                className="rounded-lg bg-ig-secondary px-4 py-1.5 text-sm font-semibold hover:bg-ig-secondary-hover"
-              >
-                Edit profile
-              </Link>
+              null
             ) : (
               <>
                 <FollowButton profile={profile} />
@@ -202,10 +202,12 @@ export function ProfileView({
           </div>
         </div>
       </header>
+      {isSelf && <div className="ig-profile-actions"><Link href="/accounts/edit">Edit profile</Link><Link href="/accounts/archive">View archive</Link></div>}
+      {isSelf && <div className="ig-profile-highlights"><button onClick={() => create(true)} aria-label="Add story"><span><Plus className="size-12 stroke-1" /></span><b>New</b></button></div>}
 
       <div
         role="tablist"
-        className="flex justify-center gap-12 border-t border-ig-separator"
+        className="ig-profile-tabs flex justify-center gap-12 border-b border-ig-separator"
       >
         {tabs.map((t) => (
           <Link
@@ -214,19 +216,21 @@ export function ProfileView({
             role="tab"
             aria-selected={tab === t.key}
             className={cn(
-              "-mt-px border-t py-4 text-xs font-semibold tracking-widest",
+              "-mb-px flex items-center gap-2 border-b-2 px-5 py-4 text-xs font-semibold tracking-widest",
               tab === t.key
                 ? "border-ig-text text-ig-text"
                 : "border-transparent text-ig-text-secondary",
             )}
           >
-            {t.label}
+            {t.key === "posts" ? <Grid3X3 className="size-6" /> : t.key === "saved" ? <Bookmark className="size-6" /> : <Clapperboard className="size-6" />}
+            <span className="sr-only">{t.label}</span>
           </Link>
         ))}
       </div>
 
       <ProfilePosts key={tab} profile={profile} tab={tab} isSelf={isSelf} />
 
+      <AuthFooter />
       {modal ? (
         <FollowListModal
           kind={modal}

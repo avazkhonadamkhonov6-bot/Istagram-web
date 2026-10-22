@@ -24,7 +24,7 @@ function Tile({ post, big }: { post: PostDto; big: boolean }) {
       href={`/p/${post.postId}`}
       className={cn(
         "relative block overflow-hidden bg-ig-bg-secondary",
-        big && "col-span-2 row-span-2",
+        big && "ig-explore-big col-span-2 row-span-2",
       )}
     >
       {url && isVideoFile(file) ? (
@@ -77,7 +77,7 @@ export function ExploreGrid({ tag }: { tag?: string }) {
   if (isPending) {
     return (
       <div style={{ containerType: "inline-size" }}>
-        <div className="grid grid-cols-3 gap-1" style={gridStyle}>
+        <div className="ig-explore-grid grid grid-cols-3 gap-1" style={gridStyle}>
           {Array.from({ length: 9 }, (_, i) => (
             <Skeleton key={i} className="size-full" />
           ))}
@@ -106,7 +106,7 @@ export function ExploreGrid({ tag }: { tag?: string }) {
 
   return (
     <div style={{ containerType: "inline-size" }}>
-      <div className="grid grid-flow-dense grid-cols-3 gap-1" style={gridStyle}>
+      <div className="ig-explore-grid grid grid-flow-dense grid-cols-3 gap-1" style={gridStyle}>
         {items.map((post, i) => (
           <Tile key={post.postId} post={post} big={isBig(i)} />
         ))}

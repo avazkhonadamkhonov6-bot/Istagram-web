@@ -23,11 +23,11 @@ export function SmallAvatar({
     <div
       aria-hidden
       className={cn(
-        "flex size-8 items-center justify-center rounded-full bg-ig-bg-secondary text-xs font-semibold uppercase text-ig-text-secondary",
+        "ig-avatar-placeholder flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
         className,
       )}
     >
-      {name.slice(0, 1)}
+      <svg viewBox="0 0 24 24" className="size-full" focusable="false"><circle cx="12" cy="8.5" r="4.5" fill="currentColor" /><path d="M2 25v-2c0-5 4-8 10-8s10 3 10 8v2Z" fill="currentColor" /></svg>
     </div>
   );
 }

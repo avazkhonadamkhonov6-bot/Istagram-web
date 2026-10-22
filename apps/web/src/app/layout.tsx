@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toast";
 import { QueryProvider } from "@/lib/providers";
 import "./globals.css";
 import "./instagram.css";
+import "./reference-style.css";
 
 const grandHotel = Grand_Hotel({
   weight: "400",
@@ -29,7 +30,7 @@ export default async function RootLayout({
 }>) {
   await connection();
   return (
-    <html lang="en" className={`${grandHotel.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${grandHotel.variable} dark h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-ig-bg text-ig-text">
         <QueryProvider>
           <OfflineBanner />

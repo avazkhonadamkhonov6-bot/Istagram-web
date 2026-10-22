@@ -1,6 +1,5 @@
 "use client";
 
-import { useMe } from "@/features/auth/hooks";
 import type { Suggestion } from "@repo/shared";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/media";
@@ -15,7 +14,7 @@ function SuggestedRow({ user }: { user: Suggestion }) {
       <SmallAvatar
         src={mediaUrl(user.avatar)}
         name={user.userName}
-        className="size-11"
+        className="size-14"
       />
       <div className="min-w-0 flex-1 text-sm">
         <Link
@@ -42,45 +41,18 @@ function SuggestedRow({ user }: { user: Suggestion }) {
 
 export function SuggestedSidebar() {
   const { data } = useSuggestions();
-  const { data: me } = useMe();
 
   return (
     <section aria-label="Suggested for you">
-      {me && (
-        <div className="mb-7 flex items-center gap-3 pt-3">
-          <SmallAvatar
-            src={mediaUrl(me.image)}
-            name={me.userName}
-            className="size-11"
-          />
-          <div className="min-w-0 flex-1">
-            <Link href={`/${me.userName}`} className="block font-semibold">
-              {me.userName}
-            </Link>
-            <p className="truncate text-ig-text-secondary">{me.fullName}</p>
-          </div>
-          <Link
-            href="/accounts/edit"
-            className="text-xs font-semibold text-ig-link-action"
-          >
-            Edit profile
-          </Link>
-        </div>
-      )}
-      <h2 className="mb-2 text-sm font-semibold text-ig-text-secondary">
+
+      <h2 className="mb-2 text-sm font-semibold text-ig-text">
         Suggested for you
       </h2>
       <ul>
-        {(data ?? []).slice(0, 5).map((user) => (
+        {(data ?? []).slice(0, 15).map((user) => (
           <SuggestedRow key={user.id} user={user} />
         ))}
       </ul>
-      <p className="mt-8 text-xs leading-5 text-ig-text-secondary">
-        Share the moments that matter.
-      </p>
-      <p className="mt-4 text-xs uppercase text-ig-text-secondary">
-        Instagram Web
-      </p>
     </section>
   );
 }

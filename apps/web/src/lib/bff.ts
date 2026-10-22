@@ -54,7 +54,7 @@ export function upstreamError(err: unknown) {
   const timeout = err instanceof DOMException && err.name === "TimeoutError";
   return json<null>({
     data: null,
-    errors: [timeout ? "Server javob namedihad, baadtar kusish kuned" : "Server dastras nest"],
+    errors: [timeout ? "The server did not respond within 60 seconds. Please try again in a moment." : "Could not connect to the server. Please try again."],
     statusCode: timeout ? 504 : 502,
   });
 }

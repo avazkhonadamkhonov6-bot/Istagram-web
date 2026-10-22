@@ -1,4 +1,6 @@
 import { Suspense, type ReactNode } from "react";
+import { BackendStatus } from "@/components/backend-status";
+import { MessagesDock } from "@/components/layout/messages-dock";
 import { CreateLauncher } from "@/components/layout/create-launcher";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -18,13 +20,15 @@ export default function MainLayout({
         <TopBar />
         <SidePanel />
       </Suspense>
-      <main className="ig-main min-w-0 flex-1 pb-[50px] pt-[60px] md:ml-[72px] md:pb-0 md:pt-0 min-[1264px]:ml-[245px]">
+      <main className="ig-main min-w-0 flex-1 pb-[50px] pt-[60px] md:ml-[72px] md:pb-0 md:pt-0">
+        <BackendStatus />
         {children}
       </main>
       {modal}
       <CreateLauncher />
       <Suspense fallback={null}>
         <BottomNav />
+        <MessagesDock />
       </Suspense>
     </>
   );
