@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { DirectShell } from "@/features/direct/components/direct-shell";
 import "./direct.css";
+
+export const metadata: Metadata = { title: "Inbox • Direct" };
 
 export default function DirectLayout({ children }: LayoutProps<"/direct">) {
   return (

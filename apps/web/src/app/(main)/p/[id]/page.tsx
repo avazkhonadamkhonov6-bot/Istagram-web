@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { getServerPost } from "@/lib/server-api";
 import { Suspense } from "react";
 import { PostDetail } from "@/features/posts/components/post-detail";
+
+export const metadata: Metadata = { title: "Post" };
 
 async function PostContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

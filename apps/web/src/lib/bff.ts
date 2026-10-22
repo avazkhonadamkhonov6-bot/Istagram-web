@@ -8,13 +8,18 @@ export const API_URL = process.env.API_URL ?? DEFAULT_BACKEND_URL;
 export const ACCESS_COOKIE = "access_token";
 // API dar Render (free) ba'd az 15 daq. bekori "xob" meravad, bedorshavi to ~50 s
 const TIMEOUT_MS = 60_000;
+/** Bor kardani video / aks (multipart): fayli kalon va internet-i sust — to 5 daqiqa */
+export const UPLOAD_TIMEOUT_MS = 5 * 60_000;
 const WEEK_SECONDS = 7 * 24 * 60 * 60;
 
 export type Envelope<T> = { data: T | null; errors: string[]; statusCode: number; code?: string };
 
 /** Fetch ba NestJS bo timeout 60 s va x-request-id */
-export function apiFetch(path: string, init: RequestInit & { token?: string; requestId?: string } = {}) {
-  const { token, requestId, headers, ...rest } = init;
+export function apiFetch(
+  path: string,
+  init: RequestInit & { token?: string; requestId?: string; timeoutMs?: number } = {},
+) {
+  const { token, requestId, headers, timeoutMs = TIMEOUT_MS, ...rest } = init;
   const h = new Headers(headers);
   if (token) h.set("authorization", `Bearer ${token}`);
   h.set("x-request-id", requestId ?? crypto.randomUUID());
@@ -22,7 +27,7 @@ export function apiFetch(path: string, init: RequestInit & { token?: string; req
     ...rest,
     headers: h,
     cache: "no-store",
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 }
 
@@ -54,7 +59,7 @@ export function upstreamError(err: unknown) {
   const timeout = err instanceof DOMException && err.name === "TimeoutError";
   return json<null>({
     data: null,
-    errors: [timeout ? "The server did not respond within 60 seconds. Please try again in a moment." : "Could not connect to the server. Please try again."],
+    errors: [timeout ? "The server took too long to respond. Check your connection and try again." : "Could not connect to the server. Please try again."],
     statusCode: timeout ? 504 : 502,
   });
 }

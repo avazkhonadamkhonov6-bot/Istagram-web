@@ -30,10 +30,26 @@ const key = ["reels"];
 // Ovoz baroi hamai reel-ho yakest (misli Instagram): yak bor unmute — reel-i bad ham bo ovoz.
 // Brauzer autoplay-ro bo ovoz bidun amali user man' mekunad; on gah muted ogoz meshavad.
 let reelsMuted = false;
+/** Ovozro brauzer xomush kard (na user) — bo avvalin click / tugma ovoz bargardonida meshavad */
+let autoMuted = false;
 const muteListeners = new Set<() => void>();
 function setReelsMuted(value: boolean) {
   reelsMuted = value;
+  autoMuted = false;
   muteListeners.forEach((l) => l());
+}
+function unmuteAfterGesture(e: Event) {
+  // Tugmai Mute / Unmute xudash ovozro idora mekunad
+  if (!autoMuted || (e.target instanceof Element && e.target.closest("[data-reel-mute]"))) return;
+  setReelsMuted(false);
+  document.querySelectorAll<HTMLVideoElement>("video[data-reel]").forEach((v) => {
+    v.muted = false;
+  });
+}
+if (typeof window !== "undefined") {
+  for (const type of ["pointerdown", "keydown", "touchstart"] as const) {
+    window.addEventListener(type, unmuteAfterGesture, { capture: true, passive: true });
+  }
 }
 function useReelsMuted() {
   return useSyncExternalStore(
@@ -53,6 +69,7 @@ function playWithSound(el: HTMLVideoElement | null) {
   return el.play().catch((err: unknown) => {
     if (el.muted || (err as Error).name !== "NotAllowedError") throw err;
     setReelsMuted(true);
+    autoMuted = true;
     el.muted = true;
     return el.play();
   });
@@ -166,6 +183,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
       >
         <video
           ref={video}
+          data-reel
           src={mediaUrl(post.images[0]) ?? undefined}
           muted={muted}
           playsInline
@@ -206,6 +224,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
           />
         )}
         <button
+          data-reel-mute
           aria-label={muted ? "Unmute" : "Mute"}
           onClick={() => {
             const next = !muted;
