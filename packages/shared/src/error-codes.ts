@@ -46,6 +46,8 @@ export const ErrorCode = {
   LIVE_ALREADY_STARTED: 'LIVE_ALREADY_STARTED',
   LIVE_NOT_ACTIVE: 'LIVE_NOT_ACTIVE',
   LIVE_FULL: 'LIVE_FULL',
+  /** Spec 17 */
+  INSTANT_NOT_FOUND: 'INSTANT_NOT_FOUND',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -96,4 +98,5 @@ export const ErrorMessage: Record<ErrorCode, string> = {
   LIVE_ALREADY_STARTED: 'Shumo allakay dar efir hasted',
   LIVE_NOT_ACTIVE: 'Efir tamom shudaast',
   LIVE_FULL: 'Dar efir joi xoli nest',
+  INSTANT_NOT_FOUND: 'Instant yoft nashud',
 };

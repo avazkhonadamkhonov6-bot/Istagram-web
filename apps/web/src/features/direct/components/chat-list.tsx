@@ -4,6 +4,7 @@ import { ChevronDown, Radio } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ErrorFallback } from "@/components/error-fallback";
+import { InstantsButton } from "@/features/instants/components/instants";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/format";
@@ -21,7 +22,7 @@ export function ChatList({ className }: { className?: string }) {
   const activeId = params.id ? Number(params.id) : null;
 
   return (
-    <aside className={cn("flex h-full flex-col border-r border-ig-separator", className)}>
+    <aside className={cn("relative flex h-full flex-col border-r border-ig-separator", className)}>
       <header className="flex min-h-[100px] shrink-0 items-center justify-between gap-4 px-6 pb-3 pt-6">
         <h1 className="flex min-w-0 items-center gap-2 text-xl font-bold"><span className="truncate">{me?.userName ?? "Instagram"}</span><ChevronDown aria-hidden className="size-4 shrink-0" /></h1>
         <span className="flex shrink-0 items-center gap-4">
@@ -100,6 +101,7 @@ export function ChatList({ className }: { className?: string }) {
           );
         })}
       </div>
+      <InstantsButton />
     </aside>
   );
 }
