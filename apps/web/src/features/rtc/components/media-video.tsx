@@ -19,9 +19,11 @@ export function MediaVideo({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.srcObject = stream;
-    if (stream) void el.play().catch(() => undefined);
-  }, [stream]);
+    // Preview-i xud: faqat tasvir — ovozi xud hech goh namebarad (aks-sado "vuuun")
+    el.muted = muted;
+    el.srcObject = stream && muted ? new MediaStream(stream.getVideoTracks()) : stream;
+    return playWhenAllowed(el, stream);
+  }, [stream, muted]);
   return <video ref={ref} autoPlay playsInline muted={muted} className={cn("bg-black object-cover", mirror && "-scale-x-100", className)} />;
 }
 
@@ -32,7 +34,21 @@ export function MediaAudio({ stream }: { stream: MediaStream | null }) {
     const el = ref.current;
     if (!el) return;
     el.srcObject = stream;
-    if (stream) void el.play().catch(() => undefined);
+    return playWhenAllowed(el, stream);
   }, [stream]);
   return <audio ref={ref} autoPlay />;
+}
+
+/** Agar brauzer autoplay-ro man kard — bo avvalin klik / lams boz play */
+function playWhenAllowed(el: HTMLMediaElement, stream: MediaStream | null) {
+  if (!stream) return;
+  const retry = () => void el.play().catch(() => undefined);
+  void el.play().catch(() => {
+    document.addEventListener("pointerdown", retry, { once: true });
+    document.addEventListener("keydown", retry, { once: true });
+  });
+  return () => {
+    document.removeEventListener("pointerdown", retry);
+    document.removeEventListener("keydown", retry);
+  };
 }

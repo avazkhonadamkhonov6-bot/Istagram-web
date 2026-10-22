@@ -1,7 +1,7 @@
 "use client";
 
 import { SocketEvent, type LiveDto } from "@repo/shared";
-import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react";
+import { Mic, MicOff, Phone, PhoneOff, SwitchCamera, Video, VideoOff } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ import {
   declineCall,
   hangUp,
   setCallUser,
+  switchCamera,
   toggleCamera,
   toggleMute,
   useCallStore,
@@ -123,10 +124,27 @@ function useTimer(from: string | null | undefined) {
   return from ? formatDuration((now - new Date(from).getTime()) / 1000) : null;
 }
 
+/** Shumorai kamera-ho (tugmai ivaz faqat agar >1) */
+function useCameraCount() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let active = true;
+    void navigator.mediaDevices
+      ?.enumerateDevices()
+      .then((list) => active && setCount(list.filter((d) => d.kind === "videoinput").length))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+  return count;
+}
+
 function CallScreen() {
   const peer = useCallPeer();
-  const { phase, call, local, remotes, connected, muted, cameraOff, endReason } = useCallStore();
+  const { phase, call, local, remotes, connected, muted, cameraOff, facing, endReason } = useCallStore();
   const timer = useTimer(phase === "active" ? call?.answeredAt : null);
+  const hasManyCameras = useCameraCount() > 1;
   if (!peer) return null;
 
   const remoteEntries = Object.entries(remotes);
@@ -149,7 +167,7 @@ function CallScreen() {
       {showVideo && remoteEntries.length > 0 ? (
         <div className={cn("grid flex-1 gap-1", remoteEntries.length > 1 && "grid-cols-2")}>
           {remoteEntries.map(([id, stream]) => (
-            <MediaVideo key={id} stream={stream} className="size-full" />
+            <MediaVideo key={id} stream={stream} className="size-full md:object-contain" />
           ))}
         </div>
       ) : (
@@ -172,7 +190,7 @@ function CallScreen() {
         <MediaVideo
           stream={local}
           muted
-          mirror
+          mirror={facing === "user"}
           className={cn(
             "absolute bottom-28 right-4 aspect-[3/4] w-28 rounded-xl border border-white/20 shadow-lg md:w-40",
             cameraOff && "opacity-0",
@@ -200,6 +218,16 @@ function CallScreen() {
               className={cn("flex size-14 items-center justify-center rounded-full", cameraOff ? "bg-white text-black" : "bg-white/20")}
             >
               {cameraOff ? <VideoOff className="size-6" /> : <Video className="size-6" />}
+            </button>
+          )}
+          {peer.isVideo && hasManyCameras && (
+            <button
+              type="button"
+              aria-label="Switch camera"
+              onClick={() => void switchCamera()}
+              className="flex size-14 items-center justify-center rounded-full bg-white/20"
+            >
+              <SwitchCamera className="size-6" />
             </button>
           )}
           <button

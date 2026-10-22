@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api-client";
 import { getSocket } from "@/lib/socket";
 import * as rtcApi from "./api";
-import { getMedia, Peer, stopStream } from "./peer";
+import { getCameraTrack, getMedia, Peer, stopStream, type Facing } from "./peer";
 
 /**
  * Zangi audio / video (Spec 16 §2) — yak zang baroi tamomi ilova.
@@ -23,6 +23,8 @@ type CallState = {
   connected: Record<string, boolean>;
   muted: boolean;
   cameraOff: boolean;
+  /** Kamerai pesh ("user") yo qafo */
+  facing: Facing;
   /** Sabab baroi ekrani "ended" */
   endReason: string | null;
 };
@@ -36,6 +38,7 @@ const initial: CallState = {
   connected: {},
   muted: false,
   cameraOff: false,
+  facing: "user",
   endReason: null,
 };
 
@@ -189,6 +192,37 @@ export function toggleCamera() {
   const cameraOff = !get().cameraOff;
   get().local?.getVideoTracks().forEach((t) => (t.enabled = !cameraOff));
   set({ cameraOff });
+}
+
+let switching = false;
+
+/** Kamerai pesh <-> qafo (telefon); track dar hamai peer-ho bidun qat-i zang ivaz meshavad */
+export async function switchCamera() {
+  const { local, facing, cameraOff } = get();
+  const old = local?.getVideoTracks()[0];
+  if (!local || !old || switching) return;
+  switching = true;
+  const next: Facing = facing === "user" ? "environment" : "user";
+  try {
+    // Baze telefonho du kameraro yakjoya kushoda nametavonand
+    old.stop();
+    const track = await getCameraTrack(next);
+    track.enabled = !cameraOff;
+    await Promise.all([...peers.values()].map((p) => p.replaceVideo(track)));
+    if (get().local !== local) return track.stop();
+    set({ local: new MediaStream([...local.getAudioTracks(), track]), facing: next });
+  } catch {
+    // Kamerai digar nest → kamerai pesh-ro bargardon
+    const track = await getCameraTrack(facing).catch(() => null);
+    if (track && get().local === local) {
+      track.enabled = !cameraOff;
+      await Promise.all([...peers.values()].map((p) => p.replaceVideo(track)));
+      set({ local: new MediaStream([...local.getAudioTracks(), track]) });
+    }
+    toast.error("Couldn't switch camera");
+  } finally {
+    switching = false;
+  }
 }
 
 /** Socket: hamai event-hoi `call:*`. Bargardonidani funksiyai off. */
