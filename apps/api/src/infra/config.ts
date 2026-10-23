@@ -30,8 +30,11 @@ const envSchema = z.object({
   TURN_URLS: z.string().optional(),
   TURN_USERNAME: z.string().optional(),
   TURN_CREDENTIAL: z.string().optional(),
-  // E-mail (kodi ivazi parol): SMTP (Gmail: smtps://you@gmail.com:<app-password>@smtp.gmail.com:465) yo Resend
+  // E-mail (kodi ivazi parol): Gmail (App Password), SMTP-i digar, Brevo yo Resend — docs/EMAIL.md
+  GMAIL_USER: z.string().email().optional(),
+  GMAIL_APP_PASSWORD: z.string().optional(),
   SMTP_URL: z.string().url().optional(),
+  BREVO_API_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   MAIL_FROM: z.string().optional(),
 });

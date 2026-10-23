@@ -14,6 +14,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "mail:test": "ts-node --transpile-only scripts/mail-test.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

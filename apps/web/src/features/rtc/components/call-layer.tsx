@@ -1,12 +1,14 @@
 "use client";
 
 import { SocketEvent, type LiveDto } from "@repo/shared";
+import { useQueryClient } from "@tanstack/react-query";
 import { Mic, MicOff, Phone, PhoneOff, SwitchCamera, Video, VideoOff } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/toast";
 import { useMe } from "@/features/direct/hooks";
+import { instantKeys } from "@/features/instants/api";
 import { mediaUrl } from "@/lib/media";
 import { getSocket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
@@ -39,6 +41,7 @@ export function CallLayer() {
 
 function ActiveCallLayer() {
   const router = useRouter();
+  const qc = useQueryClient();
   const { data: me } = useMe();
   const phase = useCallStore((s) => s.phase);
 
@@ -54,12 +57,21 @@ function ActiveCallLayer() {
         description: live.title ?? undefined,
         action: { label: "Watch", onClick: () => router.push(`/live/${live.liveId}`) },
       });
+    // Spec 17: instant-i nav az dust — inbox-i Instants foran nav meshavad va xabar dar har sahifa
+    const onInstant = (i: { userName: string }) => {
+      void qc.invalidateQueries({ queryKey: instantKeys.inbox });
+      toast(`${i.userName} sent you an Instant`, {
+        action: { label: "View", onClick: () => router.push("/direct/inbox") },
+      });
+    };
     socket.on(SocketEvent.LIVE_STARTED, onLive);
+    socket.on(SocketEvent.INSTANT_NEW, onInstant);
     return () => {
       off();
       socket.off(SocketEvent.LIVE_STARTED, onLive);
+      socket.off(SocketEvent.INSTANT_NEW, onInstant);
     };
-  }, [me?.userId, router]);
+  }, [me?.userId, router, qc]);
 
   if (phase === "idle") return null;
   if (phase === "incoming") return <IncomingCall />;

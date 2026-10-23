@@ -23,6 +23,17 @@ const RESET_TTL_MS = 15 * 60 * 1000;
 
 const sha256 = (v: string) => createHash("sha256").update(v).digest("hex");
 
+/** Xati HTML-i kodi ivazi parol (code — faqat [0-9a-f], escape lozim nest) */
+const resetEmailHtml = (code: string) => `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#fafafa;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#262626">
+  <div style="max-width:420px;margin:0 auto;background:#fff;border:1px solid #dbdbdb;border-radius:8px;padding:32px;text-align:center">
+    <div style="font-size:28px;font-family:Georgia,serif;margin-bottom:16px">Instagram</div>
+    <p style="margin:0 0 16px">Kodi shumo baroi ivazi parol:</p>
+    <div style="font-size:32px;font-weight:700;letter-spacing:6px;padding:12px 0;font-family:Menlo,Consolas,monospace">${code}</div>
+    <p style="margin:16px 0 0;font-size:13px;color:#737373">Kod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.</p>
+  </div>
+</body></html>`;
+
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
@@ -146,13 +157,19 @@ export class AccountService {
           expiresAt: new Date(Date.now() + RESET_TTL_MS),
         },
       });
-      const sent = await this.mail.send(
-        email,
-        `${code} — kodi ivazi parol`,
-        `Kodi shumo baroi ivazi paroli Instagram: ${code}\n\nKod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.`,
-      );
-      if (!sent && process.env.NODE_ENV !== "production")
-        this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
+      // Dar fon: javob foran meravad va az vaqti javob fahmida nameshavad, ki e-mail hast
+      void this.mail
+        .send({
+          to: email,
+          subject: `${code} — kodi ivazi parol`,
+          text: `Kodi shumo baroi ivazi paroli Instagram: ${code}\n\nKod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.`,
+          html: resetEmailHtml(code),
+        })
+        .then((sent) => {
+          if (!sent && process.env.NODE_ENV !== "production")
+            this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
+          else if (!sent) this.logger.warn("Kodi ivazi parol firistoda nashud (docs/EMAIL.md)");
+        });
     }
     return "Code sent";
   }

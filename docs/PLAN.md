@@ -131,6 +131,17 @@ Digar hama — **alohida**:
 
 Qoida hamon: Avaz ba faylhoi Abubakr dast namerasonad; API-i front (`features/social/api.ts`) tayyor ast — Abubakr faqat UI menavisad.
 
+## Ruzi 5 (2026-10-23) — Gmail, Instants, TanStack Query (Avaz)
+
+| Vaqt | Vazifa | Natija |
+|---|---|---|
+| 1 soat | "Forgot password" ba Gmail: provayderho Gmail / SMTP / Brevo / Resend, timeout, xati HTML, `mail:test` | [EMAIL.md](EMAIL.md) |
+| 1 soat | Instants real-time: socket `instant:new` baroi mutual / close friends, toast "sent you an Instant" dar har sahifa | Spec 17, test AC6 |
+| 30 daq. | TanStack Query: Devtools (faqat dev), `gcTime`, refetch dar focus / reconnect, mutation bidun retry | TZ §4, §6.3 |
+| 1 soat | Sanjishi purra: typecheck, lint, API e2e, UI dar brauzer | [PROGRESS.md](PROGRESS.md) |
+
+Monda (kori user): App Password-i Gmail ba `apps/api/.env` va/yo `BREVO_API_KEY` + `MAIL_FROM` ba Render.
+
 ## Agar vaqt namerasad — chi buridan (tartib)
 
 1. Suggestions (P1) → ruyxati oddii populyarho

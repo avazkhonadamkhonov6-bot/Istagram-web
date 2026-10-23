@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClientProvider } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { createContext, Suspense, useContext, useEffect, useState, type ReactNode } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { CallLayer } from "@/features/rtc/components/call-layer";
@@ -9,6 +10,12 @@ import { initMocks } from "@/mocks/browser";
 import { makeQueryClient } from "./query-client";
 
 const mockingEnabled = process.env.NEXT_PUBLIC_API_MOCKING === "on";
+
+// TanStack Query Devtools — faqat dar `next dev` (dar build-i production ba bundle namedaroyad)
+const QueryDevtools =
+  process.env.NODE_ENV === "development"
+    ? dynamic(() => import("@tanstack/react-query-devtools").then((m) => m.ReactQueryDevtools), { ssr: false })
+    : () => null;
 
 // QueryProvider-i daruni (masalan, dar Direct) qabati zangro du bor namesozad
 const NestedContext = createContext(false);
@@ -74,6 +81,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             <CallLayer />
           </Suspense>
         )}
+        {!nested && <QueryDevtools buttonPosition="bottom-left" />}
       </NestedContext.Provider>
     </QueryClientProvider>
   );

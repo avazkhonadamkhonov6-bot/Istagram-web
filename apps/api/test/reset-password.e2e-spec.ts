@@ -8,7 +8,7 @@ import { randomBytes } from 'node:crypto';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { loadConfig } from '../src/infra/config';
-import { MailService } from '../src/infra/mail.service';
+import { MailService, type MailMessage } from '../src/infra/mail.service';
 import { PrismaService } from '../src/infra/prisma.service';
 import { configureApp } from '../src/setup';
 
@@ -19,11 +19,11 @@ const OLD = 'password123';
 const NEW = 'NewPassw0rd!';
 
 /** Khatho-i firistoda — e-mail-i voqe'i nameravad */
-const outbox: { to: string; subject: string; text: string }[] = [];
+const outbox: MailMessage[] = [];
 const fakeMail = {
   enabled: true,
-  send: async (to: string, subject: string, text: string) => {
-    outbox.push({ to, subject, text });
+  send: async (m: MailMessage) => {
+    outbox.push(m);
     return true;
   },
 };

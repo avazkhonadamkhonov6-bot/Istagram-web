@@ -24,6 +24,8 @@
 
 `InstantDto { id, userId, userName, userImage, fileName, closeFriends, createdAt, expiresAt, viewCount }` — `viewCount` faqat baroi muallif, baroi digaron `null`.
 
+Realtime: pas az firistodan server ba har giranda (mutual, close friends, bidun block) socket `instant:new` `{ id, userId, userName, userImage }` mefiristad.
+
 Jadvalho: `Instant`, `InstantView` (migratsiyai `spec17_instants`).
 
 ## 3. Frontend
@@ -34,6 +36,7 @@ Jadvalho: `Instant`, `InstantView` (migratsiyai `spec17_instants`).
 | Binanda | ekrani siyoh, header (avatar, nom, vaqt, nishoni close friends), click → navbati; har aks hangomi namoyish `view-instant` | Avaz |
 | Kamera | `getUserMedia`, Friends / Close friends (`--ig-close-friends`), tugmai aksgiri, ivazi kamera; toast bo "Undo" | Avaz |
 | Archive | panjarai aksho bo shumorai binandagon, hazf | Avaz |
+| Xabar | `instant:new` → toast "<user> sent you an Instant" → View (`/direct/inbox`) dar har sahifa, invalidate-i `["instants"]` (`rtc/components/call-layer.tsx`) | Avaz |
 
 Kod: `apps/web/src/features/instants/` (`api.ts`, `components/instants.tsx`), dar `features/direct/components/chat-list.tsx` vasl shudaast.
 
@@ -44,5 +47,6 @@ Kod: `apps/web/src/features/instants/` (`api.ts`, `components/instants.tsx`), da
 - **AC3** `closeFriends` — faqat close friends mebinand.
 - **AC4** Undo — faqat muallif; begona → 404.
 - **AC5** Pas az 24 soat nopadid; be fayl → 400.
+- **AC6** Real-time: dusti mutual `instant:new` megirad, begona ne.
 
-Hamai AC dar `apps/api/test/spec17.e2e-spec.ts` (5 test).
+Hamai AC dar `apps/api/test/spec17.e2e-spec.ts` (6 test).

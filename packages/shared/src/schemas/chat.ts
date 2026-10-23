@@ -120,6 +120,8 @@ export const SocketEvent = {
   LIVE_COMMENT: 'live:comment',
   LIVE_HEART: 'live:heart',
   LIVE_SIGNAL: 'live:signal',
+  /** Spec 17: instant-i nav az dust (payload: { id, userId, userName, userImage }) */
+  INSTANT_NEW: 'instant:new',
 } as const;
 
 /** Event-hoi Socket.IO (client → server), Spec 16. Javob — ack `{ ok: true, data? }` yo `{ ok: false, code }` */

@@ -70,7 +70,7 @@ Tafsilot: [specs/01-auth.md](specs/01-auth.md).
 | API hujjat | Swagger `/api/docs` (az Zod schema-ho) | |
 | Frontend | Next.js 16 (App Router, SSR + **BFF**), React 19, TypeScript strict | SSR, sirho dar server |
 | UI | Tailwind CSS 4 + **shadcn/ui** (komponentho dar kodi mo, bo ranghoi Instagram) | Tez va yaksha |
-| Data dar front | TanStack Query (optimistic, infinite), Zustand (faqat holati UI) | Javobi favri |
+| Data dar front | TanStack Query v5 (optimistic, infinite, refetch dar focus/reconnect, invalidate az socket, Devtools dar dev), Zustand (faqat holati UI) | Javobi favri |
 | Formaho | react-hook-form + zod | |
 | Test | Vitest (unit), Supertest (API e2e), **Playwright** (e2e-i brauzer) | |
 | Sifat | ESLint, Prettier, `tsc --noEmit`, **GitHub Actions CI** | Kodi shikasta ba `main` namedaroyad |
@@ -177,7 +177,8 @@ exem-3/
 | Servisi beruni javob namedihad (S3, NestJS az BFF) | **Timeout**: BFF → API 10 s, API → S3 5 s; xatoi fahmo ba user |
 | Xatoi nomatlub dar API | Filter-i global → formati yagona, `requestId` dar har javob va log, Sentry; server namemirad |
 | Xato dar yak qismi UI | `error.tsx` dar har segment, Error Boundary baroi har widget (feed kor mekunad, hatto agar Stories xato dihad) |
-| Internet qat' shud | TanStack Query retry 2 bor; Socket.IO reconnect-i avtomati va pas az ulanish **refetch**-i paymho/notificationho; optimistic update → **rollback** |
+| Internet qat' shud | TanStack Query retry 2 bor (faqat query; mutation takror nameshavad — amal du bor ijro nashavad); Socket.IO reconnect-i avtomati va pas az ulanish **refetch**-i paymho/notificationho; optimistic update → **rollback** |
+| E-mail (kodi parol) naraft | Provayderho ba tartib (Gmail → SMTP → Brevo → Resend), timeout 10 s; javobi API intizori xatro namekashad — [EMAIL.md](EMAIL.md) |
 | Hangomi deploy/restart | Graceful shutdown (`enableShutdownHooks`): darxosthoi joriy tamom meshavand, worker vazifai joriyro tamom mekunad |
 | Migratsiyai DB | Faqat `prisma migrate` (hech vaqt `db push` dar `main`), migratsiyaho dar Git |
 
