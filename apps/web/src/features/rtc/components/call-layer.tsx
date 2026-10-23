@@ -24,7 +24,8 @@ import {
 import { formatDuration } from "../peer";
 import { MediaAudio, MediaVideo } from "./media-video";
 
-const PUBLIC = ["/login", "/signup"];
+// Sahifahoe, ki bidun login kushoda meshavand — dar onho darxosti `me` (401) ba /login nabarad
+const PUBLIC = ["/login", "/signup", "/accounts/password/reset"];
 
 /**
  * Qabati global-i zang va efir (Spec 16): zangi voridshavanda dar har sahifa, ekrani zang,
