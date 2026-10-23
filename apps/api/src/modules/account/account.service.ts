@@ -8,7 +8,7 @@ import {
 } from "@repo/shared";
 import * as argon2 from "argon2";
 import { createHash, randomBytes } from "node:crypto";
-import { AppException, badRequest, conflict } from "../../common/app-exception";
+import { AppException, badRequest, conflict, notFound } from "../../common/app-exception";
 import { JwtPayload } from "../../common/guards/jwt-auth.guard";
 import { MailService } from "../../infra/mail.service";
 import { PrismaService, isUniqueViolation } from "../../infra/prisma.service";
@@ -141,36 +141,51 @@ export class AccountService {
     return this.jwt.signAsync(payload, { expiresIn: 60 });
   }
 
-  /** Kod sohta meshavad; to ilovai e-mail (P2) dar log-i dev nishon doda meshavad. */
+  /**
+   * Kod ba hamon e-mail-e, ki korbar navisht, firistoda meshavad (misli Instagram):
+   * akkaunt nest → 404 EMAIL_NOT_FOUND; xat naraft → 503 EMAIL_NOT_SENT (na "Code sent"-i nodurust).
+   * Dar dev bidun provayderi e-mail kod dar log navishta meshavad.
+   */
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: { id: true },
     });
-    // Javob yakxela ast — az ruyi on fahmidan nashavad ki e-mail hast yo ne
-    if (user) {
-      const code = randomBytes(4).toString("hex");
-      await this.prisma.passwordResetToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: sha256(code),
-          expiresAt: new Date(Date.now() + RESET_TTL_MS),
-        },
-      });
-      // Dar fon: javob foran meravad va az vaqti javob fahmida nameshavad, ki e-mail hast
-      void this.mail
-        .send({
-          to: email,
-          subject: `${code} — kodi ivazi parol`,
-          text: `Kodi shumo baroi ivazi paroli Instagram: ${code}\n\nKod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.`,
-          html: resetEmailHtml(code),
-        })
-        .then((sent) => {
-          if (!sent && process.env.NODE_ENV !== "production")
-            this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
-          else if (!sent) this.logger.warn("Kodi ivazi parol firistoda nashud (docs/EMAIL.md)");
-        });
+    if (!user) throw notFound(ErrorCode.EMAIL_NOT_FOUND);
+
+    const devLog = !this.mail.enabled && process.env.NODE_ENV !== "production";
+    if (!this.mail.enabled && !devLog) {
+      this.logger.error("E-mail tanzim nashudaast: BREVO_API_KEY + MAIL_FROM (yo GMAIL_*) lozim (docs/EMAIL.md)");
+      throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.EMAIL_NOT_SENT);
     }
+
+    const code = randomBytes(4).toString("hex");
+    const token = await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: sha256(code),
+        expiresAt: new Date(Date.now() + RESET_TTL_MS),
+      },
+      select: { id: true },
+    });
+    if (devLog) {
+      this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
+      return "Code sent";
+    }
+
+    const sent = await this.mail.send({
+      to: email,
+      subject: `${code} — kodi ivazi parol`,
+      text: `Kodi shumo baroi ivazi paroli Instagram: ${code}\n\nKod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.`,
+      html: resetEmailHtml(code),
+    });
+    if (!sent) {
+      // Kodi naraftaro nigoh namedorem
+      await this.prisma.passwordResetToken.delete({ where: { id: token.id } });
+      this.logger.error(`Kodi ivazi parol ba ${email} firistoda nashud — log-i MailService-ro bined`);
+      throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.EMAIL_NOT_SENT);
+    }
+    this.logger.log(`Kodi ivazi parol ba ${email} firistoda shud`);
     return "Code sent";
   }
 

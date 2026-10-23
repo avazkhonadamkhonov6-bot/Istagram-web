@@ -20,9 +20,11 @@ const NEW = 'NewPassw0rd!';
 
 /** Khatho-i firistoda — e-mail-i voqe'i nameravad */
 const outbox: MailMessage[] = [];
+let mailWorks = true;
 const fakeMail = {
   enabled: true,
   send: async (m: MailMessage) => {
+    if (!mailWorks) return false;
     outbox.push(m);
     return true;
   },
@@ -62,9 +64,9 @@ describe('API (Forgot password)', () => {
     await app.close();
   });
 
-  it('AC1: e-mail-i nomavjud — hamon javob, khat nameravad', async () => {
-    const r = await forgot(`nobody_${tag}@t.tj`).expect(200);
-    expect(r.body.data).toBe('Code sent');
+  it('AC1: e-mail-i nomavjud — 404 EMAIL_NOT_FOUND, khat nameravad', async () => {
+    const r = await forgot(`nobody_${tag}@t.tj`).expect(404);
+    expect(r.body.code).toBe('EMAIL_NOT_FOUND');
     expect(outbox).toHaveLength(0);
   });
 
@@ -110,5 +112,17 @@ describe('API (Forgot password)', () => {
     await prisma.passwordResetToken.updateMany({ where: { usedAt: null, user: { userName } }, data: { expiresAt: new Date(Date.now() - 1000) } });
     await reset(lastCode()).expect(400);
     await login(OLD).expect(200);
+  });
+
+  it('AC7: agar xat naravad — 503 EMAIL_NOT_SENT, kod nigoh doshta nameshavad', async () => {
+    const before = await prisma.passwordResetToken.count({ where: { user: { userName } } });
+    mailWorks = false;
+    try {
+      const r = await forgot(email).expect(503);
+      expect(r.body.code).toBe('EMAIL_NOT_SENT');
+    } finally {
+      mailWorks = true;
+    }
+    expect(await prisma.passwordResetToken.count({ where: { user: { userName } } })).toBe(before);
   });
 });

@@ -66,3 +66,13 @@ Agar chand roh tanzim shavad, ba tartib sanjida meshavand: Gmail → SMTP → Br
 | Xat dar log "firistoda shud", vale dar Inbox nest | Papkai **Spam** / **Promotions**-ro bined |
 
 E-mail-i nomavjud: javob hamon ast ("Code sent"), xat nameravad — in amniyat ast (az ruyi javob fahmida nameshavad, ki akkaunt hast).
+
+## Javobi sahifa (az 2026-10-23)
+
+| Holat | Sahifa nishon medihad | Kod (API) |
+|---|---|---|
+| Kod ba e-mail-i navishtashuda firistoda shud | qadami "Enter confirmation code" | 200 |
+| Bo in e-mail akkaunt nest | "No account found with this email..." | 404 `EMAIL_NOT_FOUND` |
+| E-mail tanzim nashudaast yo Brevo / Gmail xato dod | "We couldn't send the email right now..." | 503 `EMAIL_NOT_SENT` |
+
+Pesh az in sahifa dar hama holat "Code sent" menavisht va xato pinhon memond. Sababi 503-ro dar log-i API (`MailService`) bined.

@@ -560,7 +560,7 @@ test("Favorites and follower removal work with real data", async ({
       .getByRole("button", { name: "Add favorite", exact: true })
       .click();
     await page.goto("/");
-    await page.getByRole("tab", { name: "favorites", exact: true }).click();
+    await page.getByRole("tab", { name: "Favorites", exact: true }).click();
     await expect(page.locator("article").first()).toBeVisible();
     const feed = await data(page.request, "/Post/get-favorites-feed");
     expect(feed.length).toBeGreaterThan(0);

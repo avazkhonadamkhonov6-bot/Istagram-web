@@ -74,7 +74,7 @@
 .login-story-reply svg { width: 32px; height: 32px; }
 .login-love { position: absolute; z-index: 3; top: 240px; left: -16px; color: #ff176b; transform: rotate(-15deg); }
 .login-love svg { width: 68px; height: 68px; }
-.login-close-friends { position: absolute; z-index: 3; right: -8px; top: 140px; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 24px; background: #1cd14f; color: white; transform: rotate(-9deg); }
+.login-close-friends { position: absolute; z-index: 3; right: -8px; top: 140px; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 24px; background: rgb(var(--ig-close-friends-refreshed)); color: white; transform: rotate(-9deg); }
 .login-close-friends svg { width: 25px; height: 25px; }
 .login-page .auth-column { display: flex; justify-content: center; width: auto; max-width: none; border-left: 1px solid rgb(var(--ig-focus-stroke)); padding: 64px clamp(24px, 2.8vw, 54px); background: rgb(var(--ig-auth-surface)); }
 .login-page .auth-card { width: 100%; max-width: 550px; margin: auto; align-items: stretch; border: 0; padding: 0; }
@@ -84,7 +84,7 @@
 .login-page .auth-form input + label { left: 17px; }
 .login-page .auth-form input:focus + label, .login-page .auth-form input:not(:placeholder-shown) + label { top: 9px; }
 .login-page .auth-form button[type="submit"] { height: 44px; margin-top: 12px; border-radius: 32px; background: #0866ff; }
-.login-page .auth-form button[type="submit"]:disabled { background: #194777; color: #a5b4c5; }
+.login-page .auth-form button[type="submit"]:disabled { background: rgb(var(--ig-colors-button-primary-background--disabled)); color: rgba(var(--ig-colors-button-primary-text), .7); }
 .login-page .auth-form button[type="button"] { top: 22px; }
 .login-account-actions { margin-top: 100px; }
 .login-create-account { display: block; width: 100%; padding: 13px 16px; border: 1px solid rgb(var(--ig-colors-link-text)); border-radius: 32px; text-align: center; font-size: 15px; font-weight: 500; color: rgb(var(--ig-colors-link-text)); }
@@ -206,7 +206,8 @@
 
 /* Mobil (telefon), misli Instagram: post-i purra-arz, satri bolo bidun xat, tugmai mudavvari Messages */
 .ig-messages-fab { position: fixed; z-index: 40; right: 16px; bottom: calc(66px + env(safe-area-inset-bottom)); display: none; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: rgb(var(--ig-elevated-background)); color: rgb(var(--ig-primary-icon)); box-shadow: 0 4px 16px rgb(0 0 0 / .35); }
-@media (max-width: 1159px) { .ig-messages-fab { display: grid; } }
+/* Mobil (< 768px): Messages dar menyui poyon — tugmai mudavvar tugmai Save-i post-ro mepushonad */
+@media (min-width: 768px) and (max-width: 1159px) { .ig-messages-fab { display: grid; } }
 @media (min-width: 768px) and (max-width: 1159px) { .ig-messages-fab { bottom: 24px; } }
 @media (max-width: 767px) {
   .ig-home { padding: 0 0 24px; gap: 0; }

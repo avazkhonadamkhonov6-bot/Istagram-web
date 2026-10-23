@@ -3,6 +3,9 @@ import { Suspense } from "react";
 import { getServerProfileData } from "@/lib/server-api";
 import { ProfileView } from "@/features/profile/components/profile-view";
 
+// This authenticated screen renders per request; skip instant-navigation assertions.
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: {

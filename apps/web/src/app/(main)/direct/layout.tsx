@@ -4,6 +4,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { DirectShell } from "@/features/direct/components/direct-shell";
 import "./direct.css";
 
+// This authenticated screen renders per request; skip instant-navigation assertions.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Inbox • Direct" };
 
 export default function DirectLayout({ children }: LayoutProps<"/direct">) {

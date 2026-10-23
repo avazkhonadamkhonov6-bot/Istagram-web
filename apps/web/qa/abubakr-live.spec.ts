@@ -30,10 +30,10 @@ test("live feed like, save, comment and share", async ({ page }) => {
   ).toHaveValue("");
   await card.getByRole("button", { name: "Share", exact: true }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Search recipients").fill("user2");
-  await dialog.getByRole("button", { name: /user2 User 2/ }).click();
+  await dialog.getByLabel("Search people").fill("user2");
+  await dialog.getByRole("button", { name: "Share with user2" }).click();
   await dialog.getByRole("button", { name: "Send", exact: true }).click();
-  await expect(page.getByText("Post sent", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sent", { exact: true })).toBeVisible();
 });
 
 test("live create, hashtag, post detail and saved profile", async ({

@@ -25,7 +25,14 @@ export async function api<T>(path: string, init: RequestInit & { schema?: Schema
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname)}`);
   }
-  if (!res.ok || !body) throw new ApiError(res.status, body?.errors ?? [], body?.code);
+  if (!res.ok || !body) {
+    // Javobi gayr-JSON (sahifai 502-i Render hangomi restart / deploy) — matni fahmo ba joi "HTTP 502"
+    const fallback =
+      res.status >= 502 && res.status <= 504
+        ? ["The server is restarting. Try again in a moment."]
+        : [];
+    throw new ApiError(res.status, body?.errors?.length ? body.errors : fallback, body?.code);
+  }
 
   if (schema) {
     const parsed = schema.safeParse(body.data);

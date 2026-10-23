@@ -7,6 +7,7 @@ import { UPLOAD_TIMEOUT_MS, apiFetch, clearToken, clientIp, forbiddenOrigin, isS
  * - /api/images/<fileName> → faylhoi API (bidun token)
  * - Login/register faqat tavassuti /api/auth/* (vagarna token ba JS merasid)
  */
+const RETRY_STATUS = new Set([502, 503, 504]);
 const BLOCKED = new Set(["account/login", "account/register", "account/ws-ticket"]);
 // range / content-range: audio va video-ro Safari faqat bo darxosthoi qismi (206) bozi mekunad
 const PASS_REQUEST_HEADERS = ["content-type", "accept", "x-request-id", "range", "if-range"];
@@ -45,9 +46,8 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
   const isImage = path[0] === "images";
   const token = isImage ? undefined : await readToken();
 
-  let res: Response;
-  try {
-    res = await apiFetch(`/${target}${req.nextUrl.search}`, {
+  const send = () =>
+    apiFetch(`/${target}${req.nextUrl.search}`, {
       method: req.method,
       headers,
       token,
@@ -57,8 +57,25 @@ async function handle(req: NextRequest, ctx: RouteContext<"/api/[...path]">) {
       // stream-i body (multipart) bidun buffer
       ...(mutating ? { duplex: "half" } : {}),
     } as RequestInit & { token?: string; timeoutMs?: number });
+
+  let res: Response;
+  try {
+    res = await send();
+    // Render (free) hangomi bedorshavi / deploy 502-503 medihad yo pevastagiro mebandad —
+    // GET bexatar ast, 2 bori digar bo intizor (1 s, 3 s) takror meshavad. POST/PUT takror nameshavand.
+    for (const wait of mutating ? [] : [1000, 3000]) {
+      if (!RETRY_STATUS.has(res.status)) break;
+      await new Promise((r) => setTimeout(r, wait));
+      res = await send();
+    }
   } catch (err) {
-    return upstreamError(err);
+    if (mutating || (err instanceof DOMException && err.name === "TimeoutError")) return upstreamError(err);
+    try {
+      await new Promise((r) => setTimeout(r, 1500));
+      res = await send();
+    } catch (retryErr) {
+      return upstreamError(retryErr);
+    }
   }
 
   // Token-i kuhna → cookie pok, front ba /login meravad

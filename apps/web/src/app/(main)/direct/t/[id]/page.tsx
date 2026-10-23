@@ -2,6 +2,9 @@ import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { ChatWindow } from "@/features/direct/components/chat-window";
 
+// This authenticated screen renders per request; skip instant-navigation assertions.
+export const instant = false;
+
 /** /direct/t/[id] — chat (Spec 08). `params` faqat dar daxili <Suspense> xonda meshavad (Next 16). */
 export default function ThreadPage({ params }: PageProps<"/direct/t/[id]">) {
   return (
