@@ -80,8 +80,9 @@ function Toggle({ checked, onChange, label, disabled }: { checked: boolean; onCh
       )}
     >
       <span
+        aria-hidden="true"
         className={cn(
-          "absolute top-0.5 size-5 rounded-full bg-ig-bg-primary transition-transform",
+          "absolute left-0 top-0.5 size-5 rounded-full bg-ig-bg-primary transition-transform",
           checked ? "translate-x-[22px]" : "translate-x-0.5",
         )}
       />
