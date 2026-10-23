@@ -106,11 +106,13 @@ export function Translator() {
     let frame = 0;
     let retry = 0;
     let retries = 0;
-    // Guzari purra; agar qisme hanuz hydrate nashuda bud — boz pas az 300 ms (to 30 bor)
+    // Guzari purra; agar qisme hanuz hydrate nashuda bud — boz: avval har 300 ms (30 bor), ba'd har 2 s
+    // (dar dev kompilyatsiya / internet-i sust hydration metavonad der shavad)
     const fullPass = () => {
+      retry = 0;
       skipped = false;
       translateNode(document.body, lang);
-      if (skipped && retries++ < 30) retry = window.setTimeout(fullPass, 300);
+      if (skipped) retry = window.setTimeout(fullPass, retries++ < 30 ? 300 : 2000);
     };
     fullPass();
     const flush = () => {
@@ -121,10 +123,7 @@ export function Translator() {
       nodes.forEach((n) => n.isConnected && translateNode(n, lang));
       if (skipped && !retry) {
         retries = 0;
-        retry = window.setTimeout(() => {
-          retry = 0;
-          fullPass();
-        }, 300);
+        retry = window.setTimeout(fullPass, 300);
       }
     };
     const observer = new MutationObserver((records) => {

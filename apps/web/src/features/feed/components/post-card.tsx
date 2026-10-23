@@ -1,4 +1,5 @@
 "use client";
+import { SeeTranslation } from "@/components/see-translation";
 import Image from "next/image";
 import { FeedVideo } from "@/components/ui/feed-video";
 
@@ -243,6 +244,9 @@ export function PostCard({
             </button>
           ) : null}
         </p>
+      ) : null}
+      {post.content ? (
+        <SeeTranslation text={post.content} className="mt-1" />
       ) : null}
 
       {!post.commentsDisabled && post.commentCount > 0 ? (

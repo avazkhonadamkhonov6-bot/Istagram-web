@@ -34,6 +34,20 @@ const TYPES = [
   "video/webm",
   "video/quicktime",
 ];
+// Mahdudiyatho (Spec 12 §1, misli Instagram): aks to 10 MB, video to 100 MB; reel to 3 daqiqa, story to 60 s
+const MAX_IMAGE_MB = 10;
+const MAX_VIDEO_MB = 100;
+const MAX_SECONDS = { post: 180, reel: 180, story: 60 } as const;
+// Windows / Android baze tipi faylro namedihand (file.type = "") — az pasvand
+const TYPE_BY_EXT: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif",
+  mp4: "video/mp4", m4v: "video/mp4", webm: "video/webm", mov: "video/quicktime", qt: "video/quicktime",
+};
+function withType(file: File) {
+  if (TYPES.includes(file.type)) return file;
+  const type = TYPE_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""];
+  return type ? new File([file], file.name, { type, lastModified: file.lastModified }) : file;
+}
 const ratios = {
   Original: "auto",
   Square: "1 / 1",
@@ -153,8 +167,9 @@ export function CreateModal() {
     setRatio("auto");
     upload.reset();
   };
-  const pick = async (files: File[]) => {
+  const pick = async (picked: File[]) => {
     setError("");
+    const files = picked.map(withType);
     if (!files.length) return;
     if (files.length > (kind === "post" ? 10 : 1)) {
       setError(
@@ -172,10 +187,10 @@ export function CreateModal() {
     }
     if (
       files.some(
-        (f) => f.size > (f.type.startsWith("video/") ? 100 : 10) * 1024 * 1024,
+        (f) => f.size > (f.type.startsWith("video/") ? MAX_VIDEO_MB : MAX_IMAGE_MB) * 1024 * 1024,
       )
     ) {
-      setError("Images must be under 10 MB and videos under 100 MB.");
+      setError(`Images must be under ${MAX_IMAGE_MB} MB and videos under ${MAX_VIDEO_MB} MB.`);
       return;
     }
     for (const file of files.filter((f) => f.type.startsWith("video/"))) {
@@ -188,18 +203,19 @@ export function CreateModal() {
             const duration = video.duration;
             video.removeAttribute("src");
             video.load();
-            if (duration <= (kind === "story" ? 60 : 90)) resolve();
+            if (!Number.isFinite(duration) || duration <= MAX_SECONDS[kind]) resolve();
             else
               reject(
                 new Error(
                   kind === "story"
                     ? "Stories can be up to 60 seconds."
-                    : "Videos can be up to 90 seconds.",
+                    : "Videos can be up to 3 minutes.",
                 ),
               );
           };
-          video.onerror = () =>
-            reject(new Error("This video could not be opened."));
+          // Masalan .mov-i iPhone (HEVC) dar Chrome kushoda nameshavad, vale server onro qabul mekunad —
+          // davomnokiro sanjida nametavonem, man' namekunem
+          video.onerror = () => resolve();
           video.src = url;
         });
       } catch (e) {
@@ -315,6 +331,9 @@ export function CreateModal() {
             </div>
             <Images className="size-20 stroke-1" />
             <p className="text-xl">Drag photos and videos here</p>
+            <p className="-mt-3 text-center text-xs text-ig-text-secondary">
+              {kind === "story" ? "Photo up to 10 MB or video up to 100 MB, 60 seconds" : kind === "reel" ? "MP4, MOV or WebM up to 100 MB, 3 minutes" : "Photos up to 10 MB, videos up to 100 MB and 3 minutes"}
+            </p>
             <Button onClick={() => input.current?.click()}>
               <Upload className="size-4" /> Select from computer
             </Button>
@@ -325,8 +344,8 @@ export function CreateModal() {
               aria-label="Choose media"
               accept={
                 kind === "reel"
-                  ? TYPES.filter((t) => t.startsWith("video")).join(",")
-                  : TYPES.join(",")
+                  ? [...TYPES.filter((t) => t.startsWith("video")), ".mp4", ".m4v", ".mov", ".webm"].join(",")
+                  : [...TYPES, ".mp4", ".m4v", ".mov", ".webm"].join(",")
               }
               multiple={kind === "post"}
               onChange={(e) => {
