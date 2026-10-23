@@ -1,4 +1,5 @@
 "use client";
+import { SeeTranslation } from "@/components/see-translation";
 import { postDtoSchema, type PostDto } from "@repo/shared";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -260,6 +261,7 @@ function Reel({ post, loadMore }: { post: PostDto; loadMore?: () => void }) {
             </button>
           )}
           <p className="line-clamp-3 leading-5">{post.content}</p>
+          <SeeTranslation text={post.content} onMedia className="mt-1" />
         </div>
         <div className="absolute bottom-5 right-2 flex flex-col items-center gap-5 md:hidden">
           <button

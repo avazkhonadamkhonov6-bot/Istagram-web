@@ -558,3 +558,13 @@
 - [x] Reel ba 3 nafar firistoda shud, 3 chat soxta shud
 - [x] Tarjimai Русский / Tojiki dar Home, Explore, Reels, Direct, Profil, Settings — bidun xatoi hydration
 - [x] API e2e 66/66, `tsc`, `eslint`
+
+### FE-33 · BFF retry, reels to 3 daqiqa, "See translation"
+- BFF: GET bo takror hangomi 502/503/504 va xatoi shabaka (Render free)
+- Create: tipi fayl az pasvand, reel to 3 daq., .mov-i HEVC, matni mahdudiyat (10 MB / 100 MB)
+- `/api/translate` + `SeeTranslation` dar caption-hoi feed / post / reels va har comment
+
+**Tayyor, agar:**
+- [x] Reel 38 MB tavassuti BFF bor shud
+- [x] "Показать перевод" dar reels va dar har comment kor mekunad
+- [x] UI QA 19/19, `tsc`, `eslint`, `next build`

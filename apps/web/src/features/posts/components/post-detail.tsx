@@ -1,4 +1,5 @@
 "use client";
+import { SeeTranslation } from "@/components/see-translation";
 import Image from "next/image";
 import { FeedVideo } from "@/components/ui/feed-video";
 
@@ -84,6 +85,7 @@ function CommentRow({
           </Link>
           {renderCaption(comment.comment)}
         </p>
+        <SeeTranslation text={comment.comment} className="mt-1" />
         <div className="mt-2 flex items-center gap-3 text-xs leading-4 text-ig-text-secondary">
           <span>{formatRelativeTime(Date.parse(comment.dateCommented))}</span>
           {comment.isPinned && <span>Pinned</span>}
@@ -440,6 +442,7 @@ export function PostDetail({
                   </Link>
                   {renderCaption(post.content)}
                 </p>
+                <SeeTranslation text={post.content} className="mt-1" />
                 <p className="mt-2 text-xs text-ig-text-secondary">
                   {formatRelativeTime(Date.parse(post.datePublished))}
                 </p>
