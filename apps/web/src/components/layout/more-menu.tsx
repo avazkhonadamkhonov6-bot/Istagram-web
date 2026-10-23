@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { AtSign, Grid2X2, LogOut, MessageCircle } from "lucide-react";
+import { AtSign, Globe, Grid2X2, LogOut, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { LanguageDialog } from "@/components/language-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +22,7 @@ export function MoreMenu() {
   const logoutMutation = useLogout();
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
+  const [langOpen, setLangOpen] = useState(false);
 
   const username = me?.userName ?? CURRENT_USERNAME;
   const labelCls = "ig-sidebar-label";
@@ -64,6 +67,10 @@ export function MoreMenu() {
           )}
           Switch appearance
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setLangOpen(true)}>
+          <Globe className="size-5" />
+          Language
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           destructive
@@ -81,6 +88,7 @@ export function MoreMenu() {
         <DropdownMenuItem asChild><a href="https://www.threads.com/" target="_blank" rel="noreferrer"><AtSign className="size-6" />Threads</a></DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <LanguageDialog open={langOpen} onOpenChange={setLangOpen} />
     </>
   );
 }

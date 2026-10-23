@@ -4,7 +4,6 @@ import {
   userProfileSchema,
   type ChatDto,
   type MessageDto,
-  type UserListItem,
   type UserProfile,
 } from "@repo/shared";
 import { api } from "@/lib/api-client";
@@ -60,13 +59,8 @@ export const editMessage = (messageId: number, text: string) =>
 
 export const leaveGroup = (chatId: number) => api<boolean>(`/Chat/leave-group?chatId=${chatId}`, { method: "DELETE" });
 
-type Paged<T> = { data: T[] };
-
-export async function searchUsers(q: string): Promise<UserListItem[]> {
-  const res = await fetch(`/api/User/get-users?UserName=${encodeURIComponent(q)}&PageSize=10`, { credentials: "same-origin" });
-  if (!res.ok) return [];
-  return ((await res.json()) as Paged<UserListItem>).data;
-}
+/** Justujui user — yak funksiya baroi hama (api-client + Zod), nig. features/search */
+export { searchUsers } from "@/features/search/api";
 
 export const addGroupMembers = (chatId: number, userIds: string[]) =>
   api<boolean>("/Chat/add-group-members", { method: "POST", ...json({ chatId, userIds }) });

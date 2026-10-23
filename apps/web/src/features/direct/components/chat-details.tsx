@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChatDto, UserListItem } from "@repo/shared";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,8 @@ import { toast } from "@/components/ui/toast";
 import { relationAction } from "@/features/social/api";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { addGroupMembers, deleteChat, leaveGroup, searchUsers, updateGroup } from "../api";
+import { useUserSearch } from "@/features/search/hooks";
+import { addGroupMembers, deleteChat, leaveGroup, updateGroup } from "../api";
 import { directKeys, peerOf } from "../hooks";
 
 /**
@@ -250,7 +251,7 @@ function AddPeopleDialog({
     onOpenChange(value);
   };
 
-  const search = useQuery({ queryKey: ["user-search", term], queryFn: () => searchUsers(term), enabled: term.length > 0 });
+  const search = useUserSearch(term, term.length > 0);
   const results = term ? (search.data ?? []).filter((u) => !exclude.includes(u.id)) : [];
 
   async function submit() {
