@@ -302,7 +302,7 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
               playsInline
               muted
               // Bo flash preview ham ravshantar — taqriban misli aksi natija
-              style={flashOn ? { filter: "brightness(1.3) contrast(1.05)" } : undefined}
+              style={flashOn ? { filter: "brightness(1.4) contrast(1.12) saturate(1.12)" } : undefined}
               className={cn("size-full object-cover", facing === "user" && "-scale-x-100")}
             />
           )}

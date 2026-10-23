@@ -148,6 +148,7 @@ const ROWS: [string, string, string][] = [
   ["Message", "Сообщение", "Paym"],
   ["Suggested for you", "Рекомендации для вас", "Baroi shumo"],
   ["Suggested", "Рекомендуемые", "Tavsiyaho"],
+  ["Add to your story", "Добавить в историю", "Ilova ba story"],
   ["Your story", "Ваша история", "Story-i shumo"],
   ["Be the first to like this", "Станьте первым, кому это понравится", "Avvalin shaved, ki like mekunad"],
   ["Be the first to", "Станьте первым, кто", "Avvalin shaved, ki"],

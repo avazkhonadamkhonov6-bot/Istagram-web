@@ -31,26 +31,55 @@ export function StoriesTray() {
     };
   }, [qc]);
   const liveUsers = new Set((lives.data ?? []).map((l) => l.user.id));
+  // Story-i xudam — dar doirai "Your story" (misli Instagram), na alohida dar ruyxat
+  const mine = stories.data?.find((u) => u.userId === me?.userId && u.stories.length > 0);
   return (
     <section
       aria-label="Stories"
       className="ig-stories-tray no-scrollbar -mx-2 mb-5 flex gap-4 overflow-x-auto px-2 py-2"
     >
-      <button
-        onClick={() => create(true)}
-        className="ig-story-item flex shrink-0 flex-col items-center gap-2"
-        aria-label="Your story"
-      >
-        <span className="ig-story-frame relative p-[5px]">
-          <SmallAvatar
-            src={mediaUrl(me?.image)}
-            name={me?.userName ?? "You"}
-            className="ig-story-avatar"
-          />
-          <Plus className="absolute bottom-0 right-0 size-5 rounded-full border-2 border-ig-bg bg-ig-primary text-ig-text-on-color" />
-        </span>
-        <span className="text-xs text-ig-text-secondary">Your story</span>
-      </button>
+      {mine ? (
+        <div className="ig-story-item relative flex shrink-0 flex-col items-center gap-2">
+          <Link
+            aria-label="Your story"
+            href={`/stories/${encodeURIComponent(mine.userName)}`}
+            className="flex flex-col items-center gap-2"
+          >
+            <StoryRing
+              className="ig-story-frame"
+              state={mine.hasUnseen ? (mine.hasCloseFriends ? "close-friends" : "unseen") : "seen"}
+            >
+              <SmallAvatar src={mediaUrl(me?.image)} name={me?.userName ?? "You"} className="ig-story-avatar" />
+            </StoryRing>
+            <span className="text-xs text-ig-text-secondary">Your story</span>
+          </Link>
+          {/* "+" — story-i nav; click ba doira — didani story-i xud */}
+          <button
+            type="button"
+            onClick={() => create(true)}
+            aria-label="Add to your story"
+            className="absolute right-0 top-[calc(var(--ig-story-avatar-size)-12px)] rounded-full"
+          >
+            <Plus className="size-5 rounded-full border-2 border-ig-bg bg-ig-primary text-ig-text-on-color" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => create(true)}
+          className="ig-story-item flex shrink-0 flex-col items-center gap-2"
+          aria-label="Your story"
+        >
+          <span className="ig-story-frame relative p-[5px]">
+            <SmallAvatar
+              src={mediaUrl(me?.image)}
+              name={me?.userName ?? "You"}
+              className="ig-story-avatar"
+            />
+            <Plus className="absolute bottom-0 right-0 size-5 rounded-full border-2 border-ig-bg bg-ig-primary text-ig-text-on-color" />
+          </span>
+          <span className="text-xs text-ig-text-secondary">Your story</span>
+        </button>
+      )}
       {(lives.data ?? []).map((live) => (
         <Link
           key={`live-${live.liveId}`}
@@ -89,7 +118,7 @@ export function StoriesTray() {
         </button>
       ) : (
         stories.data
-          ?.filter((u) => u.stories.length > 0 && !liveUsers.has(u.userId))
+          ?.filter((u) => u.stories.length > 0 && !liveUsers.has(u.userId) && u.userId !== me?.userId)
           .map((u) => (
             <Link
               key={u.userId}
