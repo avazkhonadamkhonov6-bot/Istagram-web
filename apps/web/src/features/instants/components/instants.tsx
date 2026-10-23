@@ -9,14 +9,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { boostExposure, brighten } from "../enhance";
+import { boostExposure, captureFrames, enhance } from "../enhance";
 import { addInstant, deleteInstant, getInstantArchive, getInstants, instantKeys, viewInstant } from "../api";
 
 type Mode = "camera" | "viewer" | "archive";
 
 const FLASH_KEY = "ig-instant-flash";
 // Chand ms ekran safed pesh az aks — kamera ravshaniro qabul kunad
-const FLASH_MS = 450;
+const FLASH_MS = 600;
 
 const TILT = [-8, 6, -2];
 
@@ -173,7 +173,7 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
     let cancelled = false;
     if (!navigator.mediaDevices?.getUserMedia) return;
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: facing, aspectRatio: 3 / 4 }, audio: false })
+      .getUserMedia({ video: { facingMode: facing, aspectRatio: 3 / 4, height: { ideal: 1280 } }, audio: false })
       .then((s) => {
         if (cancelled) return s.getTracks().forEach((t) => t.stop());
         stream = s;
@@ -224,24 +224,27 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
       return !on;
     });
 
-  const capture = useCallback((boost: boolean) => {
+  const capture = useCallback(async (boost: boolean) => {
     const video = videoRef.current;
     if (!video?.videoWidth) return;
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: boost });
     if (!ctx) return;
     // Kamerai pesh oinavor namoyon meshavad — aks ham hamon tavr
-    if (facing === "user") {
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, 0, 0);
-    // Flash: aks voqean ravshan meshavad (auto-levels + gamma az ruyi pikselho)
+    const mirror = facing === "user";
     if (boost) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      brighten(ctx, canvas.width, canvas.height);
+      // Flash ("night mode"): 8 kadr → miyona (shovqin kam), white balance, denoise, ravshani
+      const img = await captureFrames(video, ctx, mirror);
+      enhance(img);
+      ctx.putImageData(img, 0, 0);
+    } else {
+      if (mirror) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0);
     }
     setFlash(true);
     setTimeout(() => setFlash(false), 150);
@@ -251,13 +254,16 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
   const shoot = useCallback(async () => {
     if (!flashOn) return capture(false);
     setLighting(true);
-    // Kamera: exposure / brightness-i baland va torch (agar dastgiri kunad)
+    // Kamera: exposure-i baland va torch (agar dastgiri kunad)
     const restore = await boostExposure(streamRef.current?.getVideoTracks()[0]);
-    // Kamera ba ravshanii nav moslashavad (auto-exposure), ba'd aks
-    await new Promise((r) => setTimeout(r, FLASH_MS));
-    capture(true);
-    setLighting(false);
-    await restore();
+    try {
+      // Kamera ba ravshanii nav moslashavad (auto-exposure), ba'd kadrho — ekran to oxir safed
+      await new Promise((r) => setTimeout(r, FLASH_MS));
+      await capture(true);
+    } finally {
+      setLighting(false);
+      await restore();
+    }
   }, [flashOn, capture]);
 
   return (
@@ -302,7 +308,7 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
               playsInline
               muted
               // Bo flash preview ham ravshantar — taqriban misli aksi natija
-              style={flashOn ? { filter: "brightness(1.4) contrast(1.12) saturate(1.12)" } : undefined}
+              style={flashOn ? { filter: "brightness(1.25)" } : undefined}
               className={cn("size-full object-cover", facing === "user" && "-scale-x-100")}
             />
           )}
