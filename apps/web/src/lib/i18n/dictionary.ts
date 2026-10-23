@@ -73,6 +73,8 @@ const ROWS: [string, string, string][] = [
   ["Details", "Подробнее", "Tafsilot"],
   ["Something went wrong", "Что-то пошло не так", "Chizi xato shud"],
   ["Something went wrong. Try again.", "Что-то пошло не так. Повторите попытку.", "Chizi xato shud. Boz kushish kuned."],
+  ["The server is restarting. Try again in a moment.", "Сервер перезапускается. Повторите через минуту.", "Server az nav ba kor medaroyad. Pas az yak daqiqa boz kushish kuned."],
+  ["The server is taking too long to respond. Please try again in a moment.", "Сервер долго не отвечает. Повторите через минуту.", "Server der javob medihad. Pas az yak daqiqa boz kushish kuned."],
   ["No internet connection", "Нет подключения к интернету", "Internet nest"],
 
   // Auth

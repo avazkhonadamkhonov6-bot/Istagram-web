@@ -13,6 +13,9 @@ import { PrismaService } from './prisma.service';
 sharp.cache(false);
 sharp.concurrency(1);
 
+/** Andozai maks. baroi nusxai fayl dar DB (video-i kalon — faqat disk) */
+const DB_BACKUP_MAX_BYTES = 20 * 1024 * 1024;
+
 /** Nomi bexatari fayl (bidun `/`, `..`) — baroi bor kardan az DB */
 const SAFE_NAME = /^[\w-]+(\.[\w-]+)*$/;
 
@@ -135,7 +138,13 @@ export class StorageService {
     if (!ext) throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.MEDIA_TYPE_NOT_ALLOWED);
     const fileName = `${id}${ext}`;
     await writeFile(join(this.root, fileName), file.buffer);
-    await this.prisma.mediaFile.create({ data: { name: fileName, data: new Uint8Array(file.buffer) } });
+    // Nusxa dar DB (disk-i Render pas az restart pok meshavad). Fayli kalon ba DB namegudarad:
+    // Prisma onro dar RAM chand bor nusxa mekunad → Render (512 MB) "exceeded its memory limit" → 502
+    if (file.size <= DB_BACKUP_MAX_BYTES) {
+      await this.prisma.mediaFile.create({ data: { name: fileName, data: file.buffer as Uint8Array<ArrayBuffer> } });
+    } else {
+      this.logger.warn(`${fileName} (${Math.round(file.size / 1048576)} MB) faqat dar disk — nusxai DB baroi > 20 MB nest`);
+    }
     return fileName;
   }
 
