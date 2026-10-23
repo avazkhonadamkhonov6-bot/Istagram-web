@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import { SettingsNav } from "@/features/account/components/settings-nav";
 
+// This authenticated screen renders per request; skip instant-navigation assertions.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Settings" };
 
 export default function AccountsLayout({ children }: { children: ReactNode }) {

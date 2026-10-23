@@ -175,7 +175,7 @@ function CallScreen() {
   const showVideo = peer.isVideo && phase !== "ended";
 
   return (
-    <div role="dialog" aria-label={`Call with ${peer.name}`} className="fixed inset-0 z-[60] flex flex-col bg-neutral-950 text-white">
+    <div role="dialog" aria-label={`Call with ${peer.name}`} className="fixed inset-0 z-[60] flex flex-col bg-black text-ig-text-on-media">
       {/* Video-hoi tarafi digar; dar audio — faqat ovoz */}
       {showVideo && remoteEntries.length > 0 ? (
         <div className={cn("grid flex-1 gap-1", remoteEntries.length > 1 && "grid-cols-2")}>
