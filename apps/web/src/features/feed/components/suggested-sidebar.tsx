@@ -25,7 +25,7 @@ function SuggestedRow({ user }: { user: Suggestion }) {
 
   return (
     <li className="flex items-center gap-3 py-2">
-      <Link href={`/${user.userName}`} className="shrink-0">
+      <Link href={`/${user.userName}`} aria-label={`Profile of ${user.userName}`} className="shrink-0">
         <SmallAvatar
           src={mediaUrl(user.avatar)}
           name={user.userName}
@@ -63,7 +63,7 @@ export function SuggestedSidebar() {
     <section aria-label="Suggested for you" className="pl-4">
       {me ? (
         <div className="mb-4 flex items-center gap-3">
-          <Link href={`/${me.userName}`} className="shrink-0">
+          <Link href={`/${me.userName}`} aria-label={`Profile of ${me.userName}`} className="shrink-0">
             <SmallAvatar
               src={mediaUrl(me.image)}
               name={me.userName}
@@ -95,7 +95,7 @@ export function SuggestedSidebar() {
         ))}
       </ul>
 
-      <footer className="mt-6 text-xs leading-4 text-ig-text-tertiary">
+      <footer className="mt-6 text-xs leading-4 text-ig-text-secondary">
         <ul className="flex flex-wrap">
           {FOOTER_LINKS.map((label, i) => (
             <li key={label}>

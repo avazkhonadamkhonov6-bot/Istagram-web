@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-22",
+  "environment": "local production, dedicated PostgreSQL QA database, desktop Microsoft Edge, Lighthouse 12.8.2",
+  "lcpUnit": "milliseconds",
+  "pages": [
+    {
+      "path": "/",
+      "performance": 100,
+      "accessibility": 100,
+      "lcp": 182.7512,
+      "cls": 0.00185886488340192
+    },
+    {
+      "path": "/user1",
+      "performance": 100,
+      "accessibility": 100,
+      "lcp": 381.90528595581054,
+      "cls": 6.642661179698217e-05
+    }
+  ]
+}

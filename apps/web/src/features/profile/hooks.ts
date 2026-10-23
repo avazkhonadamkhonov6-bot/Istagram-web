@@ -6,12 +6,16 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { getUserReels, getFollowStatus } from "@/features/social/api";
-import type { UserProfile } from "@repo/shared";
+import {
+  getUserReels,
+  getFollowStatus,
+  getTagged,
+} from "@/features/social/api";
+import type { PostDto, UserProfile } from "@repo/shared";
 import { toast } from "@/components/ui/toast";
 import * as profileApi from "./api";
 
-export type GridKind = "posts" | "saved" | "reels";
+export type GridKind = "posts" | "saved" | "reels" | "tagged";
 export type FollowListKind = "followers" | "following";
 
 export const profileKeys = {
@@ -39,15 +43,24 @@ export function useIsFollowing(userId: string, enabled: boolean) {
   });
 }
 
-export function useGridPosts(kind: GridKind, userId: string) {
+export function useGridPosts(
+  kind: GridKind,
+  userId: string,
+  initialData?: PostDto[],
+) {
   return useInfiniteQuery({
+    initialData: initialData
+      ? { pages: [initialData], pageParams: [1] }
+      : undefined,
     queryKey: profileKeys.grid(kind, userId),
     queryFn: ({ pageParam }) =>
       kind === "saved"
         ? profileApi.getSavedPage(pageParam)
-        : kind === "reels"
-          ? getUserReels(userId, pageParam)
-          : profileApi.getUserPosts(userId, pageParam),
+        : kind === "tagged"
+          ? getTagged(userId, pageParam)
+          : kind === "reels"
+            ? getUserReels(userId, pageParam)
+            : profileApi.getUserPosts(userId, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last, all) =>
       last.length < profileApi.GRID_PAGE_SIZE ? undefined : all.length + 1,
@@ -65,7 +78,11 @@ export function useFollowList(kind: FollowListKind, userId: string) {
 }
 
 export function useFollowStatus(userId: string, enabled = true) {
-  return useQuery({ queryKey: profileKeys.followStatus(userId), queryFn: () => getFollowStatus(userId), enabled });
+  return useQuery({
+    queryKey: profileKeys.followStatus(userId),
+    queryFn: () => getFollowStatus(userId),
+    enabled,
+  });
 }
 
 export function useToggleFollow(profile: UserProfile) {
@@ -122,7 +139,10 @@ export function useToggleFollow(profile: UserProfile) {
     },
     onSuccess: (res) => {
       qc.setQueryData(profileKeys.isFollow(profile.userId), res.isFollowing);
-      qc.setQueryData(profileKeys.followStatus(profile.userId), res.isRequested ? "requested" : res.isFollowing ? "following" : "none");
+      qc.setQueryData(
+        profileKeys.followStatus(profile.userId),
+        res.isRequested ? "requested" : res.isFollowing ? "following" : "none",
+      );
       void qc.invalidateQueries({ queryKey: ["feed"] });
       qc.setQueryData<UserProfile | null>(
         profileKeys.byName(profile.userName),

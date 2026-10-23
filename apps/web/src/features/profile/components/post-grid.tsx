@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { PostDto } from "@repo/shared";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Pin } from "lucide-react";
 import { useUiStore } from "@/store/ui.store";
 import { Play } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +37,12 @@ function Thumb({ post }: { post: PostDto }) {
           className="size-full object-cover"
         />
       ) : null}
+      {post.isPinned && (
+        <Pin
+          aria-label="Pinned post"
+          className="absolute left-2 top-2 size-5 text-ig-text-on-media"
+        />
+      )}
       {post.isReel ? (
         <Play
           aria-hidden
@@ -53,11 +59,13 @@ export function PostGrid({
   isSelf = false,
   userId,
   filter,
+  initialPosts,
 }: {
   kind: GridKind;
   isSelf?: boolean;
   userId: string;
   filter?: "posts" | "reels";
+  initialPosts?: PostDto[];
 }) {
   const {
     data,
@@ -67,8 +75,8 @@ export function PostGrid({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useGridPosts(kind, userId);
-  const create = useUiStore(s => s.setCreateOpen);
+  } = useGridPosts(kind, userId, initialPosts);
+  const create = useUiStore((s) => s.setCreateOpen);
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -121,9 +129,23 @@ export function PostGrid({
             ? "No saved posts yet."
             : filter === "reels"
               ? "No reels yet."
-              : isSelf ? "Share photos" : "No posts yet."}
+              : isSelf
+                ? "Share photos"
+                : "No posts yet."}
         </h2>
-        {kind === "posts" && isSelf && <><p className="mx-auto mt-4 max-w-[350px]">When you share photos, they will appear on your profile.</p><button className="mt-5 text-ig-link-action" onClick={() => create(true)}>Share your first photo</button></>}
+        {kind === "posts" && isSelf && (
+          <>
+            <p className="mx-auto mt-4 max-w-[350px]">
+              When you share photos, they will appear on your profile.
+            </p>
+            <button
+              className="mt-5 text-ig-link-action"
+              onClick={() => create(true)}
+            >
+              Share your first photo
+            </button>
+          </>
+        )}
         {hasNextPage && (
           <button
             disabled={isFetchingNextPage}
