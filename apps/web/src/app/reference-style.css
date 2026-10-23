@@ -32,7 +32,7 @@
 .ig-profile-highlights { width: 100%; margin: 40px auto 28px; padding-left: 14px; }
 .ig-profile-highlights button { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 12px; }
 .ig-profile-highlights button > span { display: grid; place-items: center; width: 86px; height: 86px; border: 3px solid rgb(var(--ig-stroke)); border-radius: 50%; background: rgb(var(--ig-secondary-background)); color: rgb(var(--ig-secondary-text)); box-shadow: inset 0 0 0 3px rgb(var(--ig-primary-background)); }
-.ig-profile-tabs { gap: 60px; margin-top: 16px; }
+.ig-profile-tabs { gap: clamp(4px, 5vw, 60px); margin-top: 16px; }
 .ig-profile-empty { min-height: 320px; padding-block: 60px 48px; }
 .ig-profile-page > .auth-footer { max-width: none; padding: 32px 0 64px; }
 .ig-explore-page { width: min(100% - 64px, 1408px); margin-inline: auto; padding-block: 24px 64px; }

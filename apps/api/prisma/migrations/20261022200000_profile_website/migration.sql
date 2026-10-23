@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "website" VARCHAR(2048);

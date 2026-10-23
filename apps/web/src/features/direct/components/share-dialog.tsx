@@ -82,6 +82,7 @@ export function ShareDialog({ share, onClose }: { share: ShareTarget; onClose: (
           {list.map((t) => (
             <button
               key={t.key}
+              aria-label={`Share with ${t.label}`}
               type="button"
               onClick={() => setPicked((p) => (p[t.key] ? Object.fromEntries(Object.entries(p).filter(([k]) => k !== t.key)) : { ...p, [t.key]: t }))}
               className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-ig-hover-overlay"

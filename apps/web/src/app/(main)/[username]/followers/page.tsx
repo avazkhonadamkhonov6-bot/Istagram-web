@@ -1,13 +1,13 @@
 import { Suspense } from "react";
-import { getServerProfile } from "@/lib/server-api";
+import { getServerProfileData } from "@/lib/server-api";
 import { ProfileView } from "@/features/profile/components/profile-view";
 
 async function Content({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const initialProfile = await getServerProfile(username);
+  const initial = await getServerProfileData(username);
   return (
     <ProfileView
-      initialProfile={initialProfile}
+      {...initial}
       username={decodeURIComponent(username)}
       modal="followers"
     />

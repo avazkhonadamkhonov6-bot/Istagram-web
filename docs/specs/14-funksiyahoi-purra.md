@@ -111,3 +111,10 @@
 - **AC8** Highlight story-i guzashtaro nishon medihad.
 - **AC9** Group chat: paym ba har 3 a'zo bo socket merasad.
 - **AC10** Like-i paym → tarafi digar `message:updated` megirad.
+
+## 9. Ilovai kontrakt — 2026-10-22 (FE-06 / FE-10)
+
+- `GET /Account/username-available?UserName=` public, rate limit 30/minute: `{ available: boolean, reason?: "TAKEN" | "RESERVED" }`. Username normalizes to lowercase; validation follows TZ §3. No email or account metadata is returned. Registration remains the final atomic uniqueness check.
+- `PUT /UserProfile/update-user-profile`: optional `userName`, `fullName` (1–60), `website` (HTTP(S) URL, max 2048, nullable), alongside `about` and `gender`. Unknown fields rejected. Username uses the same normalization, reserved names and database uniqueness checks as registration; conflict returns 409 `USERNAME_TAKEN`.
+- `UserProfile.website`: optional nullable URL (old DTOs remain compatible); stored in a Prisma migration. Username changes preserve user ID, follows and media ownership. UI refreshes the current profile and navigation after saving.
+- Acceptance: public availability works without a session; uppercase duplicates and reserved names are rejected; concurrent profile renames cannot create duplicates; invalid website protocols fail validation; partial profile updates preserve omitted fields.

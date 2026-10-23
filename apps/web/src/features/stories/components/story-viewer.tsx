@@ -4,11 +4,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Send, Pause, Play, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Send,
+  Pause,
+  Play,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { Spinner } from "@/components/ui/spinner";
 import { useMe } from "@/features/auth/hooks";
+import { ShareDialog } from "@/features/direct/components/share-dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { getStoryViewers, deleteStory } from "@/features/social/api";
 import { replyStory } from "@/features/social/api";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { usePost } from "@/features/posts/hooks";
@@ -21,6 +32,9 @@ export function StoryViewer({ username }: { username: string }) {
   const qc = useQueryClient();
   const query = useQuery({ queryKey: storyKey, queryFn: getStories });
   const { data: me } = useMe();
+  const [share, setShare] = useState(false);
+  const [viewersOpen, setViewersOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [holding, setHolding] = useState(false);
@@ -39,13 +53,38 @@ export function StoryViewer({ username }: { username: string }) {
   const repost = usePost(story?.postId ?? 0, !!story?.postId);
   const file = story?.fileName ?? repost.data?.images[0];
   const sendReply = useMutation({
-    mutationFn: ({ id, text }: { id: number; text: string }) => replyStory(id, text),
-    onSuccess: () => { setReply(""); toast("Reply sent"); void qc.invalidateQueries({ queryKey: ["chats"] }); },
+    mutationFn: ({ id, text }: { id: number; text: string }) =>
+      replyStory(id, text),
+    onSuccess: () => {
+      setReply("");
+      toast("Reply sent");
+      void qc.invalidateQueries({ queryKey: ["chats"] });
+    },
     onError: () => toast.error("Could not send reply."),
   });
-  const activePause = paused || holding || reply.length > 0 || sendReply.isPending;
+  const activePause =
+    share ||
+    viewersOpen ||
+    confirmDelete ||
+    paused ||
+    holding ||
+    reply.length > 0 ||
+    sendReply.isPending;
   const storyId = story?.id;
   const storyUserId = story?.userId;
+  const viewers = useQuery({
+    queryKey: ["story-viewers", storyId],
+    queryFn: () => getStoryViewers(storyId!),
+    enabled: viewersOpen && !!storyId && storyUserId === me?.userId,
+  });
+  const remove = useMutation({
+    mutationFn: () => deleteStory(storyId!),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: storyKey });
+      router.push("/");
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const heldAt = useRef(0);
   const move = useCallback(
     (direction: number) => {
@@ -65,8 +104,13 @@ export function StoryViewer({ username }: { username: string }) {
   );
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (share || viewersOpen) return;
       if (e.key === "Escape") router.push("/");
-      if (e.target instanceof HTMLElement && e.target.closest("input, textarea")) return;
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.closest("input, textarea")
+      )
+        return;
       if (e.key === "ArrowRight") move(1);
       if (e.key === "ArrowLeft") move(-1);
       if (e.code === "Space") {
@@ -74,9 +118,9 @@ export function StoryViewer({ username }: { username: string }) {
         setPaused((p) => !p);
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [move, router]);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [move, router, share, viewersOpen]);
   useEffect(() => {
     if (!storyId || storyUserId === me?.userId) return;
     void viewStory(storyId)
@@ -150,6 +194,11 @@ export function StoryViewer({ username }: { username: string }) {
             className="size-full object-contain"
           />
         ) : null}
+        {story.closeFriends && (
+          <span className="absolute right-16 top-12 z-20 rounded-full bg-ig-close-friends px-3 py-1 text-xs">
+            Close friends
+          </span>
+        )}
         <div className="absolute inset-x-0 top-0 z-10 bg-ig-media-blur px-3 pb-4 pt-4">
           <div className="mb-4 flex gap-1">
             {user.stories.map((s, i) => (
@@ -213,14 +262,49 @@ export function StoryViewer({ username }: { username: string }) {
           />
         </div>
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-3 bg-ig-media-blur p-4">
-          {story.userId !== me?.userId && <form className="flex min-w-0 flex-1 items-center gap-2" onSubmit={(e) => { e.preventDefault(); if (reply.trim()) sendReply.mutate({ id: story.id, text: reply.trim() }); }}>
-            <input aria-label="Reply to story" placeholder={`Reply to ${username}…`} value={reply} maxLength={1000} onChange={(e) => setReply(e.target.value)} className="min-w-0 flex-1 rounded-full border border-ig-text-on-media/60 bg-transparent px-4 py-3 text-sm outline-none" />
-            {reply.trim() && <button type="submit" aria-label="Send reply" disabled={sendReply.isPending}><Send className="size-5" /></button>}
-          </form>}
+          {story.userId !== me?.userId && (
+            <form
+              className="flex min-w-0 flex-1 items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (reply.trim())
+                  sendReply.mutate({ id: story.id, text: reply.trim() });
+              }}
+            >
+              <input
+                aria-label="Reply to story"
+                placeholder={`Reply to ${username}…`}
+                value={reply}
+                maxLength={1000}
+                onChange={(e) => setReply(e.target.value)}
+                className="min-w-0 flex-1 rounded-full border border-ig-text-on-media/60 bg-transparent px-4 py-3 text-sm outline-none"
+              />
+              {reply.trim() && (
+                <button
+                  type="submit"
+                  aria-label="Send reply"
+                  disabled={sendReply.isPending}
+                >
+                  <Send className="size-5" />
+                </button>
+              )}
+            </form>
+          )}
           {story.userId === me?.userId ? (
             <p className="text-sm">
-              {story.viewerDto.viewCount ?? 0} views ·{" "}
-              {story.viewerDto.viewLike ?? 0} likes
+              <button onClick={() => setViewersOpen(true)}>
+                {story.viewerDto.viewCount ?? 0} views ·{" "}
+                {story.viewerDto.viewLike ?? 0} likes
+              </button>
+              <button
+                className="ml-4"
+                disabled={remove.isPending}
+                onClick={() =>
+                  confirmDelete ? remove.mutate() : setConfirmDelete(true)
+                }
+              >
+                {confirmDelete ? "Confirm delete story" : "Delete story"}
+              </button>
             </p>
           ) : (
             <Button
@@ -265,6 +349,46 @@ export function StoryViewer({ username }: { username: string }) {
       >
         <ChevronRight />
       </button>
+      <button
+        aria-label="Share story"
+        onClick={() => setShare(true)}
+        className="absolute bottom-20 right-4 z-20 rounded-full bg-ig-media-blur p-3"
+      >
+        <Send />
+      </button>
+      {share && (
+        <ShareDialog
+          share={{ storyId: story.id }}
+          onClose={() => setShare(false)}
+        />
+      )}
+      <Dialog open={viewersOpen} onOpenChange={setViewersOpen}>
+        <DialogContent className="max-w-sm p-5">
+          <DialogTitle>Story viewers</DialogTitle>
+          {viewers.isPending && <p role="status">Loading viewers…</p>}
+          {viewers.isError && (
+            <Button onClick={() => void viewers.refetch()}>
+              Retry viewers
+            </Button>
+          )}
+          {viewers.data?.length === 0 && <p>No views yet.</p>}
+          <ul className="max-h-[60dvh] overflow-y-auto">
+            {viewers.data?.map((v) => (
+              <li key={v.id} className="flex items-center gap-3 py-2">
+                <SmallAvatar src={mediaUrl(v.avatar)} name={v.userName} />
+                <Link href={`/${v.userName}`}>{v.userName}</Link>
+                {v.liked && (
+                  <Heart
+                    aria-label="Liked story"
+                    className="ml-auto size-4 text-ig-badge"
+                    fill="currentColor"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

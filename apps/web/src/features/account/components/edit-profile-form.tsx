@@ -2,24 +2,22 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  userNameSchema,
   updateUserProfileSchema,
   type UpdateUserProfileDto,
   type UserProfile,
 } from "@repo/shared";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { checkUsernameAvailable } from "@/features/auth/api";
 import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { ApiError } from "@/lib/api-client";
 import { mediaUrl } from "@/lib/media";
-import {
-  useDeleteAvatar,
-  useUpdateProfile,
-  useUploadAvatar,
-} from "../hooks";
+import { useDeleteAvatar, useUpdateProfile, useUploadAvatar } from "../hooks";
 
 const ABOUT_MAX = 150;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -41,9 +39,55 @@ function Form({ me }: { me: UserProfile }) {
     formState: { errors, isDirty },
   } = useForm<UpdateUserProfileDto>({
     resolver: zodResolver(updateUserProfileSchema),
-    defaultValues: { about: me.about ?? "", gender: me.gender === 1 ? 1 : 0 },
+    defaultValues: {
+      userName: me.userName,
+      fullName: me.fullName ?? "",
+      website: me.website ?? null,
+      about: me.about ?? "",
+      gender: me.gender === 1 ? 1 : 0,
+    },
   });
   const about = useWatch({ control, name: "about" }) ?? "";
+  const watchedUsername = useWatch({ control, name: "userName" }) ?? "";
+  const normalizedUsername = watchedUsername.trim().toLowerCase();
+  const usernameChanged = normalizedUsername !== me.userName;
+  const [availability, setAvailability] = useState<{
+    name: string;
+    status: "available" | "taken" | "reserved" | "unavailable";
+  } | null>(null);
+  const usernameStatus = usernameChanged
+    ? !userNameSchema.safeParse(normalizedUsername).success
+      ? "invalid"
+      : availability?.name === normalizedUsername
+        ? availability.status
+        : "checking"
+    : "unchanged";
+  useEffect(() => {
+    if (
+      !usernameChanged ||
+      !userNameSchema.safeParse(normalizedUsername).success
+    )
+      return;
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
+      const result = await checkUsernameAvailable(normalizedUsername);
+      if (!cancelled)
+        setAvailability({
+          name: normalizedUsername,
+          status: result.available
+            ? "available"
+            : result.reason === "TAKEN"
+              ? "taken"
+              : result.reason === "RESERVED"
+                ? "reserved"
+                : "unavailable",
+        });
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [normalizedUsername, usernameChanged]);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,11 +111,20 @@ function Form({ me }: { me: UserProfile }) {
   };
 
   const onSubmit = (values: UpdateUserProfileDto) => {
+    if (
+      usernameStatus === "taken" ||
+      usernameStatus === "reserved" ||
+      usernameStatus === "checking"
+    )
+      return;
     setMessage(null);
     setError(null);
     update.mutate(values, {
       onSuccess: (profile) => {
         reset({
+          userName: profile.userName,
+          fullName: profile.fullName ?? "",
+          website: profile.website ?? null,
           about: profile.about ?? "",
           gender: profile.gender === 1 ? 1 : 0,
         });
@@ -86,7 +139,7 @@ function Form({ me }: { me: UserProfile }) {
     <div className="max-w-[500px] space-y-6">
       <h1 className="text-xl font-semibold">Edit profile</h1>
 
-      <div className="flex items-center gap-4 rounded-xl bg-ig-bg-secondary p-4">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl bg-ig-bg-secondary p-4">
         <SmallAvatar
           src={mediaUrl(me.image)}
           name={me.userName}
@@ -131,11 +184,54 @@ function Form({ me }: { me: UserProfile }) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        <Input label="Username" value={me.userName} readOnly disabled />
-        <Input label="Name" value={me.fullName ?? ""} readOnly disabled />
-        <p className="text-xs text-ig-text-secondary">
-          Username and name cannot be changed yet.
-        </p>
+        <Input
+          label="Username"
+          maxLength={30}
+          error={
+            errors.userName?.message ||
+            (usernameStatus === "invalid"
+              ? "Use 3–30 letters, numbers, underscores or single dots."
+              : usernameStatus === "taken"
+                ? "This username isn't available."
+                : usernameStatus === "reserved"
+                  ? "This username is reserved."
+                  : undefined)
+          }
+          status={
+            usernameStatus === "available"
+              ? "success"
+              : usernameStatus === "taken" || usernameStatus === "reserved"
+                ? "error"
+                : undefined
+          }
+          {...register("userName", { onChange: () => setAvailability(null) })}
+        />
+        {usernameChanged && (
+          <p role="status" className="text-xs text-ig-text-secondary">
+            {usernameStatus === "checking"
+              ? "Checking username…"
+              : usernameStatus === "available"
+                ? "Username available"
+                : usernameStatus === "unavailable"
+                  ? "Could not check availability. Saving will verify your username."
+                  : "Choose another username."}
+          </p>
+        )}
+        <Input
+          label="Name"
+          maxLength={60}
+          error={errors.fullName?.message}
+          {...register("fullName")}
+        />
+        <Input
+          label="Website"
+          type="url"
+          maxLength={2048}
+          error={errors.website?.message}
+          {...register("website", {
+            setValueAs: (value) => value?.trim() || null,
+          })}
+        />
 
         <div>
           <label htmlFor="about" className="mb-1 block text-sm font-semibold">
@@ -173,7 +269,14 @@ function Form({ me }: { me: UserProfile }) {
         <Button
           type="submit"
           variant="primary"
-          disabled={!isDirty || update.isPending}
+          disabled={
+            !isDirty ||
+            update.isPending ||
+            usernameStatus === "taken" ||
+            usernameStatus === "reserved" ||
+            usernameStatus === "invalid" ||
+            usernameStatus === "checking"
+          }
         >
           Submit
         </Button>

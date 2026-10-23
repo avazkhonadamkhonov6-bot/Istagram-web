@@ -13,6 +13,7 @@ model User {
   id             String   @id @default(uuid())
   userName       String   @unique // hamesha lowercase
   email          String   @unique // hamesha lowercase
+  website        String?  @db.VarChar(2048)
   fullName       String?
   passwordHash   String
   avatar         String? // nomi fayl dar UPLOAD_DIR

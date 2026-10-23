@@ -2,6 +2,7 @@
 
 > Har vazifa dar GitHub **Issue**-i alohida ast (milestone = ruz, label = `backend` / `frontend` / `qa` va nomi odam).
 > **Holat (2026-10-21):** hamai vazifahoi Avaz tayyor — `[x]` tayyor va sanjida shud, `[-]` buridashud (sabab navishta shud). Tafsilot: [PROGRESS.md](PROGRESS.md), [qa/QA-01.md](qa/QA-01.md).
+> **Frontend Abubakr (2026-10-22):** FE-06/10/16/18/26/29/31 va QA-02 tayyor va dar muhiti mahalli sanjida shudand; [QA-02](qa/QA-02.md). Backend-i zaruri baroi FE-06/10 — Spec 14 §9.
 > **Kontrakti API (az 2026-10-21):** [specs/12-api-kontrakt.md](specs/12-api-kontrakt.md) — URL va DTO-ho az onjo, ne az spec-hoi 01–09. Ilovaho (Notifications, Explore, Hashtag, replies, Seen/typing/unread, share post, Suggestions) — [specs/13-ilovaho-tz.md](specs/13-ilovaho-tz.md).
 > Tartib va vaqt — dar [PLAN.md](PLAN.md). Pas az tamom: PR bo `Closes #<issue>` → Issue xud baste meshavad.
 
@@ -24,33 +25,34 @@
 | FE-03 | Abubakr | 1 | Komponenthoi UI | tayyor |
 | FE-04 | Abubakr | 1 | MSW mock | tayyor |
 | FE-05 | Abubakr | 1 | Layout (sidebar, bottom nav) | tayyor |
-| FE-06 | Abubakr | 2 | Login / Signup | qisman (API / QA-02) |
+| FE-06 | Abubakr | 2 | Login / Signup | tayyor (QA-02) |
 | FE-07 | Abubakr | 2 | Feed + PostCard | tayyor |
 | FE-08 | Abubakr | 2 | Post modal + comment-ho | tayyor |
 | FE-09 | Abubakr | 2 | Profil | tayyor |
-| FE-10 | Abubakr | 2 | Edit profile + parol | qisman (API / QA-02) |
+| FE-10 | Abubakr | 2 | Edit profile + parol | tayyor (QA-02) |
 | FE-11 | Abubakr | 3 | Explore, Hashtag, Search | tayyor |
 | FE-12 | Abubakr | 3 | Notifications panel (UI) | tayyor |
 | FE-13 | Avaz | 3 | BFF + proxy.ts + CSP | tayyor |
 | FE-14 | Abubakr | 3 | Xomush kardani mock, integratsiya | tayyor |
 | FE-15 | Avaz | 3 | Socket client + notifications realtime | tayyor |
-| FE-16 | Abubakr | 3 | Stories tray + viewer | qisman (API / QA-02) |
+| FE-16 | Abubakr | 3 | Stories tray + viewer | tayyor (QA-02) |
 | FE-17 | Avaz | 4 | Direct (front) | tayyor |
-| FE-18 | Abubakr | 4 | Create modal | qisman (API / QA-02) |
+| FE-18 | Abubakr | 4 | Create modal | tayyor (QA-02) |
 | FE-19 | Avaz | 4 | Bovarinokii front | tayyor |
 | FE-20 | Abubakr | 4 | Reels (front) | tayyor |
 | FE-21 | Avaz | 4 | Playwright e2e | tayyor |
 | FE-22 | Abubakr | 4 | Pardoz va responsive | tayyor |
 | QA-01 | Avaz | 4 | QA: spec 01, 05, 08, 09, 11 | tayyor |
-| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 | qisman (API / QA-02) |
+| QA-02 | Abubakr | 4 | QA: spec 02, 03, 04, 06, 07, 10 | tayyor (QA-02) |
 | FE-23 | Avaz | 4 | Direct-i Spec 14: group chat, dil-i paym, reply, paymi ovozi, javob ba story | tayyor |
 | FE-24 | Avaz | 4 | `/accounts/*`: Privacy + follow requests, Blocked, Muted, Restricted, Close friends, Archive | tayyor |
 | FE-25 | Avaz | 4 | `/explore/locations/[name]`, `features/social/api.ts` (hamai endpoint-hoi Spec 14), ShareDialog, ReportDialog | tayyor |
-| FE-26 | Abubakr | 4 | UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) |  |
+| FE-26 | Abubakr | 4 | UI-i Spec 14 dar sahifahoi xud (Stories, Reels, Create, Notifications, Profil, Post menu, comment) | tayyor (QA-02) |
 | BE-13 | Avaz | 4 | Backend-i [Spec 15](specs/15-funksiyahoi-ilovagi.md): remove follower, favorites + feed, pin-i comment, liked posts, user reels, tahriri paym, notes, "Active now"; seed (40 user, 35 reel, ~100 story) | tayyor |
 | FE-27 | Avaz | 4 | Direct-i Spec 15: Notes tray, tahriri paym ("Edited"), "Active now" | tayyor |
 | FE-28 | Avaz | 4 | `/accounts/favorites`, `/accounts/activity` (liked posts) | tayyor |
-| FE-29 | Abubakr | 4 | UI-i Spec 15 dar sahifahoi xud (remove follower, tab-i REELS, pin-i comment, feed-i Favorites, linkho dar More) + tokenhoi rangi Spec 10 §1.11.1 |  |
+| FE-29 | Abubakr | 4 | UI-i Spec 15 dar sahifahoi xud (remove follower, tab-i REELS, pin-i comment, feed-i Favorites, linkho dar More) + tokenhoi rangi Spec 10 §1.11.1 | tayyor (QA-02) |
+| FE-31 | Abubakr | 5 | Darvozahoi efir: Create, Stories, Notifications va LIVE dar profil | tayyor (QA-02) |
 
 ---
 
@@ -68,7 +70,7 @@
 - [x] `pnpm install && pnpm dev` → web :3000 va api :4000 kor mekunand (sanjida shud)
 - [x] `pnpm typecheck` va `pnpm lint` sabz
 - [x] Push ba `main` (PR #1)
-- [ ] Dar `CODEOWNERS` username-i GitHub-i Abubakr — username ma'lum nest (faqat e-mail dar commit)
+- [x] Dar `CODEOWNERS` frontend — @Abubakr-63 (username az Abubakr, 2026-10-22)
 
 ### BE-02 · Kontrakt: Zod schema-ho dar packages/shared
 <!-- who:avaz day:1 type:backend -->
@@ -234,11 +236,11 @@
 **Vaqt:** Ruzi 2, 09:15–11:00 · **Spec:** 01, 10 §4
 
 **Tayyor, agar:**
-- [ ] ozod/band username bo debounce 400ms
+- [x] ozod/band username bo debounce 400ms
 - [x] Xatoi `USERNAME_TAKEN` zeri maydon
 - [x] Tugma to forma durust nest — disabled
 
-**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+**Qayd (2026-10-22):** tayyor; kontrakti amaldori Spec 12–16 + Spec 14 §9 va natijahoi sanjish dar [QA-02](qa/QA-02.md).
 
 ### FE-07 · Feed + PostCard
 <!-- who:abubakr day:2 type:frontend -->
@@ -270,10 +272,10 @@
 **Vaqt:** Ruzi 2, 18:00–19:30 · **Spec:** 02, 03
 
 **Tayyor, agar:**
-- [ ] Avatar upload (presign → PUT), bio 0/150, ivazi username bo ozod/band
+- [x] Avatar upload (multipart, Spec 12), bio 0/150, ivazi username bo ozod/band
 - [x] Ivazi parol
 
-**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+**Qayd (2026-10-22):** tayyor; kontrakti amaldori Spec 12–16 + Spec 14 §9 va natijahoi sanjish dar [QA-02](qa/QA-02.md).
 
 ### FE-11 · Explore, Hashtag, Search
 <!-- who:abubakr day:3 type:frontend -->
@@ -322,9 +324,9 @@
 
 **Tayyor, agar:**
 - [x] Tray dar feed (gradient / didashuda)
-- [ ] Viewer: progress, tap chap/rost, hold, useri badi, Esc, viewers baroi xud
+- [x] Viewer: progress, tap chap/rost, hold, useri badi, Esc, viewers baroi xud
 
-**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+**Qayd (2026-10-22):** tayyor; kontrakti amaldori Spec 12–16 + Spec 14 §9 va natijahoi sanjish dar [QA-02](qa/QA-02.md).
 
 ### FE-17 · Direct (front)
 <!-- who:avaz day:4 type:frontend -->
@@ -343,7 +345,7 @@
 - [x] Intixob / drag & drop → crop → caption → Share
 - [x] Post (1–10 media), Reel (1 video), Story
 
-**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+**Qayd (2026-10-22):** tayyor; kontrakti amaldori Spec 12–16 + Spec 14 §9 va natijahoi sanjish dar [QA-02](qa/QA-02.md).
 
 ### FE-19 · Bovarinokii front
 <!-- who:avaz day:4 type:frontend -->
@@ -388,10 +390,10 @@
 **Vaqt:** Ruzi 4, 17:00–19:00
 
 **Tayyor, agar:**
-- [ ] Hamai AC-hoi in spec-ho tekshirida shudand
+- [x] AC-hoi frontend bo kontrakti amaldori Spec 12–16 sanjida shudand (hududho dar QA-02)
 - [x] Lighthouse: TZ §9 band 11
 
-**Qayd (2026-10-21):** Frontend-i dastras tayyor; mahdudiyathoi kontrakt va hudi QA dar [QA-02](qa/QA-02.md). Kori Avaz tagyir nayoftaast.
+**Qayd (2026-10-22):** tayyor; kontrakti amaldori Spec 12–16 + Spec 14 §9 va natijahoi sanjish dar [QA-02](qa/QA-02.md).
 
 ### FE-23 · Direct-i Spec 14
 <!-- who:avaz day:4 type:frontend -->
@@ -463,8 +465,8 @@
 - Rangho: tokenhoi Spec 10 §1.11.1 ba `globals.css` (light + dark)
 
 **Tayyor, agar:**
-- [ ] Spec 15 AC1–AC4 az UI kor mekunand
-- [ ] Har token-i Spec 10 §1 (bo §1.11.1) dar `globals.css` hast
+- [x] Spec 15 AC1–AC4 az UI kor mekunand
+- [x] Har token-i Spec 10 §1 (bo §1.11.1) dar `globals.css` hast
 
 ### FE-26 · UI-i Spec 14 dar sahifahoi Abubakr
 <!-- who:abubakr day:4 type:frontend -->
@@ -478,7 +480,7 @@
 - Dar `more-menu` / `settings-nav` linkho ba `/accounts/privacy` va digar sahifahoi FE-24
 
 **Tayyor, agar:**
-- [ ] Spec 14 AC1–AC8 az UI kor mekunand
+- [x] Spec 14 AC1–AC8 az UI kor mekunand
 
 ---
 
@@ -526,5 +528,5 @@
 - Profil: agar user dar efir ast — nishoni "LIVE" dar avatar
 
 **Tayyor, agar:**
-- [ ] Har se darvoza ba sahifai efir meravand
-- [ ] Mobil 375px
+- [x] Har se darvoza ba sahifai efir meravand
+- [x] Mobil 375px

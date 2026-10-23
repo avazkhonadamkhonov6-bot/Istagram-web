@@ -65,8 +65,8 @@ npx --yes pnpm@10.34.7 install
 npm run dev
 ```
 
-`npm run dev` собирает shared и запускает frontend на http://localhost:3000.
-Он использует закреплённый pnpm через npx, поэтому глобальный pnpm не требуется.
+`npm run dev` напрямую запускает установленный Next.js на http://localhost:3000
+и заранее компилирует основные страницы. Глобальный pnpm для этого запуска не требуется.
 В `apps/web/.env.local` оба URL (`API_URL`, `NEXT_PUBLIC_WS_URL`) должны указывать
 на `https://istagram-web.onrender.com`, а `NEXT_PUBLIC_API_MOCKING=off`.
 Для запуска всех локальных сервисов используйте `npm run dev:all`
@@ -98,3 +98,43 @@ pnpm --filter web test:e2e    # Playwright (Chrome-i nasbshuda), api va web-ro x
 4. Spec — kontrakt. Agar spec galat ast: avval spec, ba'd kod.
 5. **Emoji istifoda nabared** — na dar kod, na dar UI (ikonkaho faqat SVG), na dar commit, na dar hujjatho.
 6. Commit-ho kutoh va fahmo: `feat(api): auth register`, `fix(web): feed scroll`.
+
+## Проверка завершённых задач frontend
+
+Изменения FE-06/10/16/18/26/29/31 и QA-02 описаны в [QA-02](docs/qa/QA-02.md).
+Для новой версии API примените миграции (`pnpm --filter api db:deploy`):
+редактирование профиля добавляет поле `website` и публичную проверку username.
+Обновляйте API и frontend вместе.
+
+```sh
+pnpm --filter web lint
+pnpm --filter web typecheck
+pnpm --filter web build
+# API и production web уже запущены; требуется отдельная тестовая база:
+QA_LIVE_URL=http://127.0.0.1:3301 pnpm --filter web test:completion
+```
+
+Полностью локальный сценарий с отдельной базой, без изменения Render:
+
+```sh
+export NODE_ENV=test
+export DATABASE_URL=postgresql://app:app@localhost:5432/instagram_test
+export JWT_SECRET=local_test_secret_at_least_32_characters
+export API_URL=http://127.0.0.1:4400
+export NEXT_PUBLIC_WS_URL=http://127.0.0.1:4400
+export NEXT_PUBLIC_API_MOCKING=off
+export WEB_ORIGIN=http://127.0.0.1:3301
+export PORT=4400
+export UPLOAD_DIR=/tmp/instagram-qa-uploads
+pnpm --filter @repo/shared build
+pnpm --filter api db:deploy
+pnpm --filter api build
+node apps/api/test/seed-frontend.cjs
+NODE_ENV=production pnpm --filter web build
+pnpm --filter web exec playwright install chromium
+QA_START_SERVERS=1 pnpm --filter web test:completion
+```
+
+Скрипт тестовых данных разрешён только при `NODE_ENV=test` и имени базы с `test`
+или `qa`. GitHub Actions запускает эти проверки и сохраняет trace при ошибке.
+Демонстрационный маршрут: [docs/DEMO.md](docs/DEMO.md).
