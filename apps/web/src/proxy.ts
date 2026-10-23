@@ -8,6 +8,8 @@ import { REALTIME_URL } from "@/lib/backend-config";
  *    (Dar rejimi mock — NEXT_PUBLIC_API_MOCKING=on — tekshirishi cookie xomush.)
  */
 const AUTH_PAGES = ["/login", "/signup"];
+// Baroi hama: ham bidun session ("Forgot password?" dar login), ham bo session (az Change password)
+const OPEN_PAGES = ["/accounts/password/reset"];
 const PUBLIC_PREFIXES = ["/dev", "/brand/", "/auth/"];
 
 function buildCsp(nonce: string) {
@@ -36,7 +38,7 @@ export function proxy(req: NextRequest) {
   const mocking = process.env.NEXT_PUBLIC_API_MOCKING === "on";
   const hasSession = req.cookies.has("access_token");
   const isAuthPage = AUTH_PAGES.some((p) => pathname === p);
-  const isPublic = isAuthPage || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+  const isPublic = isAuthPage || OPEN_PAGES.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 
   if (!mocking && !hasSession && !isPublic) {
     const url = new URL("/login", req.url);

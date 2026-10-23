@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { FeedVideo } from "@/components/ui/feed-video";
 
 import { PostOptions } from "./post-options";
 import { SharePostDialog } from "./share-post-dialog";
@@ -276,12 +277,7 @@ export function PostDetail({
         }}
       >
         {url && isVideoFile(current) ? (
-          <video
-            src={url}
-            controls
-            playsInline
-            className="size-full object-contain"
-          />
+          <FeedVideo src={url} className="object-contain" />
         ) : url ? (
           <Image
             unoptimized

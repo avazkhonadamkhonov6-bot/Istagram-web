@@ -159,7 +159,8 @@ export function ProfileView({
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-xl font-semibold">{profile.userName}</h1>
             {isSelf && <Link href="/accounts/edit" aria-label="Settings"><Settings className="size-6" /></Link>}
-            {isSelf ? (
+            {/* To bor shudani "me" tugmaho nest — vagarna dar profili xud "Follow" lahzae namoyon meshavad */}
+            {isSelf || !me ? (
               null
             ) : (
               <>

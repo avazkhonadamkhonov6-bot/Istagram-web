@@ -30,6 +30,9 @@ const envSchema = z.object({
   TURN_URLS: z.string().optional(),
   TURN_USERNAME: z.string().optional(),
   TURN_CREDENTIAL: z.string().optional(),
+  // E-mail (kodi ivazi parol): Resend — https://resend.com; MAIL_FROM masalan 'Instagram <no-reply@domain.tj>'
+  RESEND_API_KEY: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

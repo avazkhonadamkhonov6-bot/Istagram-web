@@ -5,6 +5,7 @@ import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'node:crypto';
 import { AppException, badRequest, conflict } from '../../common/app-exception';
 import { JwtPayload } from '../../common/guards/jwt-auth.guard';
+import { MailService } from '../../infra/mail.service';
 import { PrismaService, isUniqueViolation } from '../../infra/prisma.service';
 
 /** argon2id: memoryCost 19 MB, timeCost 2 (TZ §6.1) */
@@ -22,6 +23,7 @@ export class AccountService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly mail: MailService,
   ) {}
 
   hashPassword(password: string) {
@@ -87,7 +89,12 @@ export class AccountService {
       await this.prisma.passwordResetToken.create({
         data: { userId: user.id, tokenHash: sha256(code), expiresAt: new Date(Date.now() + RESET_TTL_MS) },
       });
-      if (process.env.NODE_ENV !== 'production') this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
+      const sent = await this.mail.send(
+        email,
+        `${code} — kodi ivazi parol`,
+        `Kodi shumo baroi ivazi paroli Instagram: ${code}\n\nKod 15 daqiqa amal mekunad. Agar shumo darxost nakarded, in xatro nodida gired.`,
+      );
+      if (!sent && process.env.NODE_ENV !== 'production') this.logger.log(`Kodi ivazi parol baroi ${email}: ${code}`);
     }
     return 'Code sent';
   }

@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { FeedVideo } from "@/components/ui/feed-video";
 
 import { PostOptions } from "@/features/posts/components/post-options";
 import { SharePostDialog } from "@/features/posts/components/share-post-dialog";
@@ -125,13 +126,7 @@ export function PostCard({
         onDoubleClick={onDoubleTap}
       >
         {url && isVideoFile(current) ? (
-          <video
-            src={url}
-            controls
-            playsInline
-            preload="metadata"
-            className="size-full object-cover"
-          />
+          <FeedVideo src={url} className="object-cover" />
         ) : url ? (
           <Image
             preload={priority}
