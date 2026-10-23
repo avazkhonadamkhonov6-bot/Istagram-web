@@ -10,12 +10,21 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { AuthFooter } from "@/features/auth/components/auth-presentation";
 import * as authApi from "@/features/auth/api";
 import { ApiError } from "@/lib/api-client";
 
 type EmailForm = { Email: string };
 type ResetForm = { Email: string; Token: string; Password: string; ConfirmPassword: string };
+
+/** Xatohoi Forgot password misli Instagram (matni English, tarjima — Translator) */
+function resetErrorText(err: unknown) {
+  if (err instanceof ApiError && err.code === "EMAIL_NOT_FOUND") return "No account found with this email. Check it or create a new account.";
+  if (err instanceof ApiError && err.code === "EMAIL_NOT_SENT") return "We couldn't send the email right now. Try again in a few minutes.";
+  if (err instanceof ApiError && err.status === 429) return "Too many attempts. Wait a minute and try again.";
+  return "Couldn't send code. Try again.";
+}
 
 /**
  * /accounts/password/reset — "Trouble logging in?" misli instagram.com (Spec 12: ForgotPassword / ResetPassword).
@@ -65,7 +74,7 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
       await authApi.forgotPassword(Email);
       onSent(Email);
     } catch (err) {
-      setServerError(err instanceof ApiError ? err.message : "Couldn't send code. Try again.");
+      setServerError(resetErrorText(err));
     }
   };
 
@@ -154,7 +163,12 @@ function CodeStep({ email, onBack, onDone }: { email: string; onBack: () => void
         <button
           type="button"
           disabled={resent}
-          onClick={() => authApi.forgotPassword(email).then(() => setResent(true)).catch(() => undefined)}
+          onClick={() =>
+            authApi
+              .forgotPassword(email)
+              .then(() => setResent(true))
+              .catch((err) => toast.error(resetErrorText(err)))
+          }
           className="font-semibold text-ig-link disabled:text-ig-text-secondary"
         >
           {resent ? "Code sent" : "Resend code"}

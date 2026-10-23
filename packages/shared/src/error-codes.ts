@@ -9,6 +9,10 @@ export const ErrorCode = {
   WRONG_PASSWORD: 'WRONG_PASSWORD',
   INVALID_RESET_TOKEN: 'INVALID_RESET_TOKEN',
   USER_NOT_FOUND: 'USER_NOT_FOUND',
+  /** Forgot password: bo in e-mail akkaunt nest */
+  EMAIL_NOT_FOUND: 'EMAIL_NOT_FOUND',
+  /** Forgot password: xat firistoda nashud (Brevo / Gmail tanzim nashuda yo xato) */
+  EMAIL_NOT_SENT: 'EMAIL_NOT_SENT',
   CANNOT_FOLLOW_SELF: 'CANNOT_FOLLOW_SELF',
   POST_NOT_FOUND: 'POST_NOT_FOUND',
   COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
@@ -63,6 +67,8 @@ export const ErrorMessage: Record<ErrorCode, string> = {
   WRONG_PASSWORD: "Paroli joriy noto'g'ri ast",
   INVALID_RESET_TOKEN: "Kod noto'g'ri ast yo muhlatash guzashtaast",
   USER_NOT_FOUND: 'User yoft nashud',
+  EMAIL_NOT_FOUND: 'Bo in e-mail akkaunt yoft nashud',
+  EMAIL_NOT_SENT: "Xat firistoda nashud. Ba'dtar kushish kuned",
   CANNOT_FOLLOW_SELF: 'Ba xud follow kardan mumkin nest',
   POST_NOT_FOUND: 'Post yoft nashud',
   COMMENT_NOT_FOUND: 'Comment yoft nashud',
