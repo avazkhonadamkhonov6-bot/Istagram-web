@@ -4,11 +4,11 @@ import { expect, test } from "@playwright/test";
 test("favorites feed preserves likes across tabs", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("article").first()).toBeVisible();
-  await page.getByRole("tab", { name: "favorites", exact: true }).click();
+  await page.getByRole("tab", { name: "Favorites", exact: true }).click();
   await expect(page.locator("article")).toHaveCount(1);
   await page.locator("article").getByRole("button", { name: "Like", exact: true }).click();
   await expect(page.locator("article").getByRole("button", { name: "Unlike", exact: true })).toBeVisible();
-  await page.getByRole("tab", { name: "following", exact: true }).click();
+  await page.getByRole("tab", { name: "Following", exact: true }).click();
   await expect(page.locator("article").first().getByRole("button", { name: "Unlike", exact: true })).toBeVisible();
 });
 

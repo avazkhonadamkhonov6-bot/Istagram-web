@@ -9,6 +9,10 @@ import { AppException } from '../common/app-exception';
 import { APP_CONFIG, AppConfig } from './config';
 import { PrismaService } from './prisma.service';
 
+// Render free = 512 MB: kesh-i libvips va thread-hoi ziyodi sharp xotiraro mexurand ("exceeded its memory limit")
+sharp.cache(false);
+sharp.concurrency(1);
+
 /** Nomi bexatari fayl (bidun `/`, `..`) — baroi bor kardan az DB */
 const SAFE_NAME = /^[\w-]+(\.[\w-]+)*$/;
 

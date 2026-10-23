@@ -38,11 +38,11 @@ test("production BFF reads the shared Render API and loads pages", async ({ page
     expect(partial.headers()["content-range"]).toMatch(/^bytes 0-127\/\d+$/);
     expect((await partial.body()).byteLength).toBe(128);
   }
-  await expect(page.getByRole("tab", { name: "following", exact: true })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Following", exact: true })).toBeVisible();
   if (hasFeedPosts) await expect(page.locator("article").first()).toBeVisible();
   await expect(page.getByText("Could not load your feed.", { exact: true })).toHaveCount(0);
   const favorites = page.waitForResponse(r => r.url().includes("/Post/get-favorites-feed") && r.status() === 200);
-  await page.getByRole("tab", { name: "favorites", exact: true }).click();
+  await page.getByRole("tab", { name: "Favorites", exact: true }).click();
   expect(Array.isArray((await (await favorites).json()).data)).toBe(true);
 
   for (const path of ["/reels", "/explore", `/${username}/reels`, "/accounts/privacy", "/direct/inbox"]) {
