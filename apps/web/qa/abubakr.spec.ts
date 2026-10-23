@@ -177,19 +177,16 @@ test("share loads recipients and sends the post", async ({ page }) => {
     .getByRole("button", { name: "Share", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("textbox", { name: "Search recipients" }).fill("ali");
-  await expect(
-    page.getByRole("dialog").getByRole("button", { name: /ali Ali/ }),
-  ).toBeVisible();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: /ali Ali/ })
-    .click();
+  await page.getByRole("textbox", { name: "Search people" }).fill("ali");
+  const ali = page.getByRole("dialog").getByRole("button", { name: "Share with ali" });
+  await expect(ali).toBeVisible();
+  await ali.click();
+  await expect(ali).toHaveAttribute("aria-pressed", "true");
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Send", exact: true })
     .click();
-  await expect(page.getByText("Post sent", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sent", { exact: true })).toBeVisible();
 });
 
 test("reels empty state", async ({ page }) => {
