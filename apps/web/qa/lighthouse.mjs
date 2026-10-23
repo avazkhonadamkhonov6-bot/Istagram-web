@@ -8,6 +8,7 @@ const context = await chromium.launchPersistentContext(
   "/tmp/ig-abubakr-lighthouse-browser",
   {
     headless: true,
+    channel: process.env.PW_CHANNEL || undefined,
     args: ["--remote-debugging-port=9223"],
     viewport: { width: 1440, height: 900 },
   },

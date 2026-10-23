@@ -1,8 +1,7 @@
 # Ki baroi kadom papka ma'sul ast (docs/PLAN.md — "Kujo ki menavisad").
 # Qoidai oxirin golib ast, baroi hamin /apps/web/ boyad pesh az /apps/web/src/app/api/ boshad.
-# Username-i GitHub-i Abubakr-ro ba joi ABUBAKR_GITHUB guzoshta, '#'-ro hazf kuned.
 
-# /apps/web/              @ABUBAKR_GITHUB
+/apps/web/                 @Abubakr-63
 
 /apps/api/                @avazkhonadamkhonov6-bot
 /packages/                @avazkhonadamkhonov6-bot

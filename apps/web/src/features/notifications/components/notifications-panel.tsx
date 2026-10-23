@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { acceptRequest, declineRequest } from "@/features/social/api";
 import { toast } from "@/components/ui/toast";
+import { useLives } from "@/features/live-entry/hooks";
 import { followUser } from "@/features/profile/api";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
@@ -41,10 +42,19 @@ function group(date: string) {
 }
 
 function NotificationRow({ item }: { item: NotificationDto }) {
+  const lives = useLives(item.type === "LIVE_STARTED");
+  const live = lives.data?.find((l) => l.user.id === item.actor.id);
+  const href =
+    item.type === "LIVE_STARTED"
+      ? live
+        ? `/live/${live.liveId}`
+        : "/live"
+      : `/${item.actor.userName}`;
   const close = useUiStore((s) => s.closePanel);
   const qc = useQueryClient();
   const request = useMutation({
-    mutationFn: (accept: boolean) => accept ? acceptRequest(item.actor.id) : declineRequest(item.actor.id),
+    mutationFn: (accept: boolean) =>
+      accept ? acceptRequest(item.actor.id) : declineRequest(item.actor.id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["follow-requests"] });
       void qc.invalidateQueries({ queryKey: ["me"] });
@@ -59,7 +69,7 @@ function NotificationRow({ item }: { item: NotificationDto }) {
   });
   return (
     <li className="flex items-center gap-3 px-6 py-3 transition-colors hover:bg-ig-hover-overlay">
-      <Link href={item.type === "LIVE_STARTED" ? "/live" : `/${item.actor.userName}`} onClick={close}>
+      <Link href={href} onClick={close}>
         <SmallAvatar
           src={mediaUrl(item.actor.avatar)}
           name={item.actor.userName}
@@ -67,11 +77,7 @@ function NotificationRow({ item }: { item: NotificationDto }) {
         />
       </Link>
       <div className="min-w-0 flex-1 text-sm leading-5">
-        <Link
-          onClick={close}
-          href={`/${item.actor.userName}`}
-          className="font-semibold"
-        >
+        <Link onClick={close} href={href} className="font-semibold">
           {item.actor.userName}
         </Link>{" "}
         {notificationText(item)}{" "}
@@ -80,8 +86,29 @@ function NotificationRow({ item }: { item: NotificationDto }) {
         </span>
       </div>
       {item.type === "FOLLOW_REQUEST" ? (
-        request.isSuccess ? <span className="text-xs text-ig-text-secondary">{request.variables ? "Confirmed" : "Deleted"}</span> :
-        <div className="flex shrink-0 gap-2"><Button size="sm" disabled={request.isPending} onClick={() => request.mutate(true)}>Confirm</Button><Button size="sm" variant="secondary" disabled={request.isPending} onClick={() => request.mutate(false)}>Delete</Button></div>
+        request.isSuccess ? (
+          <span className="text-xs text-ig-text-secondary">
+            {request.variables ? "Confirmed" : "Deleted"}
+          </span>
+        ) : (
+          <div className="flex shrink-0 gap-2">
+            <Button
+              size="sm"
+              disabled={request.isPending}
+              onClick={() => request.mutate(true)}
+            >
+              Confirm
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={request.isPending}
+              onClick={() => request.mutate(false)}
+            >
+              Delete
+            </Button>
+          </div>
+        )
       ) : item.post ? (
         <Link
           href={`/p/${item.post.postId}`}
@@ -150,13 +177,42 @@ export function NotificationsPanel() {
         </Button>
       </div>
     );
-  const items = list.data.pages.flatMap((p) => p.data).filter(n => filter === "All" || (filter === "Following" ? n.actor.isFollowing : n.type === "COMMENT" || n.type === "COMMENT_REPLY"));
+  const items = list.data.pages
+    .flatMap((p) => p.data)
+    .filter(
+      (n) =>
+        filter === "All" ||
+        (filter === "Following"
+          ? n.actor.isFollowing
+          : n.type === "COMMENT" || n.type === "COMMENT_REPLY"),
+    );
   return (
     <>
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-6 pb-3" role="group" aria-label="Filter notifications">
-        {["All", "Following", "Comments"].map(value => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={`shrink-0 rounded-full border border-ig-stroke px-4 py-2 text-xs font-semibold ${filter === value ? "bg-ig-secondary" : ""}`}>{value}</button>)}
+      <div
+        className="no-scrollbar flex gap-2 overflow-x-auto px-6 pb-3"
+        role="group"
+        aria-label="Filter notifications"
+      >
+        {["All", "Following", "Comments"].map((value) => (
+          <button
+            key={value}
+            aria-pressed={filter === value}
+            onClick={() => setFilter(value)}
+            className={`shrink-0 rounded-full border border-ig-stroke px-4 py-2 text-xs font-semibold ${filter === value ? "bg-ig-secondary" : ""}`}
+          >
+            {value}
+          </button>
+        ))}
       </div>
-      {!items.length && <div className="px-6 py-16 text-center"><Heart className="mx-auto mb-4 size-12" /><h3 className="font-semibold">Activity on your posts</h3><p className="mt-2 text-ig-text-secondary">When someone likes or comments on your posts, you’ll see it here.</p></div>}
+      {!items.length && (
+        <div className="px-6 py-16 text-center">
+          <Heart className="mx-auto mb-4 size-12" />
+          <h3 className="font-semibold">Activity on your posts</h3>
+          <p className="mt-2 text-ig-text-secondary">
+            When someone likes or comments on your posts, you’ll see it here.
+          </p>
+        </div>
+      )}
       {["Today", "This week", "This month", "Earlier"].map((title) => {
         const entries = items.filter((n) => group(n.createdAt) === title);
         return entries.length ? (

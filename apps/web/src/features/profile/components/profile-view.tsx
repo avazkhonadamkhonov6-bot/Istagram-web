@@ -1,15 +1,25 @@
 "use client";
 
-import type { UserProfile } from "@repo/shared";
+import type { HighlightDto, PostDto, UserProfile } from "@repo/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { createChat } from "@/features/direct/api";
 import { toast } from "@/components/ui/toast";
 
-import { Bookmark, Grid3X3, Clapperboard, Plus, Settings } from "lucide-react";
+import {
+  Bookmark,
+  Grid3X3,
+  Clapperboard,
+  Contact,
+  LockKeyhole,
+  Settings,
+} from "lucide-react";
 import { AuthFooter } from "@/features/auth/components/auth-presentation";
-import { useUiStore } from "@/store/ui.store";
+import { Highlights } from "./highlights";
+import { ProfileActions } from "./profile-actions";
+import { CollectionsBrowser } from "@/features/collections/components/collections-browser";
+import { useLives } from "@/features/live-entry/hooks";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMe } from "@/features/auth/hooks";
@@ -21,12 +31,13 @@ import { useFollowStatus, useProfile, useToggleFollow } from "../hooks";
 import { FollowListModal } from "./follow-list-modal";
 import { PostGrid } from "./post-grid";
 
-type Tab = "posts" | "reels" | "saved";
+type Tab = "posts" | "reels" | "saved" | "tagged";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "posts", label: "POSTS" },
   { key: "reels", label: "REELS" },
   { key: "saved", label: "SAVED" },
+  { key: "tagged", label: "TAGGED" },
 ];
 
 function FollowButton({ profile }: { profile: UserProfile }) {
@@ -66,14 +77,54 @@ function MessageButton({ userId }: { userId: string }) {
   );
 }
 
-function ProfilePosts({ profile, tab, isSelf }: { profile: UserProfile; tab: Tab; isSelf: boolean }) {
+function ProfilePosts({
+  profile,
+  tab,
+  isSelf,
+  initialPosts,
+}: {
+  profile: UserProfile;
+  tab: Tab;
+  isSelf: boolean;
+  initialPosts?: PostDto[];
+}) {
   const status = useFollowStatus(profile.userId, profile.isPrivate && !isSelf);
   if (profile.isPrivate && !isSelf) {
-    if (status.isPending) return <div className="py-12 text-center text-ig-text-secondary">Loading profile…</div>;
-    if (status.isError) return <div className="py-12 text-center"><Button variant="borderless" onClick={() => void status.refetch()}>Retry access check</Button></div>;
-    if (status.data !== "following") return <div className="py-16 text-center"><h2 className="font-semibold">This account is private</h2><p className="mt-2 text-sm text-ig-text-secondary">Follow this account to see their photos and videos.</p></div>;
+    if (status.isPending)
+      return (
+        <div className="py-12 text-center text-ig-text-secondary">
+          Loading profile…
+        </div>
+      );
+    if (status.isError)
+      return (
+        <div className="py-12 text-center">
+          <Button variant="borderless" onClick={() => void status.refetch()}>
+            Retry access check
+          </Button>
+        </div>
+      );
+    if (status.data !== "following")
+      return (
+        <div className="py-16 text-center">
+          <LockKeyhole aria-hidden className="mx-auto mb-4 size-10" />
+          <h2 className="font-semibold">This account is private</h2>
+          <p className="mt-2 text-sm text-ig-text-secondary">
+            Follow this account to see their photos and videos.
+          </p>
+        </div>
+      );
   }
-  return <PostGrid isSelf={isSelf} key={tab} kind={tab} userId={profile.userId} filter={tab === "saved" ? undefined : tab} />;
+  return (
+    <PostGrid
+      isSelf={isSelf}
+      key={tab}
+      kind={tab}
+      userId={profile.userId}
+      initialPosts={initialPosts}
+      filter={tab === "posts" || tab === "reels" ? tab : undefined}
+    />
+  );
 }
 
 export function ProfileView({
@@ -81,11 +132,17 @@ export function ProfileView({
   modal,
   initialTab = "posts",
   initialProfile,
+  initialIsSelf,
+  initialHighlights,
+  initialPosts,
 }: {
   username: string;
   modal?: "followers" | "following";
   initialTab?: Tab;
   initialProfile?: UserProfile;
+  initialIsSelf?: boolean;
+  initialHighlights?: HighlightDto[];
+  initialPosts?: PostDto[];
 }) {
   const {
     data: profile,
@@ -95,7 +152,7 @@ export function ProfileView({
   } = useProfile(username, initialProfile);
   const { data: me } = useMe();
   const tab = initialTab;
-  const create = useUiStore(s => s.setCreateOpen);
+  const lives = useLives();
 
   if (isPending) {
     return (
@@ -141,8 +198,9 @@ export function ProfileView({
     );
   }
 
-  const isSelf = me?.userId === profile.userId;
-  const tabs = isSelf ? TABS : TABS.slice(0, 2);
+  const isSelf = me ? me.userId === profile.userId : (initialIsSelf ?? false);
+  const tabs = isSelf ? TABS : TABS.filter((t) => t.key !== "saved");
+  const live = lives.data?.find((l) => l.user.id === profile.userId);
   if (tab === "saved" && !isSelf)
     return <div className="py-24 text-center">Saved posts are private.</div>;
   const base = `/${profile.userName}`;
@@ -150,22 +208,35 @@ export function ProfileView({
   return (
     <div className="ig-profile-page">
       <header className="ig-profile-header">
-        <SmallAvatar
-          src={mediaUrl(profile.image)}
-          name={profile.userName}
-          className="size-20 shrink-0 text-4xl md:size-[150px]"
-        />
+        <div className="relative shrink-0">
+          <SmallAvatar
+            src={mediaUrl(profile.image)}
+            name={profile.userName}
+            className="size-20 text-4xl md:size-[150px]"
+          />
+          {live && (
+            <Link
+              aria-label={`${profile.userName} is live`}
+              href={`/live/${live.liveId}`}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded border-2 border-ig-bg bg-ig-badge px-2 text-xs font-bold text-ig-text-on-color"
+            >
+              LIVE
+            </Link>
+          )}
+        </div>
         <div className="ig-profile-info min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-xl font-semibold">{profile.userName}</h1>
-            {isSelf && <Link href="/accounts/edit" aria-label="Settings"><Settings className="size-6" /></Link>}
-            {/* To bor shudani "me" tugmaho nest — vagarna dar profili xud "Follow" lahzae namoyon meshavad */}
-            {isSelf || !me ? (
-              null
-            ) : (
+            {isSelf && (
+              <Link href="/accounts/edit" aria-label="Settings">
+                <Settings className="size-6" />
+              </Link>
+            )}
+            {isSelf ? null : (
               <>
                 <FollowButton profile={profile} />
                 <MessageButton userId={profile.userId} />
+                <ProfileActions profile={profile} />
               </>
             )}
           </div>
@@ -197,18 +268,37 @@ export function ProfileView({
             {profile.fullName ? (
               <p className="font-semibold">{profile.fullName}</p>
             ) : null}
+            {profile.website && (
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block truncate text-ig-link-action"
+              >
+                {profile.website}
+              </a>
+            )}
             {profile.about ? (
               <p className="whitespace-pre-wrap break-words">{profile.about}</p>
             ) : null}
           </div>
         </div>
       </header>
-      {isSelf && <div className="ig-profile-actions"><Link href="/accounts/edit">Edit profile</Link><Link href="/accounts/archive">View archive</Link></div>}
-      {isSelf && <div className="ig-profile-highlights"><button onClick={() => create(true)} aria-label="Add story"><span><Plus className="size-12 stroke-1" /></span><b>New</b></button></div>}
+      {isSelf && (
+        <div className="ig-profile-actions">
+          <Link href="/accounts/edit">Edit profile</Link>
+          <Link href="/accounts/archive">View archive</Link>
+        </div>
+      )}
+      <Highlights
+        userId={profile.userId}
+        isSelf={isSelf}
+        initialData={initialHighlights}
+      />
 
       <div
         role="tablist"
-        className="ig-profile-tabs flex justify-center gap-12 border-b border-ig-separator"
+        className="ig-profile-tabs flex justify-center border-b border-ig-separator"
       >
         {tabs.map((t) => (
           <Link
@@ -217,19 +307,34 @@ export function ProfileView({
             role="tab"
             aria-selected={tab === t.key}
             className={cn(
-              "-mb-px flex items-center gap-2 border-b-2 px-5 py-4 text-xs font-semibold tracking-widest",
+              "-mb-px flex items-center gap-2 min-w-0 flex-1 justify-center border-b-2 px-2 py-4 text-xs sm:flex-none sm:px-5 font-semibold tracking-widest",
               tab === t.key
                 ? "border-ig-text text-ig-text"
                 : "border-transparent text-ig-text-secondary",
             )}
           >
-            {t.key === "posts" ? <Grid3X3 className="size-6" /> : t.key === "saved" ? <Bookmark className="size-6" /> : <Clapperboard className="size-6" />}
+            {t.key === "posts" ? (
+              <Grid3X3 className="size-6" />
+            ) : t.key === "saved" ? (
+              <Bookmark className="size-6" />
+            ) : t.key === "tagged" ? (
+              <Contact className="size-6" />
+            ) : (
+              <Clapperboard className="size-6" />
+            )}
             <span className="sr-only">{t.label}</span>
           </Link>
         ))}
       </div>
 
-      <ProfilePosts key={tab} profile={profile} tab={tab} isSelf={isSelf} />
+      {tab === "saved" && isSelf && <CollectionsBrowser />}
+      <ProfilePosts
+        key={tab}
+        profile={profile}
+        tab={tab}
+        isSelf={isSelf}
+        initialPosts={initialPosts}
+      />
 
       <AuthFooter />
       {modal ? (

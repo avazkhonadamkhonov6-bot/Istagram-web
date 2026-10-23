@@ -1,10 +1,9 @@
 import {
   RESERVED_USERNAMES,
-  userListItemSchema,
+  usernameAvailabilitySchema,
   userProfileSchema,
   type LoginDto,
   type RegisterDto,
-  type UserListItem,
   type UserProfile,
 } from "@repo/shared";
 import { api } from "@/lib/api-client";
@@ -32,34 +31,22 @@ export const register = (dto: RegisterDto) =>
 
 export const logout = () => api<boolean>("/auth/logout", { method: "POST" });
 
-type Paged<T> = { data: T[] };
-
-/** Проверка свободного username (Spec 01 / Spec 12 §2–3) */
+/** Public check. Registration handles races with a final 409 response. */
 export async function checkUsernameAvailable(rawUsername: string): Promise<{
   available: boolean;
   reason?: "RESERVED" | "TAKEN" | "UNAVAILABLE";
 }> {
   const normalized = rawUsername.trim().toLowerCase();
-  if (!normalized || normalized.length < 3) {
-    return { available: false };
-  }
-  if ((RESERVED_USERNAMES as readonly string[]).includes(normalized)) {
+  if ((RESERVED_USERNAMES as readonly string[]).includes(normalized))
     return { available: false, reason: "RESERVED" };
+  try {
+    return await api(
+      `/Account/username-available?${new URLSearchParams({ UserName: normalized })}`,
+      { schema: usernameAvailabilitySchema },
+    );
+  } catch {
+    return { available: false, reason: "UNAVAILABLE" };
   }
-
-  const res = await fetch(
-    `/api/User/get-users?UserName=${encodeURIComponent(normalized)}&PageSize=20`,
-    { credentials: "same-origin" },
-  );
-  if (!res.ok) return { available: false, reason: "UNAVAILABLE" };
-
-  const body = (await res.json().catch(() => null)) as Paged<unknown> | null;
-  const parsed = userListItemSchema.array().safeParse(body?.data ?? []);
-  if (!parsed.success) return { available: false, reason: "UNAVAILABLE" };
-  const items: UserListItem[] = parsed.data;
-  const taken = items.some((u) => u.userName.toLowerCase() === normalized);
-
-  return taken ? { available: false, reason: "TAKEN" } : { available: true };
 }
 
 /** Spec 12: kodi ivazi parol ba e-mail (javob hamesha yakxela) */

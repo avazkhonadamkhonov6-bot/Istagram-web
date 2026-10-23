@@ -30,7 +30,8 @@ const envSchema = z.object({
   TURN_URLS: z.string().optional(),
   TURN_USERNAME: z.string().optional(),
   TURN_CREDENTIAL: z.string().optional(),
-  // E-mail (kodi ivazi parol): Resend — https://resend.com; MAIL_FROM masalan 'Instagram <no-reply@domain.tj>'
+  // E-mail (kodi ivazi parol): SMTP (Gmail: smtps://you@gmail.com:<app-password>@smtp.gmail.com:465) yo Resend
+  SMTP_URL: z.string().url().optional(),
   RESEND_API_KEY: z.string().optional(),
   MAIL_FROM: z.string().optional(),
 });

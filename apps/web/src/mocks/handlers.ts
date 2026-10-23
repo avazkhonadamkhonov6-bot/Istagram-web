@@ -1,3 +1,4 @@
+import { abubakrExtensions } from "./abubakr-extensions";
 import { http, HttpResponse } from "msw";
 import {
   postDtoSchema,
@@ -131,34 +132,94 @@ const textHistory: { id: number; text: string; createdAt: string }[] = [];
 const mockFiles = new Map<string, File>();
 
 export const handlers = [
+  ...abubakrExtensions(mockMe, mockPosts, mockStories),
+  http.get("/api/Account/username-available", ({ request }) => {
+    const name = new URL(request.url).searchParams
+      .get("UserName")
+      ?.toLowerCase();
+    return HttpResponse.json({
+      data: {
+        available: !mockUsers.some((u) => u.userName === name),
+        ...(mockUsers.some((u) => u.userName === name)
+          ? { reason: "TAKEN" }
+          : {}),
+      },
+      errors: [],
+      statusCode: 200,
+    });
+  }),
   http.get("/api/UserProfile/get-follow-status", ({ request }) => {
     const id = new URL(request.url).searchParams.get("userId") ?? "";
-    return HttpResponse.json({ data: followed.has(id) ? "following" : "none", errors: [], statusCode: 200 });
+    return HttpResponse.json({
+      data: followed.has(id) ? "following" : "none",
+      errors: [],
+      statusCode: 200,
+    });
   }),
   http.get("/api/Post/get-user-reels", ({ request }) => {
     const params = new URL(request.url).searchParams;
-    return pagedMock(mockPosts.filter(p => p.userId === params.get("UserId") && p.isReel), params);
+    return pagedMock(
+      mockPosts.filter((p) => p.userId === params.get("UserId") && p.isReel),
+      params,
+    );
   }),
-  http.get("/api/Post/get-favorites-feed", ({ request }) => pagedMock(mockPosts.filter(p => p.userId === mockUsers[1].id), new URL(request.url).searchParams)),
+  http.get("/api/Post/get-favorites-feed", ({ request }) =>
+    pagedMock(
+      mockPosts.filter((p) => p.userId === mockUsers[1].id),
+      new URL(request.url).searchParams,
+    ),
+  ),
   http.delete("/api/FollowingRelationShip/remove-follower", ({ request }) => {
     removedFollowers.add(new URL(request.url).searchParams.get("userId") ?? "");
     return HttpResponse.json({ data: true, errors: [], statusCode: 200 });
   }),
   http.post("/api/Post/like-comment", ({ request }) => {
     const id = Number(new URL(request.url).searchParams.get("commentId"));
-    const comment = mockPosts.flatMap(p => p.comments).find(c => c.postCommentId === id);
-    if (comment) { comment.isLiked = !comment.isLiked; comment.likeCount += comment.isLiked ? 1 : -1; }
-    return HttpResponse.json({ data: { isLiked: comment?.isLiked ?? true, likeCount: comment?.likeCount ?? 1 }, errors: [], statusCode: 200 });
+    const comment = mockPosts
+      .flatMap((p) => p.comments)
+      .find((c) => c.postCommentId === id);
+    if (comment) {
+      comment.isLiked = !comment.isLiked;
+      comment.likeCount += comment.isLiked ? 1 : -1;
+    }
+    return HttpResponse.json({
+      data: {
+        isLiked: comment?.isLiked ?? true,
+        likeCount: comment?.likeCount ?? 1,
+      },
+      errors: [],
+      statusCode: 200,
+    });
   }),
   http.post("/api/Post/pin-comment", ({ request }) => {
     const id = Number(new URL(request.url).searchParams.get("commentId"));
-    const comment = mockPosts.flatMap(p => p.comments).find(c => c.postCommentId === id);
+    const comment = mockPosts
+      .flatMap((p) => p.comments)
+      .find((c) => c.postCommentId === id);
     if (comment) comment.isPinned = !comment.isPinned;
-    return HttpResponse.json({ data: { value: comment?.isPinned ?? true }, errors: [], statusCode: 200 });
+    return HttpResponse.json({
+      data: { value: comment?.isPinned ?? true },
+      errors: [],
+      statusCode: 200,
+    });
   }),
   http.post("/api/Story/reply-story", async ({ request }) => {
-    const { text } = await request.json() as { text: string };
-    return HttpResponse.json({ data: messageDtoSchema.parse({ messageId: 999, chatId: 1, userId: mockMe.userId, userName: mockMe.userName, userImage: null, messageText: text, file: null, sharedPost: null, sendMassageDate: new Date().toISOString() }), errors: [], statusCode: 200 });
+    const { text } = (await request.json()) as { text: string };
+    return HttpResponse.json({
+      data: messageDtoSchema.parse({
+        messageId: 999,
+        chatId: 1,
+        userId: mockMe.userId,
+        userName: mockMe.userName,
+        userImage: null,
+        messageText: text,
+        file: null,
+        sharedPost: null,
+        sendMassageDate: new Date().toISOString(),
+      }),
+      errors: [],
+      statusCode: 200,
+    });
   }),
   // FE-07 / Spec 13: Share dialog uses these two existing Direct endpoints.
   http.post("/api/Chat/create-chat", ({ request }) => {
@@ -289,12 +350,15 @@ export const handlers = [
       userName: mockMe.userName,
     });
     entry.stories[0].fileName = name;
-    const closeFriends = new URL(request.url).searchParams.get("CloseFriends") === "true";
+    const closeFriends =
+      new URL(request.url).searchParams.get("CloseFriends") === "true";
     entry.stories[0].closeFriends = closeFriends;
     entry.hasCloseFriends = closeFriends;
     const own = mockStories.find((u) => u.userId === mockMe.userId);
-    if (own) { own.stories.push(entry.stories[0]); own.hasCloseFriends ||= closeFriends; }
-    else mockStories.unshift(entry);
+    if (own) {
+      own.stories.push(entry.stories[0]);
+      own.hasCloseFriends ||= closeFriends;
+    } else mockStories.unshift(entry);
     userStoriesSchema.parse(own ?? entry);
     return HttpResponse.json({
       data: "Story added",
@@ -502,7 +566,11 @@ export const handlers = [
   ),
 
   http.get("/api/FollowingRelationShip/get-subscribers", () =>
-    HttpResponse.json({ data: mockUsers.filter(u => !removedFollowers.has(u.id)), errors: [], statusCode: 200 }),
+    HttpResponse.json({
+      data: mockUsers.filter((u) => !removedFollowers.has(u.id)),
+      errors: [],
+      statusCode: 200,
+    }),
   ),
 
   http.get("/api/FollowingRelationShip/get-subscriptions", () =>

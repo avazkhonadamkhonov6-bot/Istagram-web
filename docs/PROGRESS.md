@@ -3,9 +3,9 @@
 > Pas az merge-i PR → `[x]`. Tafsiloti har vazifa — [TASKS.md](TASKS.md) va GitHub Issues.
 > Holat: TODO — ogoz nashud · DOING — dar jarayon · DONE — tayyor · BLOCKED — masala
 
-**Holati umumi:** Ruzi 1: TODO · Ruzi 2: TODO · Ruzi 3: TODO · Ruzi 4: TODO
-**Hozir (2026-10-22):** API dar Render: https://istagram-web.onrender.com (Swagger — `/swagger`), baza umumi — Avaz va Abubakr bo yak maʼlumot kor mekunand. Backend-i [Spec 16](specs/16-zang-va-efir.md) (zang, paymi ovozi / video, efir) tayyor, e2e 48/48. Navbat — FE-30 (Avaz), FE-31 (Abubakr), FE-26, FE-29.
-**Frontend Abubakr:** hamai vazifahoi Avaz (BE-01…BE-12, FE-13, 15, 17, 19, 21, QA-01) tayyor; API e2e 18/18, Playwright 7/7 → navbat: README/demo · Abubakr: frontend va QA nav shud — [QA-02](qa/QA-02.md); chand talab ba kontrakti API vobasta ast
+**Holati frontend Abubakr (2026-10-22):** vazifahoi MVP tayyor va dar muhiti mahalli sanjida shudand; [QA-02](qa/QA-02.md). Natijai deploy / CI-i GitHub alohida sanjida meshavad.
+**Hozir (2026-10-22):** frontend-i FE-26/29/31 va ilovahoi FE-06/10/16/18 tayyor. API-i mahalli: 59/59 e2e, mock UI: 26/26, production UI: 15/15. Backend-i umumi dar Render qablan deploy shuda bud; ilovai kontrakti profil migratsiya va deploy-i navi API-ro talab mekunad.
+**Frontend Abubakr:** [TASKS](TASKS.md) va [QA-02](qa/QA-02.md) nav shudand. Lighthouse: Performance / Accessibility 100/100 baroi feed va profil. CODEOWNERS: @Abubakr-63.
 
 ## Hujjatho
 - [x] TZ.md, PLAN.md, ROADMAP.md, TASKS.md
@@ -25,11 +25,11 @@
 ## RUZI 2
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [~] | FE-06 Login / Signup |
+| [x] | BE-06 Media: upload-i multipart ba disk, `/images/*` | [x] | FE-06 Login / Signup |
 | [x] | BE-07 Post, like, comment, favorite | [x] | FE-07 Feed + PostCard |
 | [x] | BE-08 Feed (`get-following-post`), search (`get-users`, search history) | [x] | FE-08 Post modal |
 | [x] | BE-09 Realtime gateway `/ws` (Notifications — P1) | [x] | FE-09 Profil |
-| [x] | BE-10 Story API | [~] | FE-10 Edit profile + parol |
+| [x] | BE-10 Story API | [x] | FE-10 Edit profile + parol |
 
 ## RUZI 3
 | | Avaz | | Abubakr |
@@ -37,29 +37,29 @@
 | [x] | BE-11 Chat + Reels + Location API | [x] | FE-11 Explore, Search |
 | [x] | BE-12 Seed + e2e (18 test, sabz) → **API freeze** | [x] | FE-12 Notifications panel |
 | [x] | FE-13 BFF (`/api/auth/*`, `/api/[...path]`, `/api/realtime/ticket`) + proxy.ts + CSP | [x] | FE-14 Mock xomush, integratsiya |
-| [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [~] | FE-16 Stories |
+| [x] | FE-15 Socket (ticket 60 s, reconnect + refetch) + realtime-i Direct | [x] | FE-16 Stories |
 
 ## RUZI 4
 | | Avaz | | Abubakr |
 |---|---|---|---|
-| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [~] | FE-18 Create modal |
+| [x] | FE-17 Direct: inbox, chat, optimistic, unsend, New message | [x] | FE-18 Create modal |
 | [x] | FE-19 Bovarinokii front: error.tsx, WidgetBoundary, offline banner, rollback | [x] | FE-20 Reels |
 | [x] | FE-21 Playwright: 7 test (register, post, like, follow, direct x3) | [x] | FE-22 Pardoz, responsive |
-| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [~] | QA-02 |
-| [x] | FE-23 Direct-i Spec 14 (group, dil, reply, ovoz, story) | [ ] | FE-26 UI-i Spec 14 |
+| [x] | QA-01 — [docs/qa/QA-01.md](qa/QA-01.md) | [x] | QA-02 |
+| [x] | FE-23 Direct-i Spec 14 (group, dil, reply, ovoz, story) | [x] | FE-26 UI-i Spec 14 |
 | [x] | FE-24 `/accounts/*` (privacy, blocked, muted, restricted, close friends, archive) | | |
 | [x] | FE-25 `/explore/locations/[name]`, `social/api.ts`, Share / Report dialog | | |
-| [x] | BE-13 backend-i Spec 15 + seed (40 user, 35 reel, 101 story) | [ ] | FE-29 UI-i Spec 15 |
+| [x] | BE-13 backend-i Spec 15 + seed (40 user, 35 reel, 101 story) | [x] | FE-29 UI-i Spec 15 |
 | [x] | FE-27 Direct (notes, edit, "Active now") | | |
 | [x] | FE-28 `/accounts/favorites`, `/accounts/activity` | | |
-| [ ] | README, `v0.2`, demo | | |
+| [~] | README va demo tayyor; tag / relizi `v0.2` boqi ast | | |
 
 ## RUZI 5
 | | Avaz | | Abubakr |
 |---|---|---|---|
 | [x] | Deploy: Render (API + Postgres), faylho dar DB (MediaFile), seed-i xudkor | | |
 | [x] | BE-14 backend-i Spec 16: zang, paymi ovozi / video, efir | | |
-| [x] | FE-30 Direct: zangi audio / video, paymi ovozi va video + sahifahoi efir (`/live`) | [ ] | FE-31 Darvozahoi efir (Create, story tray, notification) |
+| [x] | FE-30 Direct: zangi audio / video, paymi ovozi va video + sahifahoi efir (`/live`) | [x] | FE-31 Darvozahoi efir (Create, story tray, notification) |
 
 ## Qaydho / masalaho
 - 2026-10-21: Kontrakti API ivaz shud — endpoint-ho aynan misli Swagger-i "Web Api" (`/Account/*`, `/Post/*`, `/Chat/*`...): [Spec 12](specs/12-api-kontrakt.md). URL/DTO-hoi spec-hoi 01–09 digar amal namekunand; qoidahoi amniyat boqi memonand.
@@ -91,3 +91,9 @@
 - 2026-10-22: Bor kardani reel / video: BFF baroi multipart to 5 daqiqa intizor mekunad (pesh — 60 s, video-i 46 s dar internet-i sust "did not respond within 60 seconds" medod). Reels: agar brauzer ovozi autoplay-ro man' kunad, bo avvalin click / tugma ovoz xudkor boz meshavad. Search: pill-i xokistari bo ikonka va tugmai tozakuni, bidun xati kabud. SEO: title-i har sahifa (`%s • Instagram`, `@user • Instagram photos and videos`), description, Open Graph / Twitter, canonical, theme-color, `robots.txt`, `sitemap.xml`, `manifest.webmanifest` (`NEXT_PUBLIC_SITE_URL`). `npm run dev` — `scripts/dev.mjs`: bidun `npx pnpm` va build-i shared, Ready ~1 s, sahifahoi asosi pesh-az-vaqt kompilyatsiya meshavand (~10 s); usuli kuhna — `npm run dev:pnpm`. QA mock 26/26, `tsc`, `eslint`, `next build` — sabz.
 - 2026-10-22: Mobil misli Instagram dar telefon: satri bolo — "Instagram ⌄" (menyui Following / Favorites) va dil bo nuqtai surx; satri poyon — Home, Search (/explore), Reels, Create, Messages (bo badge), Profile; post-i purra-arz bidun border, joy zeri username; story-hoi kalon; tugmai mudavvari Messages dar sahifai asosi. QA mock 26/26, `next build` — sabz.
 - 2026-10-22: Navigatsiya misli instagram.com (2025): Home, Reels, Messages, Search, Notifications, Create, Profile dar miyonai sidebar, bidun xati kanor; Search — sahifai Explore bo satri justuju dar bolo va ruyxati natijaho zeri on; tor-i Explore 4 sutun (3:4). Story-hoi kalon (87px), tugmai "Messages" bo avatar-hoi chat-ho. Tugmai kamera (aksi fawri) dar Direct hazf shud. QA mock 26/26, `next build` — sabz.
+
+- 2026-10-22 (Abubakr, yakun): FE-06/10/16/18/26/29/31 va QA-02 tayyor. TAGGED, Highlights (bo story-i guzashta), collections, menyui purrai post, tag-i odamon, viewers/share-i story, menyui profil, Confirm/Delete-i request, LIVE dar profil va notification. Public username check va tahriri username/fullName/website — Spec 14 §9, migratsiya `20261022200000_profile_website`.
+- Sanjish: API 59/59, mock UI 26/26, production UI 15/15; TypeScript, ESLint va `next build` sabz. Spec 10: 173 sanjish. Lighthouse: feed 100/100 (LCP 0.183 s, CLS 0.00186), profil 100/100 (LCP 0.382 s, CLS 0.00007). SSR-i profil (self/highlights/grid) sathi layout-ro ustuvor kard; overflow-i 4 tab dar mobil va Escape-i viewer isloh shudand.
+- CI: frontend lint/typecheck/build va Playwright bo bazai test, artifact-i trace; `.github/CODEOWNERS`: @Abubakr-63. [Demo](DEMO.md), natijaho va hududhoi QA dar [QA-02](qa/QA-02.md). Push/deploy, relizi `v0.2`, testi WebRTC bayni du shabakai voqe'i va infra-i P1 ba sifat-i ijroshuda qayd nashudand.
+
+- 2026-10-23: yakuni sanjish — avtomati ogozi API + production web az konfiguratsiyai CI, 15/15; regression-i live (feed, create, profil/avatar/follow, story, password change/restore), 5/5. Hamagi 46 browser test va 59 API test. Vazifahoi frontend-i Abubakr monda nestand; holati deploy / reliz va testi shabakahoi voqe'i alohida boqi memonad.

@@ -11,7 +11,8 @@ import {
   Images,
   Upload,
 } from "lucide-react";
-import { postDtoSchema } from "@repo/shared";
+import { PhotoTags } from "./photo-tags";
+import { postDtoSchema, type PostTagInput } from "@repo/shared";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -95,6 +96,7 @@ export function CreateModal() {
   const [index, setIndex] = useState(0);
   const [step, setStep] = useState(0);
   const [ratio, setRatio] = useState("auto");
+  const [tags, setTags] = useState<PostTagInput[]>([]);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
   const [closeFriends, setCloseFriends] = useState(false);
@@ -113,12 +115,17 @@ export function CreateModal() {
       const form = new FormData();
       if (kind === "story") {
         form.set("Image", media[0].file);
-        return api(`/Story/AddStories?CloseFriends=${closeFriends}`, { method: "POST", body: form });
+        return api(`/Story/AddStories?CloseFriends=${closeFriends}`, {
+          method: "POST",
+          body: form,
+        });
       }
       for (const item of media)
         form.append("Images", await crop(item.file, ratio));
       if (caption.trim()) form.set("Content", caption.trim());
       if (location.trim()) form.set("Location", location.trim());
+      if (kind === "post" && tags.length)
+        form.set("Tags", JSON.stringify(tags));
       return api("/Post/add-post", {
         method: "POST",
         body: form,
@@ -133,6 +140,18 @@ export function CreateModal() {
   const close = () => {
     if (upload.isPending) return;
     setOpen(false);
+    urls.current.forEach((url) => URL.revokeObjectURL(url));
+    urls.current = [];
+    setMedia([]);
+    setTags([]);
+    setCaption("");
+    setLocation("");
+    setCloseFriends(false);
+    setIndex(0);
+    setStep(0);
+    setError("");
+    setRatio("auto");
+    upload.reset();
   };
   const pick = async (files: File[]) => {
     setError("");
@@ -197,6 +216,7 @@ export function CreateModal() {
     }));
     urls.current = selected.map((m) => m.url);
     setMedia(selected);
+    setTags([]);
     setIndex(0);
     setStep(1);
   };
@@ -409,11 +429,36 @@ export function CreateModal() {
                   <p className="text-right text-xs text-ig-text-secondary">
                     {caption.length}/2,200
                   </p>
-                  {kind !== "story" && <label className="block text-sm">
-                    Add location
-                    <input aria-label="Add location" maxLength={100} value={location} onChange={(e) => setLocation(e.target.value)} className="mt-2 w-full rounded-lg border border-ig-stroke bg-transparent px-3 py-2" />
-                  </label>}
-                  {kind === "story" && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={closeFriends} onChange={(e) => setCloseFriends(e.target.checked)} />Close friends only</label>}
+                  {kind !== "story" && (
+                    <label className="block text-sm">
+                      Add location
+                      <input
+                        aria-label="Add location"
+                        maxLength={100}
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="mt-2 w-full rounded-lg border border-ig-stroke bg-transparent px-3 py-2"
+                      />
+                    </label>
+                  )}
+                  {kind === "post" &&
+                    current?.file.type.startsWith("image/") && (
+                      <PhotoTags
+                        tags={tags}
+                        onChange={setTags}
+                        imageIndex={index}
+                      />
+                    )}
+                  {kind === "story" && (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={closeFriends}
+                        onChange={(e) => setCloseFriends(e.target.checked)}
+                      />
+                      Close friends only
+                    </label>
+                  )}
                   {kind === "story" && (
                     <p className="text-xs text-ig-text-secondary">
                       Your story will be visible for 24 hours.
