@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
+import { boostExposure, brighten } from "../enhance";
 import { addInstant, deleteInstant, getInstantArchive, getInstants, instantKeys, viewInstant } from "../api";
 
 type Mode = "camera" | "viewer" | "archive";
@@ -236,9 +237,12 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
-    // Bo flash aks kami ravshantar (dar brauzerhoe, ki ctx.filter nadorand — bidun tagyir)
-    if (boost) ctx.filter = "brightness(1.12) contrast(1.04)";
     ctx.drawImage(video, 0, 0);
+    // Flash: aks voqean ravshan meshavad (auto-levels + gamma az ruyi pikselho)
+    if (boost) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      brighten(ctx, canvas.width, canvas.height);
+    }
     setFlash(true);
     setTimeout(() => setFlash(false), 150);
     canvas.toBlob((blob) => blob && send.mutate(blob), "image/jpeg", 0.9);
@@ -246,15 +250,14 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
 
   const shoot = useCallback(async () => {
     if (!flashOn) return capture(false);
-    const track = streamRef.current?.getVideoTracks()[0];
-    const torch = Boolean(track && (track.getCapabilities?.() as { torch?: boolean } | undefined)?.torch);
     setLighting(true);
-    if (torch) await track!.applyConstraints({ advanced: [{ torch: true } as MediaTrackConstraintSet] }).catch(() => undefined);
+    // Kamera: exposure / brightness-i baland va torch (agar dastgiri kunad)
+    const restore = await boostExposure(streamRef.current?.getVideoTracks()[0]);
     // Kamera ba ravshanii nav moslashavad (auto-exposure), ba'd aks
     await new Promise((r) => setTimeout(r, FLASH_MS));
     capture(true);
     setLighting(false);
-    if (torch) await track!.applyConstraints({ advanced: [{ torch: false } as MediaTrackConstraintSet] }).catch(() => undefined);
+    await restore();
   }, [flashOn, capture]);
 
   return (
@@ -293,7 +296,15 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
               <p className="text-xs text-white/70">Instants are taken with your camera. Turn on camera access in your browser to send one.</p>
             </div>
           ) : (
-            <video ref={videoRef} autoPlay playsInline muted className={cn("size-full object-cover", facing === "user" && "-scale-x-100")} />
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              // Bo flash preview ham ravshantar — taqriban misli aksi natija
+              style={flashOn ? { filter: "brightness(1.3) contrast(1.05)" } : undefined}
+              className={cn("size-full object-cover", facing === "user" && "-scale-x-100")}
+            />
           )}
           {flash && <span className="absolute inset-0 bg-white" />}
           {!error && (
@@ -353,7 +364,7 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
         </button>
       </div>
       <p className="pb-5 text-center text-xs text-white/60">Shared with your followers. Seen once, gone in 24 hours.</p>
-      {/* Front flash: tamomi ekran safed — ruy dar kompyuter / telefon ravshan meshavad */}
+      {/* Front flash: ekrani safed ruyro ravshan mekunad; asosi — korkardi aks (brighten) */}
       {lighting && <div aria-hidden className="fixed inset-0 z-[60] bg-white" />}
     </>
   );
