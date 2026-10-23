@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/ui.store";
 import { MoreMenu } from "./more-menu";
 import { NAV_ITEMS, isItemActive } from "./nav-items";
+import { SidebarIcon } from "./sidebar-icon";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -51,7 +52,9 @@ export function Sidebar() {
         className="ig-sidebar-brand mb-7 mt-7 flex h-10 items-center gap-3 rounded-lg px-3 hover:bg-ig-hover-overlay"
       >
         <InstagramGlyph className="size-6 shrink-0" />
-        <span className="ig-sidebar-label font-semibold">Instagram</span>
+        <span aria-hidden="true" className="ig-sidebar-label">
+          <span className="ig-wordmark block h-9 w-[112px]" />
+        </span>
       </Link>
 
       <ul className="ig-sidebar-links flex flex-col gap-1">
@@ -67,7 +70,7 @@ export function Sidebar() {
               : rawItem;
 
           const active = isItemActive(item, pathname, panel);
-          const Icon = item.icon;
+          const label = item.key === "search" ? "Search query" : item.label;
           const rowCls = cn(
             "ig-nav-item group flex w-full items-center gap-4 rounded-lg p-3 text-base transition-colors hover:bg-ig-hover-overlay",
             active ? "font-semibold" : "font-normal",
@@ -91,22 +94,27 @@ export function Sidebar() {
                     )}
                   />
                 ) : (
-                  <Icon
+                  <SidebarIcon
+                    name={item.key}
+                    active={active}
                     className="size-6 shrink-0 transition-transform duration-200 group-hover:scale-105"
-                    strokeWidth={active ? 2.75 : 2}
-                    fill={
-                      active && item.fillWhenActive ? "currentColor" : "none"
-                    }
                   />
                 )}
                 {hasBadge ? (
                   <span
                     aria-label="Unread"
-                    className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-ig-badge ring-2 ring-ig-bg"
-                  />
+                    className={cn(
+                      "absolute rounded-full bg-ig-badge ring-2 ring-ig-bg",
+                      item.key === "messages"
+                        ? "-bottom-1 -right-2 flex h-[18px] min-w-[18px] items-center justify-center px-1 text-[11px] leading-none text-white"
+                        : "-right-0.5 -top-0.5 size-2.5",
+                    )}
+                  >
+                    {item.key === "messages" ? Math.min(directUnread?.count ?? 0, 99) : null}
+                  </span>
                 ) : null}
               </span>
-              <span className={labelCls}>{item.label}</span>
+              <span className={labelCls}>{label}</span>
             </>
           );
 

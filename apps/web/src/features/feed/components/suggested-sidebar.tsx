@@ -60,7 +60,7 @@ export function SuggestedSidebar() {
   const { data: me } = useMe();
 
   return (
-    <section aria-label="Suggested for you" className="pl-4">
+    <section aria-label="Suggested for you" className="w-full min-w-0">
       {me ? (
         <div className="mb-4 flex items-center gap-3">
           <Link href={`/${me.userName}`} aria-label={`Profile of ${me.userName}`} className="shrink-0">
@@ -89,7 +89,7 @@ export function SuggestedSidebar() {
           See All
         </Link>
       </div>
-      <ul>
+      <ul className="ig-suggested-users">
         {(data ?? []).slice(0, 5).map((user) => (
           <SuggestedRow key={user.id} user={user} />
         ))}

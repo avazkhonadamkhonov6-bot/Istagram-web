@@ -38,14 +38,14 @@ export function StoriesTray() {
     >
       <button
         onClick={() => create(true)}
-        className="flex w-[66px] shrink-0 flex-col items-center gap-2"
+        className="ig-story-item flex shrink-0 flex-col items-center gap-2"
         aria-label="Your story"
       >
-        <span className="relative p-[5px]">
+        <span className="ig-story-frame relative p-[5px]">
           <SmallAvatar
             src={mediaUrl(me?.image)}
             name={me?.userName ?? "You"}
-            className="size-14"
+            className="ig-story-avatar"
           />
           <Plus className="absolute bottom-0 right-0 size-5 rounded-full border-2 border-ig-bg bg-ig-primary text-ig-text-on-color" />
         </span>
@@ -56,12 +56,12 @@ export function StoriesTray() {
           key={`live-${live.liveId}`}
           aria-label={`${live.user.userName} is live`}
           href={`/live/${live.liveId}`}
-          className="flex w-[66px] shrink-0 flex-col items-center gap-2"
+          className="ig-story-item flex shrink-0 flex-col items-center gap-2"
         >
-          <span className="relative">
+          <span className="ig-story-frame relative">
             <span className="block rounded-full bg-[linear-gradient(45deg,rgb(var(--decorative-ig-lavender)),rgb(var(--ig-live-badge)))] p-[2px]">
-              <span className="block rounded-full bg-ig-bg p-[2px]">
-                <SmallAvatar src={mediaUrl(live.user.avatar)} name={live.user.userName} className="size-14" />
+              <span className="block rounded-full bg-ig-bg p-[3px]">
+                <SmallAvatar src={mediaUrl(live.user.avatar)} name={live.user.userName} className="ig-story-avatar" />
               </span>
             </span>
             <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 rounded-[4px] border-2 border-ig-bg bg-[linear-gradient(90deg,rgb(var(--decorative-ig-lavender)),rgb(var(--ig-live-badge)))] px-1 text-[10px] font-bold leading-[14px] tracking-wide text-ig-text-on-color">
@@ -73,7 +73,12 @@ export function StoriesTray() {
       ))}
       {stories.isPending ? (
         [1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="size-[66px] shrink-0 rounded-full" />
+          <div key={i} className="ig-story-item flex shrink-0 flex-col items-center gap-2" aria-hidden="true">
+            <span className="ig-story-frame inline-flex p-[5px]">
+              <Skeleton className="ig-story-avatar rounded-full" />
+            </span>
+            <Skeleton className="h-4 w-12" />
+          </div>
         ))
       ) : stories.isError ? (
         <button
@@ -90,13 +95,13 @@ export function StoriesTray() {
               key={u.userId}
               aria-label={u.userName}
               href={`/stories/${encodeURIComponent(u.userName)}`}
-              className="flex w-[66px] shrink-0 flex-col items-center gap-2"
+              className="ig-story-item flex shrink-0 flex-col items-center gap-2"
             >
-              <StoryRing state={u.hasUnseen ? u.hasCloseFriends ? "close-friends" : "unseen" : "seen"}>
+              <StoryRing className="ig-story-frame" state={u.hasUnseen ? u.hasCloseFriends ? "close-friends" : "unseen" : "seen"}>
                 <SmallAvatar
                   src={mediaUrl(u.userImage)}
                   name={u.userName}
-                  className="size-14"
+                  className="ig-story-avatar"
                 />
               </StoryRing>
               <span className="w-full truncate text-center text-xs">

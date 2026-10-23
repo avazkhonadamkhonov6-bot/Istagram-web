@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AtSign, Globe, Grid2X2, LogOut, MessageCircle } from "lucide-react";
+import { AtSign, Globe, LogOut, MessageCircle } from "lucide-react";
+import { SidebarIcon } from "./sidebar-icon";
 import { useState } from "react";
 import { LanguageDialog } from "@/components/language-dialog";
 import {
@@ -82,7 +83,7 @@ export function MoreMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
     <DropdownMenu>
-      <DropdownMenuTrigger asChild><button type="button" aria-label="Other Meta products" className="mt-2 flex w-full items-center gap-4 rounded-lg p-3 text-base hover:bg-ig-hover-overlay"><Grid2X2 className="size-6 shrink-0" /><span className={cn(labelCls, "truncate")}>Other Meta products</span></button></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild><button type="button" aria-label="Other Meta products" className="mt-2 flex w-full items-center gap-4 rounded-lg p-3 text-base hover:bg-ig-hover-overlay"><SidebarIcon name="products" className="size-6 shrink-0" /><span className={cn(labelCls, "truncate")}>Other Meta products</span></button></DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" className="w-64">
         <DropdownMenuItem asChild><a href="https://www.whatsapp.com/" target="_blank" rel="noreferrer"><MessageCircle className="size-6" />WhatsApp</a></DropdownMenuItem>
         <DropdownMenuItem asChild><a href="https://www.threads.com/" target="_blank" rel="noreferrer"><AtSign className="size-6" />Threads</a></DropdownMenuItem>

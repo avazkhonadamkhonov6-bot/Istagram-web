@@ -1,5 +1,71 @@
 import { expect, test } from "@playwright/test";
 
+test("desktop dock sends messages without leaving the feed", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1920, height: 1000 });
+  await page.addInitScript(() => {
+    const nativeFetch = window.fetch;
+    const myId = "00000000-0000-4000-8000-000000000001";
+    const message = {
+      messageId: 1, chatId: 7, userId: "peer", userName: "dock.friend",
+      userImage: null, messageText: "Hello from the dock", file: null,
+      sharedPost: null, sendMassageDate: new Date().toISOString(),
+    };
+    const messages = [message];
+    const chat = {
+      chatId: 7, sendUserId: myId, sendUserName: "abubakr", sendUserImage: null,
+      receiveUserId: "peer", receiveUserName: "dock.friend", receiveUserImage: null,
+      lastMessage: message, unreadCount: 1, peerReadAt: null,
+    };
+    window.fetch = async (input, init) => {
+      const path = String(input);
+      const respond = (data: unknown) => Promise.resolve(new Response(JSON.stringify({ data, errors: [], statusCode: 200 }), { headers: { "content-type": "application/json" } }));
+      if (path.includes("/Chat/get-chats")) return respond([chat]);
+      if (path.includes("/Chat/get-chat-by-id")) return respond(messages);
+      if (path.includes("/Chat/read-chat")) return respond({ chatId: 7, readAt: new Date().toISOString() });
+      if (path.includes("/Chat/send-message")) {
+        const form = init?.body as FormData;
+        const sent = { ...message, messageId: 2, userId: myId, userName: "abubakr", messageText: String(form.get("MessageText")) };
+        messages.push(sent);
+        chat.lastMessage = sent;
+        return respond(sent);
+      }
+      return nativeFetch(input, init);
+    };
+  });
+  await page.goto("/");
+  await page.locator("article").first().waitFor();
+  const suggestions = await page.locator(".ig-suggestions").boundingBox();
+  expect(suggestions?.width).toBe(360);
+  expect(1920 - (suggestions!.x + suggestions!.width)).toBe(24);
+  await page.evaluate(() => window.scrollTo(0, 250));
+  const scrollY = await page.evaluate(() => window.scrollY);
+  await page.getByRole("button", { name: "Open messages preview" }).click();
+  const dock = page.getByRole("region", { name: "Messages preview" });
+  await dock.getByRole("button", { name: /dock.friend/ }).click();
+  await expect(dock.getByText("Hello from the dock", { exact: true })).toBeVisible();
+  await expect(dock.getByRole("button", { name: "Send photo or video" })).toBeVisible();
+  await dock.getByRole("textbox", { name: "Message", exact: true }).fill("Reply without leaving the feed");
+  await dock.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(dock.getByText("Reply without leaving the feed", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+  const bounds = await dock.boundingBox();
+  expect(bounds?.width).toBe(360);
+  expect(bounds?.height).toBe(520);
+  await dock.getByRole("button", { name: "Back to messages" }).click();
+  await expect(dock.getByRole("button", { name: /dock.friend/ })).toBeVisible();
+  await dock.getByRole("button", { name: "Close messages" }).click();
+  await expect(dock).toBeHidden();
+  await page.getByRole("button", { name: "Open messages preview" }).click();
+  await dock.getByRole("button", { name: /dock.friend/ }).click();
+  await expect(dock.getByText("Reply without leaving the feed", { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("desktop-dock.png") });
+  await dock.getByRole("link", { name: "Expand conversation" }).click();
+  await expect(page).toHaveURL(/\/direct\/t\/7$/);
+  await expect(page.getByRole("textbox", { name: "Message", exact: true })).toBeVisible();
+  await expect(page.getByText("Reply without leaving the feed", { exact: true }).last()).toBeVisible();
+});
+
 for (const width of [1440, 1000, 390]) {
   test(`navigation and feed at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

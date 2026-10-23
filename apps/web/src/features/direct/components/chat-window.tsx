@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Heart, ImageIcon, Info, Mic, Pencil, Phone, Reply, Send, Video, X } from "lucide-react";
+import { ChevronLeft, Heart, ImageIcon, Info, Maximize2, Mic, Pencil, Phone, Reply, Send, Video, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorFallback } from "@/components/error-fallback";
@@ -35,7 +35,7 @@ const GAP_MS = 15 * 60_000;
 /** Spec 15 §3 */
 const EDIT_WINDOW_MS = 15 * 60_000;
 
-export function ChatWindow({ chatId }: { chatId: number }) {
+export function ChatWindow({ chatId, dock, onBack, onClose }: { chatId: number; dock?: boolean; onBack?: () => void; onClose?: () => void }) {
   const { data: me } = useMe();
   const { data: chats } = useChats();
   const { data: messages, isPending, isError, error, refetch } = useMessages(chatId);
@@ -51,7 +51,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const [editing, setEditing] = useState<UiMessage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder((file, durationSec) => send.mutate({ text: "", file, durationSec }));
   const [videoOpen, setVideoOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -62,7 +62,8 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const isGroup = !!chat?.isGroup;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
+    const thread = threadRef.current;
+    if (thread) thread.scrollTop = thread.scrollHeight;
   }, [messages?.length, peerTyping]);
 
   // "Seen" zeri paymi oxirini xud, agar tarafi digar pas az on xondaast (Spec 13 §4)
@@ -113,9 +114,16 @@ export function ChatWindow({ chatId }: { chatId: number }) {
   const forbidden = error instanceof ApiError && error.status === 403;
 
   return (
-    <div className="flex h-full min-w-0 flex-1">
-    <section className={cn("flex h-full min-w-0 flex-1 flex-col", detailsOpen && "hidden md:flex")}>
-      <header className="flex h-[75px] items-center gap-3 border-b border-ig-separator px-4">
+    <div className={cn("flex h-full min-h-0 min-w-0 flex-1", dock && "ig-dock-chat")}>
+    <section className={cn("flex h-full min-h-0 min-w-0 flex-1 flex-col", detailsOpen && "hidden md:flex")}>
+      {dock ? (
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-ig-separator px-3">
+          <button type="button" aria-label="Back to messages" onClick={onBack} className="shrink-0 p-1"><ChevronLeft className="size-5" /></button>
+          {peer && <><Avatar src={mediaUrl(peer.image)} alt={peer.userName} size={32} /><div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold" data-no-translate>{peer.userName}</h2>{status && <p className="truncate text-xs text-ig-text-secondary">{status}</p>}</div></>}
+          <Link href={`/direct/t/${chatId}`} aria-label="Expand conversation" className="ml-auto shrink-0 p-1"><Maximize2 className="size-4" /></Link>
+          <button type="button" aria-label="Close messages" onClick={onClose} className="shrink-0 p-1"><X className="size-5" /></button>
+        </header>
+      ) : <header className="flex h-[75px] shrink-0 items-center gap-3 border-b border-ig-separator px-4">
         <Link href="/direct/inbox" aria-label="Back" className="text-ig-icon md:hidden">
           <ChevronLeft className="size-7" />
         </Link>
@@ -182,9 +190,9 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             </button>
           </>
         )}
-      </header>
+      </header>}
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div ref={threadRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
         {isPending && (
           <div className="flex justify-center py-8">
             <Spinner />
@@ -210,7 +218,6 @@ export function ChatWindow({ chatId }: { chatId: number }) {
             {isGroup ? "Someone" : peer.userName} is typing...
           </p>
         )}
-        <div ref={bottomRef} />
       </div>
 
       {editing && (
@@ -244,7 +251,7 @@ export function ChatWindow({ chatId }: { chatId: number }) {
         </div>
       )}
 
-      <form onSubmit={submit} className="m-4 flex items-center gap-3 rounded-full border border-ig-stroke px-4 py-2">
+      <form onSubmit={submit} className={cn("flex shrink-0 items-center rounded-full border border-ig-stroke py-2", dock ? "m-3 gap-2 px-3" : "m-4 gap-3 px-4")}>
         {voice.recording ? (
           <>
             <button type="button" aria-label="Cancel recording" onClick={voice.cancel} className="text-ig-icon hover:text-ig-error">
@@ -269,8 +276,9 @@ export function ChatWindow({ chatId }: { chatId: number }) {
                 if (e.target.value) typing.onInput();
               }}
               placeholder="Message..."
+              aria-label="Message"
               maxLength={1000}
-              className="flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
+              className="ig-message-input min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-ig-input-placeholder"
             />
             {text.trim() ? (
               <button type="submit" className="text-sm font-semibold text-ig-borderless hover:text-ig-borderless-hover">
@@ -411,7 +419,7 @@ function MessageList({
                 )}
               </div>
               {!m.pending && (
-                <span className="invisible flex items-center gap-2 group-hover:visible">
+                <span className="ig-message-actions invisible flex items-center gap-2 group-hover:visible focus-within:visible">
                   <button type="button" aria-label="Like" onClick={() => onLike(m.messageId)} className="text-ig-icon">
                     <Heart className={cn("size-4", liked && "text-ig-badge")} fill={liked ? "currentColor" : "none"} />
                   </button>
