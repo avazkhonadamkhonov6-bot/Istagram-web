@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/format";
 import { mediaUrl } from "@/lib/media";
+import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 import { peerOf, useChats, useMe } from "../hooks";
 import { NewMessageDialog } from "./new-message-dialog";
@@ -17,7 +18,13 @@ import { NotesTray } from "./notes-tray";
 /** Sutuni chap-i Direct: 397px dar desktop (Spec 08) */
 export function ChatList({ className }: { className?: string }) {
   const { data: me } = useMe();
-  const { data: chats, isPending, isError, refetch } = useChats();
+  // To hydration skeleton — dock-i Messages chat-horo pesh-tar bor mekunad va HTML-i server bo client mos nameomad
+  const hydrated = useHydrated();
+  const query = useChats();
+  const chats = hydrated ? query.data : undefined;
+  const isPending = !hydrated || query.isPending;
+  const isError = hydrated && query.isError;
+  const refetch = query.refetch;
   const params = useParams<{ id?: string }>();
   const activeId = params.id ? Number(params.id) : null;
 

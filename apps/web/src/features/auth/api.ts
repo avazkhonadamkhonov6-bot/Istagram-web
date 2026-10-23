@@ -48,3 +48,10 @@ export async function checkUsernameAvailable(rawUsername: string): Promise<{
     return { available: false, reason: "UNAVAILABLE" };
   }
 }
+
+/** Spec 12: kodi ivazi parol ba e-mail (javob hamesha yakxela) */
+export const forgotPassword = (email: string) =>
+  api<string>(`/Account/ForgotPassword?${new URLSearchParams({ Email: email })}`, { method: "DELETE" });
+
+export const resetPassword = (q: { Email: string; Token: string; Password: string; ConfirmPassword: string }) =>
+  api<string>(`/Account/ResetPassword?${new URLSearchParams(q)}`, { method: "DELETE" });

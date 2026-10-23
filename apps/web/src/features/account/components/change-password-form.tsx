@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { changePasswordQuerySchema } from "@repo/shared";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,9 @@ export function ChangePasswordForm() {
           error={errors.ConfirmPassword?.message}
           {...register("ConfirmPassword")}
         />
+        <Link href="/accounts/password/reset" className="block text-sm font-semibold text-ig-link">
+          Forgot your password?
+        </Link>
         <Button
           type="submit"
           variant="primary"

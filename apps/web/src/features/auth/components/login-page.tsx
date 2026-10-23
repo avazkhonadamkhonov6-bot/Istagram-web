@@ -129,6 +129,9 @@ function LoginForm() {
                   {serverError}
                 </p>
               ) : null}
+              <Link href="/accounts/password/reset" className="mt-4 block text-center text-sm font-semibold">
+                Forgot password?
+              </Link>
             </form>
             <div className="login-account-actions">
               <Link href="/signup" className="login-create-account">Create new account</Link>
