@@ -17,7 +17,7 @@ import { createChat, createGroup } from "../api";
 import { directKeys, useMe } from "../hooks";
 
 /** Modali "New message": justujui user → create-chat → /direct/t/[id]; 2+ user → group chat (Spec 14 §4) */
-export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
+export function NewMessageDialog({ trigger, onChatCreated }: { trigger?: React.ReactNode; onChatCreated?: (chatId: number) => void }) {
   const router = useRouter();
   const qc = useQueryClient();
   const { data: me } = useMe();
@@ -54,7 +54,8 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
       setQ("");
       setSelected([]);
       setGroupName("");
-      router.push(`/direct/t/${chatId}`);
+      if (onChatCreated) onChatCreated(chatId);
+      else router.push(`/direct/t/${chatId}`);
     } catch {
       toast.error("Couldn't start chat");
     } finally {

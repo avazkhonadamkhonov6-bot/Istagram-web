@@ -15,6 +15,7 @@ const ROWS: [string, string, string][] = [
   // Navigatsiya
   ["Home", "Главная", "Sahifai asosi"],
   ["Search", "Поиск", "Justuju"],
+  ["Search query", "Поисковый запрос", "Darhosti justuju"],
   ["Explore", "Интересное", "Kashf"],
   ["Reels", "Reels", "Reels"],
   ["Messages", "Сообщения", "Paymho"],
@@ -339,6 +340,8 @@ const ROWS: [string, string, string][] = [
   ["You don't have access to this chat.", "У вас нет доступа к этому чату.", "Shumo ba in chat dastras nadored."],
   ["Open messages", "Открыть сообщения", "Kushodani paymho"],
   ["Close messages", "Закрыть сообщения", "Pushidani paymho"],
+  ["Back to messages", "К списку сообщений", "Ba ruyxati paymho"],
+  ["Expand conversation", "Развернуть переписку", "Kalon kardani suhbat"],
 
   // Instants
   ["Instants", "Моментальные фото", "Aksi momentali"],
