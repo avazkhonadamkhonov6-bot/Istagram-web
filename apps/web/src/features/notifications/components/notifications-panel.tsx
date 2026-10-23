@@ -17,7 +17,7 @@ import { toast } from "@/components/ui/toast";
 import { useLives } from "@/features/live-entry/hooks";
 import { followUser } from "@/features/profile/api";
 import { formatRelativeTime } from "@/lib/format";
-import { mediaUrl } from "@/lib/media";
+import { isVideoFile, mediaUrl } from "@/lib/media";
 import {
   getNotifications,
   notificationKeys,
@@ -116,7 +116,17 @@ function NotificationRow({ item }: { item: NotificationDto }) {
           aria-label="View post"
           className="size-11 shrink-0 overflow-hidden rounded-md bg-ig-bg-secondary"
         >
-          {item.post.image && (
+          {/* Posti video — kadri avval, na <img> bo fayli .mp4 */}
+          {item.post.image && isVideoFile(item.post.image) ? (
+            <video
+              src={`${mediaUrl(item.post.image)}#t=0.1`}
+              muted
+              playsInline
+              preload="metadata"
+              aria-label="Post"
+              className="size-11 object-cover"
+            />
+          ) : item.post.image && (
             <SmallAvatar
               src={mediaUrl(item.post.image)}
               name="Post"
