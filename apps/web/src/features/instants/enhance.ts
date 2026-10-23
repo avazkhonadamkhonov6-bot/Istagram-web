@@ -3,8 +3,8 @@
  * 1) `boostExposure` — kamera (agar dastgiri kunad) ba exposure-i baland va torch;
  * 2) `captureFrames` — chand kadr pay dar pay girifta, miyonaashon hisob meshavad: shovqini webcam
  *    (nuqtahoi rangin dar xonai torik) taqriban √N barobar kam meshavad;
- * 3) `enhance` — white balance-i avtomati (rangi binafsh / surx narmal), denoise-i rang,
- *    auto-levels va gamma-i narm (ravshan, vale nuri safed nemesuzad).
+ * 3) `enhance` — white balance az pikselhoi miyona, denoise-i rang, black point (siyoh — siyoh),
+ *    ekspozitsiya az ruyi markaz (ruy), kontrast-i S-curve va clarity — aks ravshan va toza, na xira.
  * Sharpen va rangi zoid istifoda nameshavand — onho shovqinro zurtar mekunand.
  */
 
@@ -12,8 +12,13 @@ type Range = { min: number; max: number };
 type Caps = MediaTrackCapabilities & { exposureCompensation?: Range; torch?: boolean; exposureMode?: string[] };
 type Settings = MediaTrackSettings & { exposureCompensation?: number };
 
+// Ravshanii ruy (markaz) pas az korkard
 const TARGET_MEAN = 0.5;
-const MIN_GAMMA = 0.5;
+const MIN_GAMMA = 0.55;
+// Kontrast (S-curve), kontrasti mahalli va rang
+const CONTRAST = 0.3;
+const CLARITY = 0.35;
+const SATURATION = 0.95;
 const FRAMES = 12;
 
 /** Kamera-ro muvaqqatan ravshan mekunad; funksiyai bozgardonandaro bar megardonad */
@@ -81,27 +86,45 @@ export async function captureFrames(
   return img!;
 }
 
-/** Ravshani, rang va shovqin — dar joy (in place) */
+/** Ravshani, rang, kontrast va shovqin — dar joy (in place) */
 export function enhance(img: ImageData) {
   const { data: d, width, height } = img;
   const px = d.length / 4;
+  // Markaz (ruy dar Instant): ekspozitsiya va white balance az ruyi on
+  const cx0 = Math.floor(width * 0.25);
+  const cx1 = Math.ceil(width * 0.75);
+  const cy0 = Math.floor(height * 0.2);
+  const cy1 = Math.ceil(height * 0.8);
+  const inCenter = (p: number) => {
+    const x = p % width;
+    const y = (p / width) | 0;
+    return x >= cx0 && x < cx1 && y >= cy0 && y < cy1;
+  };
 
-  // 1) White balance (gray world, bo mahdudiyat): miyonai R, G, B barobar meshavand
+  // 1) White balance: faqat pikselhoi miyona (na siyoh, na safed) — rangi devor / ekran kamtar ta'sir mekunad
   let sr = 0;
   let sg = 0;
   let sb = 0;
-  for (let i = 0; i < d.length; i += 16) {
-    sr += d[i]!;
-    sg += d[i + 1]!;
-    sb += d[i + 2]!;
+  let wn = 0;
+  for (let p = 0, i = 0; p < px; p += 3, i += 12) {
+    const r = d[i]!;
+    const g = d[i + 1]!;
+    const b = d[i + 2]!;
+    const l = (r + g + b) / 3;
+    if (l < 20 || l > 235) continue;
+    const w = inCenter(p) ? 2 : 1;
+    sr += r * w;
+    sg += g * w;
+    sb += b * w;
+    wn += w;
   }
   const avg = (sr + sg + sb) / 3;
-  const clampGain = (g: number) => Math.min(1.6, Math.max(0.7, g));
-  const gr = clampGain(avg / Math.max(sr, 1));
-  const gg = clampGain(avg / Math.max(sg, 1));
-  const gb = clampGain(avg / Math.max(sb, 1));
+  const clampGain = (g: number) => Math.min(1.8, Math.max(0.6, g));
+  const gr = wn ? clampGain(avg / Math.max(sr, 1)) : 1;
+  const gg = wn ? clampGain(avg / Math.max(sg, 1)) : 1;
+  const gb = wn ? clampGain(avg / Math.max(sb, 1)) : 1;
 
-  // 2) Denoise-i rang: Y (tafsilot) nigoh doshta, Cb/Cr (nuqtahoi rangin) bo blur-i 7×7 hamvor
+  // 2) YCbCr: rang (Cb/Cr) bo blur-i 7×7 — nuqtahoi rangin nest
   const Y = new Float32Array(px);
   const Cb = new Float32Array(px);
   const Cr = new Float32Array(px);
@@ -116,43 +139,55 @@ export function enhance(img: ImageData) {
   }
   boxBlur(Cb, width, height, 3);
   boxBlur(Cr, width, height, 3);
-  // Y — blur-i sabuk (3×3) bo omezish: shovqini ravshani kam, ruy aniq memonad
-  const Ys = Y.slice();
-  boxBlur(Ys, width, height, 1);
-  for (let p = 0; p < px; p++) Y[p] = Y[p]! * 0.35 + Ys[p]! * 0.65;
+  // Y: blur-i sabuk (3×3) — shovqin kam; clarity: kontrasti mahalli (radius 12) — aks "xira" nest
+  const fine = Y.slice();
+  boxBlur(fine, width, height, 1);
+  const wide = Y.slice();
+  boxBlur(wide, width, height, 12);
+  for (let p = 0; p < px; p++) {
+    const y = Y[p]! * 0.4 + fine[p]! * 0.6;
+    Y[p] = y + (y - wide[p]!) * CLARITY;
+  }
 
-  // 3) Levels + gamma-i narm az ruyi histogram-i Y
+  // 3) Black point / white point az hamai aks, ekspozitsiya az markaz (ruy)
   const hist = new Uint32Array(256);
   let samples = 0;
-  for (let p = 0; p < px; p += 4) {
-    hist[Math.min(255, Math.max(0, Math.round(Y[p]!)))]!++;
+  let centerSum = 0;
+  let centerN = 0;
+  for (let p = 0; p < px; p += 3) {
+    const v = Math.min(255, Math.max(0, Math.round(Y[p]!)));
+    hist[v]!++;
     samples++;
+    if (inCenter(p)) {
+      centerSum += v;
+      centerN++;
+    }
   }
   const at = (q: number) => {
     let acc = 0;
     for (let v = 0; v < 256; v++) if ((acc += hist[v]!) >= samples * q) return v;
     return 255;
   };
-  // Gain-i maks. ~2.3× (hi - lo >= 110): kashishi zur shovqinro kalon mekunad
-  const lo = Math.min(at(0.005), 30);
-  const hi = Math.max(at(0.995), lo + 110);
-  let sum = 0;
-  for (let v = 0; v < 256; v++) sum += v * hist[v]!;
-  const mid = Math.min(Math.max((sum / samples - lo) / (hi - lo), 0.02), 0.98);
-  const gamma = Math.min(1, Math.max(MIN_GAMMA, Math.log(TARGET_MEAN) / Math.log(mid)));
+  // Siyoh — siyoh (haze nest); gain-i maks. ~2.5× (hi - lo >= 100) — shovqin kalon nashavad
+  const lo = at(0.02);
+  const hi = Math.max(at(0.995), lo + 100);
+  const center = centerN ? centerSum / centerN : 128;
+  const mid = Math.min(Math.max((center - lo) / (hi - lo), 0.02), 0.98);
+  const gamma = Math.min(1.2, Math.max(MIN_GAMMA, Math.log(TARGET_MEAN) / Math.log(mid)));
   const lut = new Float32Array(256);
   for (let v = 0; v < 256; v++) {
     const x = Math.min(Math.max((v - lo) / (hi - lo), 0), 1);
-    // Gamma va "shoulder"-i narm dar ravshanho — nuri safed nemesuzad
     const y = Math.pow(x, gamma);
-    lut[v] = 255 * (y < 0.85 ? y : 0.85 + (y - 0.85) * 0.7);
+    // S-curve: kontrast — siyohho chuqur, ravshanho toza
+    const sCurve = y * y * (3 - 2 * y);
+    lut[v] = 255 * (y + (sCurve - y) * CONTRAST);
   }
 
-  // 4) Bozgasht ba RGB: rang bo hamon nisbati ravshani (to 2×) miqyos meshavad
+  // 4) Bozgasht ba RGB; rang bo nisbati ravshani (to 2×), saturation-i kami past — boqimondai rang nest
   for (let p = 0, i = 0; p < px; p++, i += 4) {
-    const y0 = Y[p]!;
-    const y1 = lut[Math.min(255, Math.max(0, Math.round(y0)))]!;
-    const k = y0 > 1 ? Math.min(y1 / y0, 2) : 1;
+    const y0 = Math.min(255, Math.max(0, Y[p]!));
+    const y1 = lut[Math.round(y0)]!;
+    const k = (y0 > 1 ? Math.min(y1 / y0, 2) : 1) * SATURATION;
     const cb = Cb[p]! * k;
     const cr = Cr[p]! * k;
     const r = y1 + cr;
