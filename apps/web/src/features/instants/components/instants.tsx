@@ -3,7 +3,7 @@
 import type { InstantDto } from "@repo/shared";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, Camera, ChevronLeft, Eye, RefreshCw, Star, Trash2, X, Zap } from "lucide-react";
+import { Archive, Camera, ChevronLeft, Eye, RefreshCw, Star, Trash2, X, Zap, ZapOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/format";
@@ -12,6 +12,10 @@ import { cn } from "@/lib/utils";
 import { addInstant, deleteInstant, getInstantArchive, getInstants, instantKeys, viewInstant } from "../api";
 
 type Mode = "camera" | "viewer" | "archive";
+
+const FLASH_KEY = "ig-instant-flash";
+// Chand ms ekran safed pesh az aks — kamera ravshaniro qabul kunad
+const FLASH_MS = 450;
 
 const TILT = [-8, 6, -2];
 
@@ -141,6 +145,17 @@ function Viewer({ items, onDone }: { items: InstantDto[]; onDone: () => void }) 
 function InstantCamera({ onArchive }: { onArchive: () => void }) {
   const qc = useQueryClient();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  // Flash: dar kompyuter — ekrani safed (front flash), dar telefon — ham chirog-i kamera (torch).
+  // Intixob nigoh doshta meshavad; peshfarz — fa'ol
+  const [flashOn, setFlashOn] = useState(() => {
+    try {
+      return localStorage.getItem(FLASH_KEY) !== "off";
+    } catch {
+      return true;
+    }
+  });
+  const [lighting, setLighting] = useState(false);
   const [facing, setFacing] = useState<"user" | "environment">("user");
   const [closeFriends, setCloseFriends] = useState(false);
   // Kamerae, ki kushoda nashud (ijozat nest yo dastgoh nest)
@@ -161,6 +176,7 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
       .then((s) => {
         if (cancelled) return s.getTracks().forEach((t) => t.stop());
         stream = s;
+        streamRef.current = s;
         if (videoRef.current) videoRef.current.srcObject = s;
       })
       .catch(() => !cancelled && setFailed(facing));
@@ -199,7 +215,15 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
     onError: () => setFailure("Couldn't send Instant. Try again."),
   });
 
-  const shoot = useCallback(() => {
+  const toggleFlash = () =>
+    setFlashOn((on) => {
+      try {
+        localStorage.setItem(FLASH_KEY, on ? "off" : "on");
+      } catch {}
+      return !on;
+    });
+
+  const capture = useCallback((boost: boolean) => {
     const video = videoRef.current;
     if (!video?.videoWidth) return;
     const canvas = document.createElement("canvas");
@@ -212,11 +236,26 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
+    // Bo flash aks kami ravshantar (dar brauzerhoe, ki ctx.filter nadorand — bidun tagyir)
+    if (boost) ctx.filter = "brightness(1.12) contrast(1.04)";
     ctx.drawImage(video, 0, 0);
     setFlash(true);
     setTimeout(() => setFlash(false), 150);
     canvas.toBlob((blob) => blob && send.mutate(blob), "image/jpeg", 0.9);
   }, [facing, send]);
+
+  const shoot = useCallback(async () => {
+    if (!flashOn) return capture(false);
+    const track = streamRef.current?.getVideoTracks()[0];
+    const torch = Boolean(track && (track.getCapabilities?.() as { torch?: boolean } | undefined)?.torch);
+    setLighting(true);
+    if (torch) await track!.applyConstraints({ advanced: [{ torch: true } as MediaTrackConstraintSet] }).catch(() => undefined);
+    // Kamera ba ravshanii nav moslashavad (auto-exposure), ba'd aks
+    await new Promise((r) => setTimeout(r, FLASH_MS));
+    capture(true);
+    setLighting(false);
+    if (torch) await track!.applyConstraints({ advanced: [{ torch: false } as MediaTrackConstraintSet] }).catch(() => undefined);
+  }, [flashOn, capture]);
 
   return (
     <>
@@ -257,6 +296,17 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
             <video ref={videoRef} autoPlay playsInline muted className={cn("size-full object-cover", facing === "user" && "-scale-x-100")} />
           )}
           {flash && <span className="absolute inset-0 bg-white" />}
+          {!error && (
+            <button
+              type="button"
+              aria-label={flashOn ? "Flash on" : "Flash off"}
+              aria-pressed={flashOn}
+              onClick={toggleFlash}
+              className="absolute right-3 top-3 z-10 rounded-full bg-black/40 p-2 backdrop-blur hover:bg-black/60"
+            >
+              {flashOn ? <Zap className="size-5 fill-current" /> : <ZapOff className="size-5" />}
+            </button>
+          )}
           {failure && (
             <p role="alert" className="absolute inset-x-3 bottom-3 rounded-xl bg-ig-toast px-4 py-3 text-center text-sm font-semibold shadow-ig-strong">
               {failure}
@@ -287,8 +337,8 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
         <button
           type="button"
           aria-label="Take Instant"
-          disabled={error || send.isPending}
-          onClick={shoot}
+          disabled={error || send.isPending || lighting}
+          onClick={() => void shoot()}
           className="size-[72px] rounded-full border-4 border-white p-1 transition-transform active:scale-90 disabled:opacity-40"
         >
           <span className="block size-full rounded-full bg-white" />
@@ -302,7 +352,9 @@ function InstantCamera({ onArchive }: { onArchive: () => void }) {
           <RefreshCw className="size-7" />
         </button>
       </div>
-      <p className="pb-5 text-center text-xs text-white/60">Shared with friends who follow you back. Seen once, gone in 24 hours.</p>
+      <p className="pb-5 text-center text-xs text-white/60">Shared with your followers. Seen once, gone in 24 hours.</p>
+      {/* Front flash: tamomi ekran safed — ruy dar kompyuter / telefon ravshan meshavad */}
+      {lighting && <div aria-hidden className="fixed inset-0 z-[60] bg-white" />}
     </>
   );
 }
