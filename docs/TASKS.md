@@ -530,3 +530,19 @@
 **Tayyor, agar:**
 - [x] Har se darvoza ba sahifai efir meravand
 - [x] Mobil 375px
+
+### BE-15 · Forgot password ba Gmail, Instants real-time, TanStack Query
+<!-- who:avaz day:6 type:fullstack -->
+**Spec:** 12 (ForgotPassword / ResetPassword), 17 (Instants) · Hujjat: [EMAIL.md](EMAIL.md)
+
+- `MailService`: Gmail (App Password), SMTP, Brevo, Resend — ba tartib, timeout 10 s, xati HTML; `pnpm --filter api mail:test <email>`
+- `render.yaml`: `BREVO_API_KEY`, `MAIL_FROM` (`sync: false` — dar Dashboard vorid meshavand)
+- Socket `instant:new` → toast dar har sahifa va invalidate-i `["instants"]`
+- TanStack Query Devtools (faqat dev), peshfarzhoi `QueryClient`
+
+**Tayyor, agar:**
+- [x] Kod → paroli nav → login bo paroli nav; paroli kuhna 401 (brauzer + API e2e)
+- [x] `mail:test` bo Gmail ba `smtp.gmail.com` mepayvandad (bo paroli soxta — 535, intizorshuda)
+- [x] API e2e 66/66, test-i Spec 17 AC6 (`instant:new` faqat ba mutual)
+- [x] Toast-i Instants dar brauzer sanjida shud
+- [ ] Gmail App Password dar `apps/api/.env` yo Brevo dar Render (kori sohibi akkaunt) — xat dar Inbox-i Gmail

@@ -28,6 +28,12 @@ services:
         value: http://localhost:3000
       - key: UPLOAD_DIR
         value: uploads
+      # Kodi ivazi parol ba Gmail (docs/EMAIL.md). Render free portho-i SMTP-ro mebandad —
+      # baroi hamin dar Render Brevo (HTTP): kalid va firistandai tasdiqshuda dar Dashboard vorid meshavand
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
 
 databases:
   - name: instagram-db

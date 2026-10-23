@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ErrorCode, INSTANT_ARCHIVE_MS, INSTANT_TTL_MS, InstantDto } from '@repo/shared';
+import { ErrorCode, INSTANT_ARCHIVE_MS, INSTANT_TTL_MS, InstantDto, SocketEvent } from '@repo/shared';
 import { badRequest, notFound } from '../../common/app-exception';
 import { userShortSelect } from '../../common/mappers';
 import { PrismaService } from '../../infra/prisma.service';
 import { StorageService } from '../../infra/storage.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { RelationsService } from '../relations/relations.service';
 
 const instantInclude = {
@@ -24,6 +25,7 @@ export class InstantsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly relations: RelationsService,
+    private readonly realtime: RealtimeGateway,
   ) {}
 
   private toDto(i: InstantRow, me: string): InstantDto {
@@ -49,7 +51,25 @@ export class InstantsService {
       data: { userId: me, fileName, closeFriends, createdAt: now, expiresAt: new Date(now.getTime() + INSTANT_TTL_MS) },
       include: instantInclude,
     });
+    void this.notifyRecipients(me, row).catch(() => undefined);
     return this.toDto(row, me);
+  }
+
+  /** Real-time: girandagon instant-i navro foran mebinand (hamon qoidahoi inbox — mutual, close friends, block) */
+  private async notifyRecipients(me: string, row: InstantRow) {
+    const [mutual, blocked, closeFriends] = await Promise.all([
+      this.prisma.follow.findMany({
+        where: { followingId: me, follower: { followers: { some: { followerId: me } } } },
+        select: { followerId: true },
+      }),
+      this.relations.blockedIds(me),
+      row.closeFriends ? this.relations.targetIds(me, 'CLOSE_FRIEND') : Promise.resolve(null),
+    ]);
+    const payload = { id: row.id, userId: me, userName: row.user.userName, userImage: row.user.avatar };
+    mutual
+      .map((f) => f.followerId)
+      .filter((id) => !blocked.includes(id) && (!closeFriends || closeFriends.includes(id)))
+      .forEach((id) => this.realtime.emitToUser(id, SocketEvent.INSTANT_NEW, payload));
   }
 
   /** Instant-hoi nadida az digaron (kuhna → nav, misli tudai aksho) */

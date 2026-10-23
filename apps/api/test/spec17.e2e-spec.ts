@@ -4,6 +4,8 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { randomBytes } from 'node:crypto';
+import { SocketEvent } from '@repo/shared';
+import { io } from 'socket.io-client';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { loadConfig } from '../src/infra/config';
@@ -101,5 +103,32 @@ describe('API (Spec 17)', () => {
     await prisma.instant.update({ where: { id: i.id }, data: { expiresAt: new Date(Date.now() - 1000) } });
     expect(await inbox('a')).not.toContain(i.id);
     await http().post('/Instant/add-instant').set(auth('c')).expect(400);
+  });
+
+  it('AC6: real-time — mutual `instant:new` megirad, begona ne', async () => {
+    const baseUrl = await app.getUrl();
+    const connect = async (who: string) => {
+      const ticket = (await http().post('/Account/ws-ticket').set(auth(who)).expect(200)).body.data as string;
+      const s = io(baseUrl, { path: '/ws', auth: { token: ticket }, transports: ['websocket'] });
+      await new Promise<void>((resolve) => s.on('connect', () => resolve()));
+      // handleConnection asinxronist — room-i user pas az verify
+      await new Promise((r) => setTimeout(r, 50));
+      return s;
+    };
+    const [sa, sb] = [await connect('a'), await connect('b')];
+    let bGot = false;
+    sb.on(SocketEvent.INSTANT_NEW, () => (bGot = true));
+    try {
+      const got = new Promise<{ id: number; userName: string }>((resolve) => sa.once(SocketEvent.INSTANT_NEW, resolve));
+      const i = await instant('c');
+      const e = await got;
+      expect(e.id).toBe(i.id);
+      expect(e.userName).toBe(name('c'));
+      await new Promise((r) => setTimeout(r, 300));
+      expect(bGot).toBe(false);
+    } finally {
+      sa.close();
+      sb.close();
+    }
   });
 });
