@@ -16,7 +16,7 @@
 .ig-stories-tray > a, .ig-stories-tray > button { width: 96px; }
 .ig-stories-tray > a > span:first-child, .ig-stories-tray > a > div:first-child { padding: 3px; }
 .ig-stories-tray img, .ig-stories-tray button > span > div, .ig-stories-tray a > div > div { width: 87px; height: 87px; }
-.ig-suggestions { display: none; width: 319px; padding-top: 36px; }
+.ig-suggestions { display: none; position: sticky; top: 16px; align-self: start; width: 319px; padding-top: 36px; }
 .ig-suggestions li { padding-block: 8px; gap: 12px; }
 .ig-suggestions li > div { font-size: 14px; }
 .ig-suggestions li span { font-size: 12px; }
