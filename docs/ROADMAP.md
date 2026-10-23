@@ -70,7 +70,9 @@ v0.1 Backend ──▶ v0.2 Frontend ──▶ v0.3 Production ──▶ v0.4 Pa
 | Optimizatsiya: Lighthouse ≥ 90, API p95 < 150 ms | P1 |
 | "Forgot password" — kod ba Gmail (Gmail lokali, Brevo dar Render; [EMAIL.md](EMAIL.md)) — DONE 2026-10-23 | P1 |
 | Instants real-time: `instant:new` + xabar dar har sahifa — DONE 2026-10-23 | P1 |
-| TanStack Query: Devtools, refetch dar focus/reconnect, mutation bidun retry — DONE 2026-10-23 | P1 |
+| TanStack Query: refetch dar focus/reconnect, mutation bidun retry, justujui yagona bo kesh — DONE 2026-10-23 | P1 |
+| Share-i post / reel ba chand nafar (misli Instagram) — DONE 2026-10-23 | P1 |
+| Tarjimai UI: English / Русский / Tojiki (More va Settings → Language) — DONE 2026-10-23 | P1 |
 
 ---
 

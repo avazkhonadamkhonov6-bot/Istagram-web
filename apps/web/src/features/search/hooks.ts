@@ -1,7 +1,7 @@
 "use client";
 
 import type { UserShort } from "@repo/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import * as searchApi from "./api";
 
@@ -21,11 +21,17 @@ export function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
+// Justuju (TanStack Query): natijai har harf 1 daqiqa dar kesh, hangomi navishtan ruyxati pesh
+// namemonad xoli (keepPreviousData) — misli Instagram, bidun "jahidan"
+const SEARCH_STALE_MS = 60_000;
+
 export function useUserSearch(q: string, enabled: boolean) {
   return useQuery({
     queryKey: searchKeys.users(q),
     queryFn: () => searchApi.searchUsers(q),
     enabled,
+    staleTime: SEARCH_STALE_MS,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -35,7 +41,16 @@ export function useHashtagSearch(q: string, enabled: boolean) {
     queryKey: searchKeys.tags(name),
     queryFn: () => searchApi.searchHashtags(name),
     enabled,
+    staleTime: SEARCH_STALE_MS,
+    placeholderData: keepPreviousData,
   });
+}
+
+/** Justujui odamon baroi dialogho (Share, New message, gruppa, Close friends): debounce + kesh-i umumi */
+export function usePeopleSearch(raw: string) {
+  const term = useDebounced(raw.trim().replace(/^@/, ""), 300);
+  const query = useUserSearch(term, term.length > 0);
+  return { term, ...query, isSearching: raw.trim() !== term || query.isFetching };
 }
 
 export type RecentItem = { key: string; createdAt: string } & (

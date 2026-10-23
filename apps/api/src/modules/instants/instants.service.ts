@@ -16,7 +16,7 @@ type InstantRow = Prisma.InstantGetPayload<{ include: typeof instantInclude }>;
 
 /**
  * Instants (Spec 17): aksi momentali az kamera.
- * Giranda — followerhoe, ki muallif onhoro follow kardaast (mutual) yo faqat close friends.
+ * Giranda — hamai followerhoi muallif (subscriber-ho) yo faqat close friends.
  * Har giranda yak bor mebinad; 24 soat ba'd baroi hama nopadid; muallif dar archive 1 sol mebinad.
  */
 @Injectable()
@@ -55,18 +55,18 @@ export class InstantsService {
     return this.toDto(row, me);
   }
 
-  /** Real-time: girandagon instant-i navro foran mebinand (hamon qoidahoi inbox — mutual, close friends, block) */
+  /** Real-time: girandagon instant-i navro foran mebinand (hamon qoidahoi inbox — followerho, close friends, block) */
   private async notifyRecipients(me: string, row: InstantRow) {
-    const [mutual, blocked, closeFriends] = await Promise.all([
+    const [followers, blocked, closeFriends] = await Promise.all([
       this.prisma.follow.findMany({
-        where: { followingId: me, follower: { followers: { some: { followerId: me } } } },
+        where: { followingId: me },
         select: { followerId: true },
       }),
       this.relations.blockedIds(me),
       row.closeFriends ? this.relations.targetIds(me, 'CLOSE_FRIEND') : Promise.resolve(null),
     ]);
     const payload = { id: row.id, userId: me, userName: row.user.userName, userImage: row.user.avatar };
-    mutual
+    followers
       .map((f) => f.followerId)
       .filter((id) => !blocked.includes(id) && (!closeFriends || closeFriends.includes(id)))
       .forEach((id) => this.realtime.emitToUser(id, SocketEvent.INSTANT_NEW, payload));
@@ -80,8 +80,8 @@ export class InstantsService {
         expiresAt: { gt: new Date() },
         userId: { not: me, notIn: blocked },
         views: { none: { userId: me } },
-        // muallif maro follow mekunad va man uro
-        user: { following: { some: { followingId: me } }, followers: { some: { followerId: me } } },
+        // man muallifro follow mekunam (follower-i u hastam)
+        user: { followers: { some: { followerId: me } } },
         OR: [{ closeFriends: false }, { user: { relations: { some: { targetId: me, type: 'CLOSE_FRIEND' } } } }],
       },
       include: instantInclude,

@@ -5,6 +5,7 @@ import type { PostDto, UserShort } from "@repo/shared";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useUserSearch } from "@/features/search/hooks";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Play } from "@/components/ui/icons";
@@ -258,7 +259,6 @@ export function RelationListView({ kind }: { kind: RelationList }) {
   );
 }
 
-type SearchUser = { id: string; userName: string; fullName: string | null; avatar: string | null };
 
 function AddToList({ kind }: { kind: "close-friends" | "favorites" }) {
   const qc = useQueryClient();
@@ -268,14 +268,7 @@ function AddToList({ kind }: { kind: "close-friends" | "favorites" }) {
     const t = setTimeout(() => setTerm(q.trim()), 300);
     return () => clearTimeout(t);
   }, [q]);
-  const search = useQuery({
-    queryKey: ["user-search", term],
-    enabled: term.length > 0,
-    queryFn: async () => {
-      const res = await fetch(`/api/User/get-users?UserName=${encodeURIComponent(term)}&PageSize=10`, { credentials: "same-origin" });
-      return res.ok ? ((await res.json()) as { data: SearchUser[] }).data : [];
-    },
-  });
+  const search = useUserSearch(term, term.length > 0);
   const add = useMutation({
     mutationFn: (userId: string) => relationAction(kind === "favorites" ? "add-favorite" : "add-close-friend", userId),
     onSuccess: () => {

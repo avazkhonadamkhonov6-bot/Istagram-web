@@ -102,3 +102,8 @@
 - 2026-10-23 (Avaz): **Instants real-time** — pas az `add-instant` server ba girandagon (mutual, close friends, bidun block) `instant:new` mefiristad; dar har sahifa toast "<user> sent you an Instant" → View, va inbox-i Instants foran nav meshavad. Dar brauzer sanjida shud.
 - 2026-10-23 (Avaz): **TanStack Query** — Devtools (faqat `next dev`, tugma dar kunji chap-i poyon), `gcTime` 5 daq., refetch dar focus / reconnect, mutation-ho xudkor takror nameshavand.
 - Sanjish: API e2e 66/66 (test-i navi Spec 17 AC6), `tsc` (api + web), `eslint` — sabz.
+- 2026-10-23 (Avaz, qismi 2): **Share ba chand nafar** — dialogi Share (post, reel, story) misli Instagram: tor-i avatar-ho, nishoni kabud (`--ig-primary` #4A5DF9), "Write a message...", "Send" / "Send separately", "Copy link"; har giranda alohida, agar yake naravad — faqat on intixobshuda memonad. Dar brauzer: reel ba 3 nafar → "Sent to 3 people", 3 chat.
+- **Instants ba hamai followerho** (pesh — faqat mutual): inbox va `instant:new` ba har follower-i muallif (close friends va block — misli pesh). Instants dar **Direct (Messages) → tugmai rost-i poyon (barq)**: agar instant-i nav boshad — tudai aksho bo shumora.
+- **TanStack Query dar justuju**: hamai justujuhoi odamon (Search, Share, New message, gruppa, tag, Close friends / Favorites) — yak hook `useUserSearch` / `usePeopleSearch` bo kesh-i umumi (1 daq.) va `keepPreviousData`; `fetch`-i dasti hazf shud. Tugmai Devtools hazf shud.
+- **Tarjima**: English / Русский / Tojiki — More → Language va Settings → Language (zeri "Switch appearance"), footer-i sahifahoi vorid. Faqat DOM-i hydrate-shuda tarjima meshavad (xatoi hydration nest); matni korbar tarjima nameshavad.
+- Isloh: xatoi hydration dar `/accounts/edit` (skeleton to hydration).

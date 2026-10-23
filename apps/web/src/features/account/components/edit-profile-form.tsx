@@ -17,6 +17,7 @@ import { useMe } from "@/features/auth/hooks";
 import { SmallAvatar } from "@/features/feed/components/small-avatar";
 import { ApiError } from "@/lib/api-client";
 import { mediaUrl } from "@/lib/media";
+import { useHydrated } from "@/lib/use-hydrated";
 import { useDeleteAvatar, useUpdateProfile, useUploadAvatar } from "../hooks";
 
 const ABOUT_MAX = 150;
@@ -298,8 +299,10 @@ function Form({ me }: { me: UserProfile }) {
 
 export function EditProfileForm() {
   const { data: me, isPending } = useMe();
+  // Server hamesha skeleton mekashad; to hydration client ham — vagarna kesh-i `me` farqi HTML medihad
+  const hydrated = useHydrated();
 
-  if (isPending) {
+  if (isPending || !hydrated) {
     return (
       <div className="max-w-[500px] space-y-4">
         <Skeleton className="h-8 w-40" />

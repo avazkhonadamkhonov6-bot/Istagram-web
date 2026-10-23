@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { postTagsInputSchema, type PostTagInput } from "@repo/shared";
-import { searchUsers } from "@/features/direct/api";
+import { useUserSearch } from "@/features/search/hooks";
 import { Button } from "@/components/ui/button";
 
 export function PhotoTags({
@@ -23,11 +22,7 @@ export function PhotoTags({
     const id = setTimeout(() => setTerm(search.trim()), 300);
     return () => clearTimeout(id);
   }, [search]);
-  const users = useQuery({
-    queryKey: ["tag-user-search", term],
-    queryFn: () => searchUsers(term),
-    enabled: term.length > 0,
-  });
+  const users = useUserSearch(term, term.length > 0);
   const selected = tags.filter((t) => t.imageIndex === imageIndex);
   return (
     <fieldset className="space-y-3 border-t border-ig-separator pt-4">

@@ -1,9 +1,11 @@
 "use client";
 
 import { useUiStore } from "@/store/ui.store";
-import { Moon } from "lucide-react";
+import { Globe, Moon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { LanguageDialog } from "@/components/language-dialog";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -21,6 +23,7 @@ const LINKS = [
 
 export function SettingsNav() {
   const pathname = usePathname();
+  const [langOpen, setLangOpen] = useState(false);
 
   return (
     <nav
@@ -47,6 +50,14 @@ export function SettingsNav() {
         <Moon className="size-4" />
         Switch appearance
       </button>
+      <button
+        onClick={() => setLangOpen(true)}
+        className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm hover:bg-ig-hover-overlay"
+      >
+        <Globe className="size-4" />
+        Language
+      </button>
+      <LanguageDialog open={langOpen} onOpenChange={setLangOpen} />
     </nav>
   );
 }

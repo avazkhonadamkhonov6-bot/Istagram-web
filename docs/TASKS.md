@@ -546,3 +546,15 @@
 - [x] API e2e 66/66, test-i Spec 17 AC6 (`instant:new` faqat ba mutual)
 - [x] Toast-i Instants dar brauzer sanjida shud
 - [ ] Gmail App Password dar `apps/api/.env` yo Brevo dar Render (kori sohibi akkaunt) — xat dar Inbox-i Gmail
+
+### FE-32 · Share ba chand nafar, tarjimai UI, justuju bo TanStack Query
+<!-- who:avaz day:6 type:frontend -->
+- Dialogi Share (post / reel / story): intixobi chand nafar, "Send separately", paym, "Copy link"
+- Instants: girandagon — hamai followerho (Spec 17 AC1, AC6)
+- `useUserSearch` / `usePeopleSearch` dar hamai justujuho
+- Tarjima: `src/lib/i18n/` (lugat + `Translator`), `LanguageDialog` dar More, Settings va footer-i vorid
+
+**Tayyor, agar:**
+- [x] Reel ba 3 nafar firistoda shud, 3 chat soxta shud
+- [x] Tarjimai Русский / Tojiki dar Home, Explore, Reels, Direct, Profil, Settings — bidun xatoi hydration
+- [x] API e2e 66/66, `tsc`, `eslint`

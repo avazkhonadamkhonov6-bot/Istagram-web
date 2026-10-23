@@ -1,7 +1,7 @@
 "use client";
 
 import type { UserListItem } from "@repo/shared";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { SquarePen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,7 +12,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { mediaUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
-import { createChat, createGroup, searchUsers } from "../api";
+import { useUserSearch } from "@/features/search/hooks";
+import { createChat, createGroup } from "../api";
 import { directKeys, useMe } from "../hooks";
 
 /** Modali "New message": justujui user → create-chat → /direct/t/[id]; 2+ user → group chat (Spec 14 §4) */
@@ -33,7 +34,7 @@ export function NewMessageDialog({ trigger }: { trigger?: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [q]);
 
-  const search = useQuery({ queryKey: ["user-search", term], queryFn: () => searchUsers(term), enabled: term.length > 0 });
+  const search = useUserSearch(term, term.length > 0);
   const results = term ? (search.data ?? []).filter((u) => u.id !== me?.userId) : [];
   const loading = term.length > 0 && search.isFetching;
 

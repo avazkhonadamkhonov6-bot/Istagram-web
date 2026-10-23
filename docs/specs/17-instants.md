@@ -24,7 +24,9 @@
 
 `InstantDto { id, userId, userName, userImage, fileName, closeFriends, createdAt, expiresAt, viewCount }` — `viewCount` faqat baroi muallif, baroi digaron `null`.
 
-Realtime: pas az firistodan server ba har giranda (mutual, close friends, bidun block) socket `instant:new` `{ id, userId, userName, userImage }` mefiristad.
+Giranda — **hamai followerhoi muallif** (az 2026-10-23; pesh az on faqat mutual) yo faqat close friends.
+
+Realtime: pas az firistodan server ba har giranda (followerho, close friends, bidun block) socket `instant:new` `{ id, userId, userName, userImage }` mefiristad.
 
 Jadvalho: `Instant`, `InstantView` (migratsiyai `spec17_instants`).
 
@@ -42,11 +44,11 @@ Kod: `apps/web/src/features/instants/` (`api.ts`, `components/instants.tsx`), da
 
 ## 4. Kriteriyahoi qabul
 
-- **AC1** Instant-ro faqat dusti mutual mebinad; muallif dar javob `viewCount` megirad.
+- **AC1** Instant-ro hamai followerhoi muallif mebinand, begona ne; muallif dar javob `viewCount` megirad.
 - **AC2** Pas az `view-instant` instant az ruyxati giranda nopadid meshavad; dar archive `viewCount = 1`.
 - **AC3** `closeFriends` — faqat close friends mebinand.
 - **AC4** Undo — faqat muallif; begona → 404.
 - **AC5** Pas az 24 soat nopadid; be fayl → 400.
-- **AC6** Real-time: dusti mutual `instant:new` megirad, begona ne.
+- **AC6** Real-time: follower `instant:new` megirad, begona ne.
 
 Hamai AC dar `apps/api/test/spec17.e2e-spec.ts` (6 test).

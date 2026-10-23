@@ -70,7 +70,7 @@ Tafsilot: [specs/01-auth.md](specs/01-auth.md).
 | API hujjat | Swagger `/api/docs` (az Zod schema-ho) | |
 | Frontend | Next.js 16 (App Router, SSR + **BFF**), React 19, TypeScript strict | SSR, sirho dar server |
 | UI | Tailwind CSS 4 + **shadcn/ui** (komponentho dar kodi mo, bo ranghoi Instagram) | Tez va yaksha |
-| Data dar front | TanStack Query v5 (optimistic, infinite, refetch dar focus/reconnect, invalidate az socket, Devtools dar dev), Zustand (faqat holati UI) | Javobi favri |
+| Data dar front | TanStack Query v5 (optimistic, infinite, refetch dar focus/reconnect, invalidate az socket; justuju — kesh-i umumi `searchKeys.users` + keepPreviousData), Zustand (faqat holati UI) | Javobi favri |
 | Formaho | react-hook-form + zod | |
 | Test | Vitest (unit), Supertest (API e2e), **Playwright** (e2e-i brauzer) | |
 | Sifat | ESLint, Prettier, `tsc --noEmit`, **GitHub Actions CI** | Kodi shikasta ba `main` namedaroyad |

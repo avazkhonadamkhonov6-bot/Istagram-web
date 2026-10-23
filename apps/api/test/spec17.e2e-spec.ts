@@ -1,5 +1,5 @@
 /**
- * e2e baroi AC-hoi Spec 17: Instants — faqat mutual / close friends, yak bor didan, undo, archive, 24 soat.
+ * e2e baroi AC-hoi Spec 17: Instants — hamai followerho / close friends, yak bor didan, undo, archive, 24 soat.
  */
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
@@ -68,12 +68,16 @@ describe('API (Spec 17)', () => {
     await app.close();
   });
 
-  it('AC1: faqat mutual mebinad; muallif viewCount mebinad', async () => {
+  it('AC1: hamai followerho mebinand, begona ne; muallif viewCount mebinad', async () => {
     const i = await instant('c');
     expect(i.viewCount).toBe(0);
     expect(await inbox('a')).toContain(i.id);
-    expect(await inbox('b')).not.toContain(i.id);
+    expect(await inbox('b')).toContain(i.id);
     expect(await inbox('c')).not.toContain(i.id);
+    // b a-ro follow namekunad
+    const j = await instant('a');
+    expect(await inbox('c')).toContain(j.id);
+    expect(await inbox('b')).not.toContain(j.id);
   });
 
   it('AC2: yak bor didan — ba\'d az view nopadid; archive viewCount = 1', async () => {
@@ -105,7 +109,7 @@ describe('API (Spec 17)', () => {
     await http().post('/Instant/add-instant').set(auth('c')).expect(400);
   });
 
-  it('AC6: real-time — mutual `instant:new` megirad, begona ne', async () => {
+  it('AC6: real-time — follower `instant:new` megirad, begona ne', async () => {
     const baseUrl = await app.getUrl();
     const connect = async (who: string) => {
       const ticket = (await http().post('/Account/ws-ticket').set(auth(who)).expect(200)).body.data as string;
@@ -115,19 +119,19 @@ describe('API (Spec 17)', () => {
       await new Promise((r) => setTimeout(r, 50));
       return s;
     };
-    const [sa, sb] = [await connect('a'), await connect('b')];
+    const [sc, sb] = [await connect('c'), await connect('b')];
     let bGot = false;
     sb.on(SocketEvent.INSTANT_NEW, () => (bGot = true));
     try {
-      const got = new Promise<{ id: number; userName: string }>((resolve) => sa.once(SocketEvent.INSTANT_NEW, resolve));
-      const i = await instant('c');
+      const got = new Promise<{ id: number; userName: string }>((resolve) => sc.once(SocketEvent.INSTANT_NEW, resolve));
+      const i = await instant('a');
       const e = await got;
       expect(e.id).toBe(i.id);
-      expect(e.userName).toBe(name('c'));
+      expect(e.userName).toBe(name('a'));
       await new Promise((r) => setTimeout(r, 300));
       expect(bGot).toBe(false);
     } finally {
-      sa.close();
+      sc.close();
       sb.close();
     }
   });

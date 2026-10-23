@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LanguageFooterButton } from "@/components/language-dialog";
 import { Heart } from "@/components/ui/icons";
 
 export function AuthFooter() {
@@ -20,7 +21,7 @@ export function AuthFooter() {
         <a href="https://www.threads.com/" target="_blank" rel="noreferrer">Threads</a>
         <a href="https://www.meta.com/meta-verified/" target="_blank" rel="noreferrer">Meta Verified</a>
       </nav>
-      <p className="mt-4">English <span className="mx-3">⌄</span> © {new Date().getFullYear()} Instagram from Meta</p>
+      <p className="mt-4"><LanguageFooterButton /> © {new Date().getFullYear()} Instagram from Meta</p>
     </footer>
   );
 }
