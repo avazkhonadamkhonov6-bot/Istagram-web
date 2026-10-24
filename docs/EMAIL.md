@@ -76,3 +76,15 @@ E-mail-i nomavjud: javob hamon ast ("Code sent"), xat nameravad — in amniyat a
 | E-mail tanzim nashudaast yo Brevo / Gmail xato dod | "We couldn't send the email right now..." | 503 `EMAIL_NOT_SENT` |
 
 Pesh az in sahifa dar hama holat "Code sent" menavisht va xato pinhon memond. Sababi 503-ro dar log-i API (`MailService`) bined.
+
+## Diagnostika va islohi avtomati (az 2026-10-24)
+
+- `GET /health` → `mail: { ready, providers, from, last }` — natijai firistodani oxirin bo sabab (bidun kalid va e-mail). Masalan: https://istagram-web.onrender.com/health
+- Qimathoi `BREVO_API_KEY`, `MAIL_FROM` va g. az fosila, satri nav va qavsho xudkor toza meshavand.
+- Agar `MAIL_FROM` nest yo dar Brevo tasdiq nashudaast — sender-i tasdiqshuda **xudkor az Brevo** (Senders) girifta meshavad. Bas ast, ki dar Brevo yak sender tasdiq shuda boshad.
+
+| `mail.last.error` | Hal |
+|---|---|
+| `HTTP 401 — BREVO_API_KEY nodurust ast` | Kalidi navro dar Brevo → SMTP & API → API keys sozed va dar Render ivaz kuned |
+| `Dar Brevo sender-i tasdiqshuda nest` | Brevo → Senders → Add a sender → kodi tasdiq az Gmail |
+| `mail.ready: false` | `BREVO_API_KEY` dar Render → Environment nest yo Render restart nashud |

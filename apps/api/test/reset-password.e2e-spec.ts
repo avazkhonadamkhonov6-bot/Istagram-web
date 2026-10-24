@@ -23,6 +23,7 @@ const outbox: MailMessage[] = [];
 let mailWorks = true;
 const fakeMail = {
   enabled: true,
+  status: () => ({ ready: true, providers: ['fake'], from: 'set', last: null }),
   send: async (m: MailMessage) => {
     if (!mailWorks) return false;
     outbox.push(m);
