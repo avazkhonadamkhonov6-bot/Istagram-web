@@ -45,7 +45,9 @@ export function proxy(req: NextRequest) {
     if (pathname !== "/") url.searchParams.set("next", pathname + search);
     return NextResponse.redirect(url);
   }
-  if (!mocking && hasSession && isAuthPage) {
+  // /login?add=1 — "Log into an existing account" az Switch accounts (session-i joriro nigoh medorad)
+  const addingAccount = pathname === "/login" && req.nextUrl.searchParams.has("add");
+  if (!mocking && hasSession && isAuthPage && !addingAccount) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

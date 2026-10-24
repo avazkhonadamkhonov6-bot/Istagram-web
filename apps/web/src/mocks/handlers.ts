@@ -630,6 +630,18 @@ export const handlers = [
     HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 }),
   ),
 
+  http.get("/api/auth/accounts", () =>
+    HttpResponse.json({
+      data: [{ id: mockMe.userId, userName: mockMe.userName, image: mockMe.image, current: true }],
+      errors: [],
+      statusCode: 200,
+    }),
+  ),
+
+  http.post("/api/auth/accounts", () =>
+    HttpResponse.json({ data: mockMe, errors: [], statusCode: 200 }),
+  ),
+
   http.post("/api/auth/logout", () =>
     HttpResponse.json({ data: true, errors: [], statusCode: 200 }),
   ),

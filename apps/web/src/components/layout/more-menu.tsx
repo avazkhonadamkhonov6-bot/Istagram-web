@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AtSign, Globe, LogOut, MessageCircle } from "lucide-react";
+import { AtSign, Globe, LogOut, MessageCircle, Users } from "lucide-react";
+import { SwitchAccountsDialog } from "@/features/auth/components/switch-accounts-dialog";
 import { SidebarIcon } from "./sidebar-icon";
 import { useState } from "react";
 import { LanguageDialog } from "@/components/language-dialog";
@@ -24,6 +25,7 @@ export function MoreMenu() {
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
   const [langOpen, setLangOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
 
   const username = me?.userName ?? CURRENT_USERNAME;
   const labelCls = "ig-sidebar-label";
@@ -73,6 +75,10 @@ export function MoreMenu() {
           Language
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => setSwitchOpen(true)}>
+          <Users className="size-5" />
+          Switch accounts
+        </DropdownMenuItem>
         <DropdownMenuItem
           destructive
           onSelect={() => logoutMutation.mutate()}
@@ -90,6 +96,7 @@ export function MoreMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
     <LanguageDialog open={langOpen} onOpenChange={setLangOpen} />
+    <SwitchAccountsDialog open={switchOpen} onOpenChange={setSwitchOpen} />
     </>
   );
 }
