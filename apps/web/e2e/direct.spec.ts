@@ -53,7 +53,8 @@ test("direct: API xomush → xatoi fahmo + Try again (Spec 10 AC6)", async ({ br
   await expect(page.getByRole("button", { name: "Send message" })).toBeVisible();
 
   await page.unroute("**/api/Chat/get-chats");
-  await page.getByRole("button", { name: "Try again" }).click();
+  // "Try again" dar ruyxati chat-ho (banner-i server ham tugmai xudro dorad)
+  await page.getByRole("complementary").getByRole("button", { name: "Try again" }).click();
   await expect(page.getByText("No messages yet.")).toBeVisible();
   await context.close();
 });

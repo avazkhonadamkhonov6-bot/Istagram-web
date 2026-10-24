@@ -11,6 +11,7 @@ import { formatDuration } from "@/features/rtc/peer";
 import { ApiError } from "@/lib/api-client";
 import { formatRelativeTime } from "@/lib/format";
 import { isVideoFile, mediaUrl } from "@/lib/media";
+import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 import {
   activityLabel,
@@ -57,7 +58,9 @@ export function ChatWindow({ chatId, dock, onBack, onClose }: { chatId: number; 
   const [detailsOpen, setDetailsOpen] = useState(false);
   const inCall = useCallStore((st) => st.phase !== "idle" && st.phase !== "ended");
 
-  const chat = chats?.find((c) => c.chatId === chatId);
+  // To hydration — bidun chat: ChatList kesh-ro dar client zudtar por mekunad, HTML-i server-ro tagyir nadihem
+  const hydrated = useHydrated();
+  const chat = hydrated ? chats?.find((c) => c.chatId === chatId) : undefined;
   const peer = chat ? peerOf(chat, me?.userId) : null;
   const isGroup = !!chat?.isGroup;
 

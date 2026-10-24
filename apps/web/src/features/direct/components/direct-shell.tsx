@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { useNotificationsRealtime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import { useDirectRealtime } from "../hooks";
 import { ChatList } from "./chat-list";
@@ -11,9 +10,8 @@ import { ChatList } from "./chat-list";
 export function DirectShell({ children }: { children: ReactNode }) {
   const params = useParams<{ id?: string }>();
   const activeId = params.id ? Number(params.id) : null;
+  // Notification-hoi realtime dar Sidebar (hamai sahifaho) — inja takror nameshavad, vagarna toast du bor
   useDirectRealtime(activeId);
-  // Hozir faqat dar Direct; Abubakr onro ba root layout meguzorad (FE-12)
-  useNotificationsRealtime();
 
   return (
     <div className="ig-direct-shell flex h-[calc(100dvh-110px)] min-w-0 md:h-dvh">

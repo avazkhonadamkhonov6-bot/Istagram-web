@@ -55,7 +55,9 @@ test("direct: group chat az 'New message' (Spec 14 §4)", async ({ browser }) =>
   await page.getByRole("button", { name: "Chat", exact: true }).click();
   await expect(page).toHaveURL(/\/direct\/t\/\d+/);
   await expect(page.getByText("3 members")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Leave group" })).toBeVisible();
+  // Misli Instagram: "Leave chat" dar panel-i Details
+  await page.getByRole("button", { name: "Conversation information" }).click();
+  await expect(page.getByRole("button", { name: "Leave chat" })).toBeVisible();
   for (const ctx of [a, b, c]) await ctx.context.close();
 });
 
