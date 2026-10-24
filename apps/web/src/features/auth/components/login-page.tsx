@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 import * as authApi from "@/features/auth/api";
 import { authKeys } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
+import { closeSocket } from "@/lib/socket";
 
 function LoginForm() {
   const router = useRouter();
@@ -32,10 +33,12 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
     mode: "onChange",
     defaultValues: {
-      userName: "",
+      // Switch accounts: session-i akkaunt kuhna shud → nomi korbar az pesh navishta
+      userName: searchParams.get("u") ?? "",
       password: "",
     },
   });
+  const addingAccount = searchParams.has("add");
 
   const passwordVal = useWatch({ control, name: "password" });
 
@@ -54,6 +57,12 @@ function LoginForm() {
         !requestedNext.includes("\\")
           ? requestedNext
           : "/";
+      if (addingAccount) {
+        // Akkaunti digar: kesh, socket va store-hoi akkaunti peshina bo navigatsiyai purra pok meshavand
+        closeSocket();
+        window.location.assign(nextUrl);
+        return;
+      }
       router.replace(nextUrl);
       router.refresh();
     } catch (err) {

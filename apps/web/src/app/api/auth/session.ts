@@ -1,6 +1,6 @@
 import "server-only";
 import type { UserProfile } from "@repo/shared";
-import { apiFetch, type Envelope, json, setToken, upstreamError } from "@/lib/bff";
+import { apiFetch, type Envelope, json, rememberAccount, setToken, upstreamError } from "@/lib/bff";
 
 /** Login dar NestJS → token ba cookie → ba brauzer faqat profil (bidun token) */
 export async function loginAndRespond(userName: string, password: string, requestId?: string, ip?: string) {
@@ -16,7 +16,12 @@ export async function loginAndRespond(userName: string, password: string, reques
 
     await setToken(body.data);
     const me = await apiFetch("/UserProfile/get-my-profile", { token: body.data, requestId });
-    return json((await me.json()) as Envelope<UserProfile>, me.status);
+    const profile = (await me.json()) as Envelope<UserProfile>;
+    if (me.ok && profile.data) {
+      const { userId, userName: name, image } = profile.data;
+      await rememberAccount({ id: userId, userName: name, image, token: body.data });
+    }
+    return json(profile, me.status);
   } catch (err) {
     return upstreamError(err);
   }

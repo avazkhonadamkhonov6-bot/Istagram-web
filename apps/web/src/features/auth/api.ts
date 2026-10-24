@@ -31,6 +31,19 @@ export const register = (dto: RegisterDto) =>
 
 export const logout = () => api<boolean>("/auth/logout", { method: "POST" });
 
+/** Switch accounts: akkaunthoi dar hamin brauzer vorid shuda (token-ho dar cookie-i httpOnly) */
+export type SavedAccount = { id: string; userName: string; image: string | null; current: boolean };
+
+export const getSavedAccounts = () => api<SavedAccount[]>("/auth/accounts");
+
+export const switchAccount = (id: string) =>
+  api<UserProfile>("/auth/accounts", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ id }),
+    schema: userProfileSchema,
+  });
+
 /** Public check. Registration handles races with a final 409 response. */
 export async function checkUsernameAvailable(rawUsername: string): Promise<{
   available: boolean;

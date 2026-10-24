@@ -50,6 +50,59 @@ export async function clearToken() {
   (await cookies()).delete(ACCESS_COOKIE);
 }
 
+/**
+ * Switch accounts (misli Instagram): akkauntho-i vorid shuda dar cookie-i httpOnly-i alohida.
+ * Token-ho ba JS-i brauzer namerasand — UI faqat id / userName / image-ro megirad.
+ */
+export const ACCOUNTS_COOKIE = "saved_accounts";
+const MAX_ACCOUNTS = 5;
+// Hadd-i cookie ~4 KB — akkaunti kuhnatarin hazf meshavad
+const MAX_ACCOUNTS_BYTES = 3800;
+
+export type SavedAccount = { id: string; userName: string; image: string | null; token: string };
+
+export async function readAccounts(): Promise<SavedAccount[]> {
+  const raw = (await cookies()).get(ACCOUNTS_COOKIE)?.value;
+  if (!raw) return [];
+  try {
+    const list = JSON.parse(Buffer.from(raw, "base64url").toString("utf8")) as unknown;
+    return Array.isArray(list)
+      ? list.filter((a): a is SavedAccount => typeof a?.id === "string" && typeof a?.userName === "string" && typeof a?.token === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function writeAccounts(list: SavedAccount[]) {
+  const jar = await cookies();
+  let items = list.slice(0, MAX_ACCOUNTS);
+  let value = Buffer.from(JSON.stringify(items)).toString("base64url");
+  while (items.length > 1 && value.length > MAX_ACCOUNTS_BYTES) {
+    items = items.slice(0, -1);
+    value = Buffer.from(JSON.stringify(items)).toString("base64url");
+  }
+  if (!items.length) return jar.delete(ACCOUNTS_COOKIE);
+  jar.set(ACCOUNTS_COOKIE, value, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: WEEK_SECONDS,
+  });
+}
+
+/** Akkaunti joriro ba avvali ruyxat meguzorad (token-i nav, aks-i nav) */
+export async function rememberAccount(account: SavedAccount) {
+  const rest = (await readAccounts()).filter((a) => a.id !== account.id);
+  await writeAccounts([account, ...rest]);
+}
+
+export async function forgetAccount(token: string | undefined) {
+  if (!token) return;
+  await writeAccounts((await readAccounts()).filter((a) => a.token !== token));
+}
+
 export function json<T>(body: Envelope<T>, status = body.statusCode) {
   return Response.json(body, { status });
 }

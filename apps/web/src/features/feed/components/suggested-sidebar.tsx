@@ -2,6 +2,8 @@
 
 import type { Suggestion } from "@repo/shared";
 import Link from "next/link";
+import { useState } from "react";
+import { SwitchAccountsDialog } from "@/features/auth/components/switch-accounts-dialog";
 import { useMe } from "@/features/auth/hooks";
 import { mediaUrl } from "@/lib/media";
 import { useFollow, useSuggestions } from "../hooks";
@@ -58,6 +60,7 @@ function SuggestedRow({ user }: { user: Suggestion }) {
 export function SuggestedSidebar() {
   const { data } = useSuggestions();
   const { data: me } = useMe();
+  const [switchOpen, setSwitchOpen] = useState(false);
 
   return (
     <section aria-label="Suggested for you" className="w-full min-w-0">
@@ -78,8 +81,16 @@ export function SuggestedSidebar() {
               {me.fullName ?? ""}
             </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setSwitchOpen(true)}
+            className="text-xs font-semibold text-[rgb(var(--ig-colors-button-borderless-text))] hover:text-[rgb(var(--ig-link))]"
+          >
+            Switch
+          </button>
         </div>
       ) : null}
+      <SwitchAccountsDialog open={switchOpen} onOpenChange={setSwitchOpen} />
 
       <div className="mb-1 flex items-center justify-between py-1">
         <h2 className="text-sm font-semibold text-ig-text-secondary">
